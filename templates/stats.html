@@ -1,0 +1,43 @@
+<!-- templates/stats.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Model Stats</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.5rem; border: 1px solid #ccc; }
+    th { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <h1>Model Response Statistics</h1>
+
+  {% if stats %}
+    <table>
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Model</th>
+          <th>Question</th>
+          <th>Response Time (ms)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in stats %}
+          <tr>
+            <td>{{ row.timestamp }}</td>
+            <td>{{ row.model }}</td>
+            <td>{{ row.question }}</td>
+            <td>{{ row.response_time_ms }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No stats available yet.</p>
+  {% endif %}
+
+  <p><a href="/">⬅ Back to Home</a></p>
+</body>
+</html>

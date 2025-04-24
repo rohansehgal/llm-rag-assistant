@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LLM + RAG Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>🧠 LLM + RAG Assistant</h1>
+      <a href="/stats" class="btn btn-outline-secondary">View Stats</a>
+    </div>
+
+    <!-- Prompt Form -->
+    <form id="qa-form" class="mb-4">
+      <div class="mb-3">
+        <label for="prompt" class="form-label">Enter your question:</label>
+        <textarea class="form-control" id="prompt" name="prompt" rows="3" placeholder="Ask me anything..."></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Select model(s):</label><br>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="models" value="llama3.2" id="model1" checked>
+          <label class="form-check-label" for="model1">LLaMA 3.2</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="models" value="mistral" id="model2" checked>
+          <label class="form-check-label" for="model2">Mistral</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="models" value="phi3" id="model3" checked>
+          <label class="form-check-label" for="model3">Phi-3</label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Ask</button>
+    </form>
+
+    <div id="results"></div>
+
+    <!-- Image Analysis Section -->
+    <hr class="my-5">
+    <h3 class="mb-3">🖼️ Analyze an Image with Bakllava</h3>
+    <form method="POST" action="/analyze-image" enctype="multipart/form-data" class="mb-4">
+      <div class="mb-3">
+        <label for="image" class="form-label">Upload an image (.jpg, .png):</label>
+        <input type="file" class="form-control" id="image" name="image" accept=".jpg,.jpeg,.png" required>
+      </div>
+      <div class="mb-3">
+        <label for="image_prompt" class="form-label">Enter a question or description prompt:</label>
+        <input type="text" class="form-control" id="image_prompt" name="image_prompt"
+               placeholder="e.g., What is shown in this image?" value="{{ image_prompt or '' }}">
+      </div>
+      <button type="submit" class="btn btn-success">Analyze Image</button>
+    </form>
+
+    {% if image_response %}
+    <div class="card mt-4">
+      <div class="card-header">Response from Bakllava</div>
+      <div class="card-body">
+        <p class="card-text">{{ image_response }}</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- JavaScript -->
+
+
+<script>
+  function sanitizeModelName(name) {
+    return name.replace(/\./g, "").replace(/:/g, "");
+  }
+
+  const pollState = {}; // Tracks retries and animation state per model
+
+  function pollModel(prompt, model) {
+    const safeId = sanitizeModelName(model);
+    const dots = [".", "..", "..."];
+    let dotIndex = 0;
+
+    pollState[model] = {
+      interval: setInterval(() => {
+        const el = document.getElementById(`response-${safeId}`);
+        if (el && el.textContent.startsWith("Loading")) {
+          dotIndex = (dotIndex + 1) % dots.length;
+          el.textContent = "Loading" + dots[dotIndex];
+        }
+      }, 500)
+    };
+
+    function retryFetch() {
+      fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: prompt, model: model })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const safe = sanitizeModelName(data.model);
+        const responseEl = document.getElementById(`response-${safe}`);
+
+        if (!responseEl) return;
+
+        if (data.answer === "Loading...") {
+          // Still not ready, retry later
+          setTimeout(retryFetch, 2000);
+        } else {
+          // Final answer received
+          clearInterval(pollState[model].interval);
+          responseEl.textContent = data.answer + ` (⏱ ${data.time_ms} ms)`;
+          responseEl.classList.remove("text-muted");
+
+          const updated = JSON.parse(localStorage.getItem("responses") || "{}");
+          updated[data.model] = data.answer + ` (⏱ ${data.time_ms} ms)`;
+          localStorage.setItem("responses", JSON.stringify(updated));
+        }
+      })
+      .catch(err => {
+        console.error("❌ Poll fetch failed:", err);
+      });
+    }
+
+    retryFetch(); // Start polling
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const resultsDiv = document.getElementById("results");
+    const storedPrompt = localStorage.getItem("active_prompt");
+    const savedResponses = JSON.parse(localStorage.getItem("responses") || "{}");
+
+    if (storedPrompt) {
+      document.getElementById("prompt").value = storedPrompt;
+    }
+
+    if (storedPrompt && Object.keys(savedResponses).length > 0) {
+      Object.entries(savedResponses).forEach(([model, answer]) => {
+        const safeModelId = sanitizeModelName(model);
+        const isLoading = answer === "Loading...";
+
+        const card = document.createElement("div");
+        card.className = "card mb-3";
+        card.id = `card-${safeModelId}`;
+        card.innerHTML = `
+          <div class="card-header">Response from ${model}</div>
+          <div class="card-body">
+            <p class="card-text ${isLoading ? 'text-muted' : ''}" id="response-${safeModelId}">${answer}</p>
+          </div>
+        `;
+        resultsDiv.appendChild(card);
+
+        if (isLoading) {
+          pollModel(storedPrompt, model);
+        }
+      });
+    }
+  });
+
+  document.getElementById("qa-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const prompt = document.getElementById("prompt").value.trim();
+    const selectedModels = Array.from(document.querySelectorAll('input[name="models"]:checked')).map(cb => cb.value);
+    const resultsDiv = document.getElementById("results");
+
+    localStorage.setItem("active_prompt", prompt);
+    localStorage.setItem("responses", "{}");
+    resultsDiv.innerHTML = "";
+
+    let responsesReturned = 0;
+
+    selectedModels.forEach(model => {
+      const safeModelId = sanitizeModelName(model);
+
+      const card = document.createElement("div");
+      card.className = "card mb-3";
+      card.id = `card-${safeModelId}`;
+      card.innerHTML = `
+        <div class="card-header">Response from ${model}</div>
+        <div class="card-body">
+          <p class="card-text text-muted" id="response-${safeModelId}">Loading...</p>
+        </div>
+      `;
+      resultsDiv.appendChild(card);
+
+      const saved = JSON.parse(localStorage.getItem("responses") || "{}");
+      saved[model] = "Loading...";
+      localStorage.setItem("responses", JSON.stringify(saved));
+
+      pollModel(prompt, model);
+    });
+  });
+</script>
+
+
+
+
+</body>
+</html>

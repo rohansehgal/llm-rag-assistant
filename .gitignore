@@ -12,3 +12,4 @@ stats.json
 *.log
 .cache/
 uploads/
+testbed/

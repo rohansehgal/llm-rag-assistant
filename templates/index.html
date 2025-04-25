@@ -9,75 +9,90 @@
     rel="stylesheet">
 </head>
 <body class="bg-light">
-  <div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1>🧠 LLM + RAG Assistant</h1>
-      <a href="/stats" class="btn btn-outline-secondary">View Stats</a>
+
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- Sidebar (Left) -->
+    <div class="col-12 col-md-3 col-lg-2 bg-light p-0 border-end" style="min-height: 100vh;">
+      {% include 'navbar.html' %}
     </div>
 
-<form action="/upload" method="post" enctype="multipart/form-data" class="mb-4">
-  <div class="mb-3">
-    <label for="file" class="form-label">Upload PDF file for RAG</label>
-    <input class="form-control" type="file" id="file" name="file" accept=".pdf" required>
-  </div>
-  <button class="btn btn-secondary" type="submit">Upload</button>
-</form>
+    <!-- Main Content (Right) -->
+    <div class="col-12 col-md-9 col-lg-10 p-4">
 
-
-    <!-- Prompt Form -->
-    <form id="qa-form" class="mb-4">
-      <div class="mb-3">
-        <label for="prompt" class="form-label">Enter your question:</label>
-        <textarea class="form-control" id="prompt" name="prompt" rows="3" placeholder="Ask me anything..."></textarea>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>🧠 LLM + RAG Assistant</h1>
+        <a href="/stats" class="btn btn-outline-secondary">View Stats</a>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Select model(s):</label><br>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="models" value="llama3" id="model1" checked>
-          <label class="form-check-label" for="model1">LLaMA 3</label>
+      <!-- Upload Form -->
+      <form action="/upload" method="post" enctype="multipart/form-data" class="mb-4">
+        <div class="mb-3">
+          <label for="file" class="form-label">Upload PDF file for RAG</label>
+          <input class="form-control" type="file" id="file" name="file" accept=".pdf" required>
         </div>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="models" value="mistral" id="model2" checked>
-          <label class="form-check-label" for="model2">Mistral</label>
+        <button class="btn btn-secondary" type="submit">Upload</button>
+      </form>
+
+      <!-- Prompt Form -->
+      <form id="qa-form" class="mb-4">
+        <div class="mb-3">
+          <label for="prompt" class="form-label">Enter your question:</label>
+          <textarea class="form-control" id="prompt" name="prompt" rows="3" placeholder="Ask me anything..."></textarea>
         </div>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="models" value="phi3" id="model3" checked>
-          <label class="form-check-label" for="model3">Phi-3</label>
+
+        <div class="mb-3">
+          <label class="form-label">Select model(s):</label><br>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="models" value="llama3" id="model1" checked>
+            <label class="form-check-label" for="model1">LLaMA 3</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="models" value="mistral" id="model2">
+            <label class="form-check-label" for="model2">Mistral</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="models" value="phi3" id="model3">
+            <label class="form-check-label" for="model3">Phi-3</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Ask</button>
+      </form>
+
+      <!-- Results Section -->
+      <div id="results"></div>
+
+      <!-- Image Analysis Section -->
+      <hr class="my-5">
+      <h3 class="mb-3">🖼️ Analyze an Image with Bakllava</h3>
+      <form method="POST" action="/analyze-image" enctype="multipart/form-data" class="mb-4">
+        <div class="mb-3">
+          <label for="image" class="form-label">Upload an image (.jpg, .png):</label>
+          <input type="file" class="form-control" id="image" name="image" accept=".jpg,.jpeg,.png" required>
+        </div>
+        <div class="mb-3">
+          <label for="image_prompt" class="form-label">Enter a question or description prompt:</label>
+          <input type="text" class="form-control" id="image_prompt" name="image_prompt"
+                 placeholder="e.g., What is shown in this image?" value="{{ image_prompt or '' }}">
+        </div>
+        <button type="submit" class="btn btn-success">Analyze Image</button>
+      </form>
+
+      {% if image_response %}
+      <div class="card mt-4">
+        <div class="card-header">Response from Bakllava</div>
+        <div class="card-body">
+          <p class="card-text">{{ image_response }}</p>
         </div>
       </div>
+      {% endif %}
 
-      <button type="submit" class="btn btn-primary">Ask</button>
-    </form>
+    </div> <!-- End Main Content -->
 
-    <div id="results"></div>
-
-    <!-- Image Analysis Section -->
-    <hr class="my-5">
-    <h3 class="mb-3">🖼️ Analyze an Image with Bakllava</h3>
-    <form method="POST" action="/analyze-image" enctype="multipart/form-data" class="mb-4">
-      <div class="mb-3">
-        <label for="image" class="form-label">Upload an image (.jpg, .png):</label>
-        <input type="file" class="form-control" id="image" name="image" accept=".jpg,.jpeg,.png" required>
-      </div>
-      <div class="mb-3">
-        <label for="image_prompt" class="form-label">Enter a question or description prompt:</label>
-        <input type="text" class="form-control" id="image_prompt" name="image_prompt"
-               placeholder="e.g., What is shown in this image?" value="{{ image_prompt or '' }}">
-      </div>
-      <button type="submit" class="btn btn-success">Analyze Image</button>
-    </form>
-
-    {% if image_response %}
-    <div class="card mt-4">
-      <div class="card-header">Response from Bakllava</div>
-      <div class="card-body">
-        <p class="card-text">{{ image_response }}</p>
-      </div>
-    </div>
-    {% endif %}
-  </div>
-
+  </div> <!-- End Row -->
+</div> <!-- End Container-Fluid -->
   <!-- JavaScript -->
 
 

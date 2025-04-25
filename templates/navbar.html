@@ -1,0 +1,30 @@
+<!-- templates/navbar.html -->
+
+<div class="d-flex flex-column vh-100 bg-light border-end">
+    <div class="p-3">
+      <h4 class="fw-bold text-primary">LLM Assistant</h4>
+    </div>
+  
+    <ul class="nav flex-column p-2">
+      <li class="nav-item mb-2">
+        <a href="{{ url_for('home') }}" class="nav-link {% if active_page == 'home' %}active text-primary fw-bold{% else %}text-dark{% endif %}">
+          🏠 Home
+        </a>
+      </li>
+      <li class="nav-item mb-2">
+        <a href="{{ url_for('stats') }}" class="nav-link {% if active_page == 'stats' %}active text-primary fw-bold{% else %}text-dark{% endif %}">
+          📊 Statistics
+        </a>
+      </li>
+      <li class="nav-item mb-2">
+        <a href="{{ url_for('upload') }}" class="nav-link {% if active_page == 'upload' %}active text-primary fw-bold{% else %}text-dark{% endif %}">
+          📄 Upload Knowledge Base
+        </a>
+      </li>
+    </ul>
+  
+    <div class="mt-auto p-3">
+      <small class="text-muted">&copy; 2025 LLM Assistant</small>
+    </div>
+  </div>
+  

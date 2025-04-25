@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+import functools
 from flask import Flask, request, render_template, redirect, jsonify
 import ollama
 import faiss
@@ -11,6 +13,7 @@ import json
 import datetime
 
 app = Flask(__name__)
+executor = ThreadPoolExecutor(max_workers=3)  # You can adjust the number of workers as needed
 UPLOAD_FOLDER = "uploaded_docs"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -157,7 +160,10 @@ def ask():
 
     try:
         start_time = time.time()
-        result = dict(ollama.generate(model=model, prompt=full_prompt))
+        future = executor.submit(functools.partial(ollama.generate, model=model, prompt=full_prompt))
+        print("waiting for ollama result")
+        result = dict(future.result())
+        print("ollama result recieved")
         response_text = result.get("response", "[No response returned]")
         time_ms = int((time.time() - start_time) * 1000)
 

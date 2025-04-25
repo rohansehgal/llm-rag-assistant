@@ -13,3 +13,5 @@ stats.json
 .cache/
 uploads/
 testbed/
+*.sqlite
+*.db

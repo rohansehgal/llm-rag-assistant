@@ -1,44 +1,56 @@
-<!-- templates/stats.html   -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Model Stats</title>
-  <style>
-    body { font-family: sans-serif; padding: 2rem; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 0.5rem; border: 1px solid #ccc; }
-    th { background: #f0f0f0; }
-  </style>
+  <meta charset="UTF-8">
+  <title>Statistics - LLM Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-  {% include 'navbar.html' %}
-  <h1>Model Response Statistics</h1>
+<body class="bg-light">
 
-  {% if stats %}
-    <table>
-      <thead>
-        <tr>
-          <th>Timestamp</th>
-          <th>Model</th>
-          <th>Question</th>
-          <th>Response Time (ms)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in stats %}
-          <tr>
-            <td>{{ row.timestamp }}</td>
-            <td>{{ row.model }}</td>
-            <td>{{ row.question }}</td>
-            <td>{{ row.response_time_ms }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No stats available yet.</p>
-  {% endif %}
+<div class="container-fluid">
+  <div class="row">
 
-  <p><a href="/">⬅ Back to Home</a></p>
+    <!-- Sidebar -->
+    <div class="col-12 col-md-3 col-lg-2 p-0 border-end bg-light">
+      {% include 'navbar.html' %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-12 col-md-9 col-lg-10 p-4">
+
+      <h1 class="mb-4">📊 Statistics</h1>
+
+      <!-- Statistics Table or Chart Placeholder -->
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Question</th>
+              <th>Timestamp</th>
+              <th>Model</th>
+              <th>Response Time (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for stat in statistics %}
+            <tr>
+              <td>{{ stat.question }}</td>
+              <td>{{ stat.timestamp }}</td>
+              <td>{{ stat.model }}</td>
+              <td>{{ stat.response_time }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

@@ -155,6 +155,10 @@ def upload():
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER_FILES, filename)
 
+@app.route('/settings')
+def settings():
+    return render_template('settings.html', active_page='settings')
+
 
 @app.route("/", methods=["GET"])
 def index():

@@ -87,10 +87,7 @@ OTHER:
               <td>{{ file.upload_date }}</td>
               <td>
                 <a href="{{ url_for('uploaded_file', filename=file.name) }}" target="_blank" class="btn btn-outline-primary btn-sm">View</a>
-                <form action="/delete-file" method="post" class="d-inline">
-                  <input type="hidden" name="filename" value="{{ file.name }}">
-                  <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                </form>
+                <button onclick="confirmDelete('{{ file.name }}', this)" class="btn btn-outline-danger btn-sm">🗑️ Delete</button>
               </td>
             </tr>
             {% endfor %}

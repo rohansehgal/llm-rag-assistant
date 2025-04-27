@@ -151,6 +151,10 @@ def upload():
 
     return render_template('upload.html', uploaded_files=uploaded_files, active_page='upload')
 
+@app.route('/uploads/files/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(UPLOAD_FOLDER_FILES, filename)
+
 
 @app.route("/", methods=["GET"])
 def index():

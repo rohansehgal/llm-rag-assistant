@@ -121,16 +121,45 @@ def get_all_rag_documents():
 def upload():
     uploaded_files = []
 
-    # Load already uploaded files (only from uploads/files/)
+ # Load all files from uploads/files (Manual Upload)
     for filename in os.listdir(UPLOAD_FOLDER_FILES):
         path = os.path.join(UPLOAD_FOLDER_FILES, filename)
         if os.path.isfile(path):
             uploaded_files.append({
                 'name': filename,
+                'source': 'Manual Upload',
                 'type': filename.split('.')[-1].upper(),
                 'size': f"{round(os.path.getsize(path) / 1024, 2)} KB",
-                'upload_date': datetime.datetime.fromtimestamp(os.path.getmtime(path)).strftime('%Y-%m-%d')
+                'upload_date': datetime.datetime.fromtimestamp(os.path.getmtime(path)).strftime('%Y-%m-%d'),
+                'folder': 'files'
             })
+
+    # Load all PDFs from uploads/rag (PDF Analysis)
+    for filename in os.listdir(UPLOAD_FOLDER_RAG):
+        path = os.path.join(UPLOAD_FOLDER_RAG, filename)
+        if os.path.isfile(path):
+            uploaded_files.append({
+                'name': filename,
+                'source': 'PDF Analysis',
+                'type': filename.split('.')[-1].upper(),
+                'size': f"{round(os.path.getsize(path) / 1024, 2)} KB",
+                'upload_date': datetime.datetime.fromtimestamp(os.path.getmtime(path)).strftime('%Y-%m-%d'),
+                'folder': 'rag'
+            })
+
+    # Load all images from uploads/images (Image Analysis)
+    for filename in os.listdir(UPLOAD_FOLDER_IMAGES):
+        path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
+        if os.path.isfile(path):
+            uploaded_files.append({
+                'name': filename,
+                'source': 'Image Analysis',
+                'type': filename.split('.')[-1].upper(),
+                'size': f"{round(os.path.getsize(path) / 1024, 2)} KB",
+                'upload_date': datetime.datetime.fromtimestamp(os.path.getmtime(path)).strftime('%Y-%m-%d'),
+                'folder': 'images'
+            })
+
 
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -151,9 +180,22 @@ def upload():
 
     return render_template('upload.html', uploaded_files=uploaded_files, active_page='upload')
 
-@app.route('/uploads/files/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(UPLOAD_FOLDER_FILES, filename)
+
+
+@app.route('/uploads/<folder>/<filename>')
+def uploaded_file(folder, filename):
+    if folder == 'files':
+        upload_folder = UPLOAD_FOLDER_FILES
+    elif folder == 'rag':
+        upload_folder = UPLOAD_FOLDER_RAG
+    elif folder == 'images':
+        upload_folder = UPLOAD_FOLDER_IMAGES
+    else:
+        return "Invalid folder", 404
+
+    return send_from_directory(upload_folder, filename)
+
+
 
 @app.route('/settings')
 def settings():
@@ -168,13 +210,25 @@ def index():
 def delete_file():
     data = request.get_json()
     filename = data.get('filename')
-    filepath = os.path.join(UPLOAD_FOLDER_FILES, filename)
+    folder = data.get('folder')
+
+    if folder == 'files':
+        folder_path = UPLOAD_FOLDER_FILES
+    elif folder == 'rag':
+        folder_path = UPLOAD_FOLDER_RAG
+    elif folder == 'images':
+        folder_path = UPLOAD_FOLDER_IMAGES
+    else:
+        return jsonify({'error': 'Invalid folder'}), 400
+
+    filepath = os.path.join(folder_path, filename)
 
     if not filename or not os.path.exists(filepath):
         return jsonify({'error': 'File not found'}), 404
 
     os.remove(filepath)
     return jsonify({'message': 'File deleted successfully'}), 200
+
 
 
 @app.route("/ask", methods=["POST"])

@@ -11,6 +11,7 @@ GENERAL:
 TABLE STRUCTURE:
 - Columns:
   - File Name
+  - Upload Source (Manual Upload, PDF Analysis, Image Analysis)
   - File Type
   - File Size
   - Upload Date
@@ -72,6 +73,7 @@ OTHER:
           <thead class="table-light">
             <tr>
               <th>File Name</th>
+              <th>Upload Source</th>
               <th>Type</th>
               <th>Size</th>
               <th>Upload Date</th>
@@ -82,13 +84,13 @@ OTHER:
             {% for file in uploaded_files %}
             <tr>
               <td>{{ file.name }}</td>
+              <td>{{ file.source }}</td>
               <td>{{ file.type }}</td>
               <td>{{ file.size }}</td>
               <td>{{ file.upload_date }}</td>
               <td>
-                <a href="{{ url_for('uploaded_file', filename=file.name) }}" target="_blank" class="btn btn-outline-primary btn-sm">View</a>
-                <button onclick="confirmDelete('{{ file.name }}', this)" class="btn btn-outline-danger btn-sm">🗑️ Delete</button>
-              </td>
+                <a href="{{ url_for('uploaded_file',folder=file.folder,filename=file.name) }}" target="_blank" class="btn btn-outline-primary btn-sm">View</a>
+                <button onclick="confirmDelete('{{ file.name }}', '{{ file.folder }}', this)" class="btn btn-outline-danger btn-sm">🗑️ Delete</button>              </td>
             </tr>
             {% endfor %}
           </tbody>
@@ -139,7 +141,7 @@ function validateAndSubmitFiles() {
   document.getElementById('upload-form').submit();
 }
 
-function confirmDelete(fileName, button) {
+function confirmDelete(fileName, folder, button) {
   if (confirm(`Are you sure you want to delete "${fileName}"?`)) {
     button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...';
     button.disabled = true;
@@ -147,7 +149,7 @@ function confirmDelete(fileName, button) {
     fetch('/delete-file', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename: fileName })
+      body: JSON.stringify({ filename: fileName, folder: folder })
     })
     .then(response => {
       if (response.ok) {
@@ -166,6 +168,8 @@ function confirmDelete(fileName, button) {
     });
   }
 }
+
+
 
 function sortTable(n) {
   const table = document.getElementById("uploaded-files-table");

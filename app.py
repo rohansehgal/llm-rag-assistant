@@ -1,11 +1,3 @@
-UPLOAD_FOLDER_FILES = 'uploads/files'
-UPLOAD_FOLDER_RAG = 'uploads/rag'
-UPLOAD_FOLDER_IMAGES = 'uploads/images'
-ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png', 'gif', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'}
-MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
-app.secret_key = 'your_secret_key'
-
-
 from concurrent.futures import ThreadPoolExecutor
 import functools
 from flask import Flask, request, render_template, redirect, jsonify
@@ -28,7 +20,12 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 INDEX_PATH = "vector_index.faiss"
 CHUNKS_PATH = "chunks.pkl"
 STATS_FILE = "stats.json"
-
+UPLOAD_FOLDER_FILES = 'uploads/files'
+UPLOAD_FOLDER_RAG = 'uploads/rag'
+UPLOAD_FOLDER_IMAGES = 'uploads/images'
+ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png', 'gif', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'}
+MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
+app.secret_key = 'your_secret_key'
 CACHE_FILE = "query_cache.json"
 
 def allowed_file(filename):

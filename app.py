@@ -1,3 +1,11 @@
+UPLOAD_FOLDER_FILES = 'uploads/files'
+UPLOAD_FOLDER_RAG = 'uploads/rag'
+UPLOAD_FOLDER_IMAGES = 'uploads/images'
+ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png', 'gif', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'}
+MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
+app.secret_key = 'your_secret_key'
+
+
 from concurrent.futures import ThreadPoolExecutor
 import functools
 from flask import Flask, request, render_template, redirect, jsonify
@@ -14,7 +22,7 @@ import datetime
 
 app = Flask(__name__)
 executor = ThreadPoolExecutor(max_workers=3)  # You can adjust the number of workers as needed
-UPLOAD_FOLDER = "uploaded_docs"
+# UPLOAD_FOLDER = "uploaded_docs" no longer used
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 INDEX_PATH = "vector_index.faiss"
@@ -22,6 +30,10 @@ CHUNKS_PATH = "chunks.pkl"
 STATS_FILE = "stats.json"
 
 CACHE_FILE = "query_cache.json"
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def load_cache():
     if not os.path.exists(CACHE_FILE):
@@ -80,41 +92,86 @@ def split_text(text, chunk_size=500, overlap=100):
         result.append(" ".join(words[i:i+chunk_size]))
     return result
 
-@app.route("/upload", methods=["POST"])
+
+def get_all_rag_documents():
+    all_files = []
+
+    # PDFs from /uploads/rag
+    for filename in os.listdir(UPLOAD_FOLDER_RAG):
+        path = os.path.join(UPLOAD_FOLDER_RAG, filename)
+        if filename.lower().endswith('.pdf') and os.path.isfile(path):
+            all_files.append(path)
+
+    # PDFs and files from /uploads/files
+    for filename in os.listdir(UPLOAD_FOLDER_FILES):
+        path = os.path.join(UPLOAD_FOLDER_FILES, filename)
+        if filename.lower().endswith('.pdf') and os.path.isfile(path):
+            all_files.append(path)
+
+    return all_files
+
+
+
+@app.route('/upload', methods=['GET', 'POST'])
 def upload():
-    global vector_index, chunks
-    uploaded_file = request.files["file"]
-    if uploaded_file.filename.endswith(".pdf"):
-        filepath = os.path.join(UPLOAD_FOLDER, uploaded_file.filename)
-        uploaded_file.save(filepath)
+    uploaded_files = []
 
-        doc = fitz.open(filepath)
-        full_text = "\n".join([page.get_text() for page in doc])
-        new_chunks = split_text(full_text)
-        new_embeddings = embedder.encode(new_chunks)
+    # Load already uploaded files (only from uploads/files/)
+    for filename in os.listdir(UPLOAD_FOLDER_FILES):
+        path = os.path.join(UPLOAD_FOLDER_FILES, filename)
+        if os.path.isfile(path):
+            uploaded_files.append({
+                'name': filename,
+                'type': filename.split('.')[-1].upper(),
+                'size': f"{round(os.path.getsize(path) / 1024, 2)} KB",
+                'upload_date': datetime.datetime.fromtimestamp(os.path.getmtime(path)).strftime('%Y-%m-%d')
+            })
 
-        if vector_index is None:
-            vector_index = faiss.IndexFlatL2(new_embeddings[0].shape[0])
+    if request.method == 'POST':
+        if 'files' not in request.files:
+            flash('No files part in request.', 'danger')
+            return redirect(url_for('upload'))
 
-        vector_index.add(np.array(new_embeddings))
-        chunks.extend(new_chunks)
+        files = request.files.getlist('files')
+        for file in files:
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(UPLOAD_FOLDER_FILES, filename))
+            else:
+                flash('Invalid file type or file too large.', 'danger')
+                return redirect(url_for('upload'))
 
-        faiss.write_index(vector_index, INDEX_PATH)
-        with open(CHUNKS_PATH, "wb") as f:
-            pickle.dump(chunks, f)
+        flash('Files uploaded successfully!', 'success')
+        return redirect(url_for('upload'))
 
-    return redirect("/")
+    return render_template('upload.html', uploaded_files=uploaded_files, active_page='upload')
+
 
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
+
+@app.route('/delete-file', methods=['POST'])
+def delete_file():
+    data = request.get_json()
+    filename = data.get('filename')
+    filepath = os.path.join(UPLOAD_FOLDER_FILES, filename)
+
+    if not filename or not os.path.exists(filepath):
+        return jsonify({'error': 'File not found'}), 404
+
+    os.remove(filepath)
+    return jsonify({'message': 'File deleted successfully'}), 200
 
 
 @app.route("/ask", methods=["POST"])
 def ask():
     import time
     from datetime import datetime
-
+    file = request.files.get('file')
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(UPLOAD_FOLDER_RAG, filename))
     data = request.get_json()
     prompt = data.get("prompt", "").strip()
     model = data.get("model", "").strip()

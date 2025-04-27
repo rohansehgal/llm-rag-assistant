@@ -15,7 +15,10 @@ import datetime
 app = Flask(__name__)
 executor = ThreadPoolExecutor(max_workers=3)  # You can adjust the number of workers as needed
 # UPLOAD_FOLDER = "uploaded_docs" no longer used
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# replaced makedir calls with os.makedirs with all 3 sub folders
+os.makedirs(UPLOAD_FOLDER_FILES, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER_RAG, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER_IMAGES, exist_ok=True)
 
 INDEX_PATH = "vector_index.faiss"
 CHUNKS_PATH = "chunks.pkl"

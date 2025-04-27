@@ -12,6 +12,8 @@ import fitz  # PyMuPDF
 import time
 import json
 import datetime
+from werkzeug.utils import secure_filename
+
 
 # app creation
 app = Flask(__name__)

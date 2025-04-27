@@ -1,0 +1,237 @@
+<!--
+==============================================
+ Upload Page - Functional Requirements
+==============================================
+
+GENERAL:
+- No upload form visible initially on page load
+- Show existing uploaded files in a sortable table at the top
+- Place "➕ Add File" button underneath the table
+
+TABLE STRUCTURE:
+- Columns:
+  - File Name
+  - File Type
+  - File Size
+  - Upload Date
+  - View/Download (link or button)
+  - Delete (action button)
+- Support sorting on all columns
+
+UPLOAD BEHAVIOR:
+- Clicking "Add File" opens file picker
+- Allow multiple files to be selected
+- Accept only these file types:
+  .pdf, .jpg, .jpeg, .png, .gif, .doc, .docx, .xls, .xlsx, .ppt, .pptx
+- Validate each file:
+  - File type must be allowed
+  - File size must be ≤ 25 MB
+- Show Bootstrap alert if validation fails
+- On successful upload, refresh table to include new files
+
+DELETE BEHAVIOR:
+- Each file has a "🗑️ Delete" button
+- Clicking Delete:
+  - Show confirmation popup
+  - Show spinner inside Delete button during deletion
+  - Refresh table after deletion
+
+OTHER:
+- Bootstrap 5 styling throughout
+- Fully mobile responsive layout
+
+==============================================
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Files - LLM Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    th {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- Sidebar -->
+    <div class="col-12 col-md-3 col-lg-2 bg-light p-0 border-end" style="min-height: 100vh;">
+      {% include 'navbar.html' %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-12 col-md-9 col-lg-10 p-4">
+
+      <h1 class="mb-4">📄 Uploaded Files</h1>
+
+      {% if upload_success %}
+      <div class="alert alert-success">
+        {{ upload_success }}
+      </div>
+      {% endif %}
+
+      {% if upload_error %}
+      <div class="alert alert-danger">
+        {{ upload_error }}
+      </div>
+      {% endif %}
+
+      <!-- Uploaded Files Table -->
+      {% if uploaded_files %}
+      <div class="table-responsive mb-4">
+        <table class="table table-bordered table-hover" id="uploaded-files-table">
+          <thead class="table-light">
+            <tr>
+              <th onclick="sortTable(0)">File Name</th>
+              <th onclick="sortTable(1)">File Type</th>
+              <th onclick="sortTable(2)">File Size</th>
+              <th onclick="sortTable(3)">Upload Date</th>
+              <th>View</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for file in uploaded_files %}
+            <tr>
+              <td>{{ file.name }}</td>
+              <td>{{ file.type }}</td>
+              <td>{{ file.size }}</td>
+              <td>{{ file.upload_date }}</td>
+              <td>
+                <a href="{{ url_for('uploaded_file', filename=file.name) }}" target="_blank" class="btn btn-outline-primary btn-sm">View</a>
+              </td>
+              <td>
+                <button class="btn btn-danger btn-sm" onclick="confirmDelete('{{ file.name }}', this)">🗑️ Delete</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>No files uploaded yet.</p>
+      {% endif %}
+
+      <!-- Add File Button -->
+      <button class="btn btn-success" onclick="document.getElementById('file-input').click()">➕ Add File</button>
+
+      <!-- Hidden File Input -->
+      <form id="upload-form" method="POST" action="/upload" enctype="multipart/form-data" style="display:none;">
+        <input 
+          type="file" 
+          id="file-input" 
+          name="files" 
+          multiple
+          accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+          onchange="validateAndSubmitFiles()"
+        >
+      </form>
+
+    </div> <!-- End of Main Content -->
+
+  </div> <!-- End of Row -->
+</div> <!-- End of Container -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const maxFileSize = 25 * 1024 * 1024; // 25MB
+const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+
+function validateAndSubmitFiles() {
+  const input = document.getElementById('file-input');
+  const files = input.files;
+
+  for (let file of files) {
+    const extension = file.name.split('.').pop().toLowerCase();
+    if (!allowedExtensions.includes(extension)) {
+      alert('Unsupported file type. Allowed types: PDF, Images, Word, Excel, PPT.');
+      input.value = '';
+      return;
+    }
+    if (file.size > maxFileSize) {
+      alert('File size exceeds 25MB limit.');
+      input.value = '';
+      return;
+    }
+  }
+  document.getElementById('upload-form').submit();
+}
+
+function confirmDelete(fileName, button) {
+  if (confirm(`Are you sure you want to delete "${fileName}"?`)) {
+    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...';
+    button.disabled = true;
+
+    fetch('/delete-file', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: fileName })
+    })
+    .then(response => {
+      if (response.ok) {
+        location.reload();
+      } else {
+        alert('Error deleting file.');
+        button.disabled = false;
+        button.innerHTML = '🗑️ Delete';
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error deleting file.');
+      button.disabled = false;
+      button.innerHTML = '🗑️ Delete';
+    });
+  }
+}
+
+function sortTable(n) {
+  const table = document.getElementById("uploaded-files-table");
+  let switching = true, dir = "asc", switchcount = 0;
+
+  while (switching) {
+    switching = false;
+    const rows = table.rows;
+
+    for (let i = 1; i < (rows.length - 1); i++) {
+      let shouldSwitch = false;
+      const x = rows[i].getElementsByTagName("TD")[n];
+      const y = rows[i + 1].getElementsByTagName("TD")[n];
+
+      if (dir == "asc") {
+        if (x.innerText.toLowerCase() > y.innerText.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        }
+      } else if (dir == "desc") {
+        if (x.innerText.toLowerCase() < y.innerText.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+
+    if (shouldSwitch) {
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      switchcount++;
+    } else {
+      if (switchcount === 0 && dir === "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+</script>
+
+</body>
+</html>

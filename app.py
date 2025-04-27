@@ -1,3 +1,4 @@
+# Imports 
 from concurrent.futures import ThreadPoolExecutor
 import functools
 from flask import Flask, request, render_template, redirect, jsonify
@@ -12,14 +13,12 @@ import time
 import json
 import datetime
 
+# app creation
 app = Flask(__name__)
-executor = ThreadPoolExecutor(max_workers=3)  # You can adjust the number of workers as needed
-# UPLOAD_FOLDER = "uploaded_docs" no longer used
-# replaced makedir calls with os.makedirs with all 3 sub folders
-os.makedirs(UPLOAD_FOLDER_FILES, exist_ok=True)
-os.makedirs(UPLOAD_FOLDER_RAG, exist_ok=True)
-os.makedirs(UPLOAD_FOLDER_IMAGES, exist_ok=True)
+app.secret_key = 'your_secret_key'
 
+# configurations
+executor = ThreadPoolExecutor(max_workers=3)  # You can adjust the number of workers as needed
 INDEX_PATH = "vector_index.faiss"
 CHUNKS_PATH = "chunks.pkl"
 STATS_FILE = "stats.json"
@@ -28,8 +27,12 @@ UPLOAD_FOLDER_RAG = 'uploads/rag'
 UPLOAD_FOLDER_IMAGES = 'uploads/images'
 ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png', 'gif', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'}
 MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
-app.secret_key = 'your_secret_key'
 CACHE_FILE = "query_cache.json"
+
+# folder creation
+os.makedirs(UPLOAD_FOLDER_FILES, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER_RAG, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER_IMAGES, exist_ok=True)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

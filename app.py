@@ -133,11 +133,11 @@ def upload():
             })
 
     if request.method == 'POST':
-        if 'files' not in request.files:
-            flash('No files part in request.', 'danger')
+        if 'file' not in request.files:
+            flash('No file part in request.', 'danger')
             return redirect(url_for('upload'))
 
-        files = request.files.getlist('files')
+        files = request.files.getlist('file')
         for file in files:
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)

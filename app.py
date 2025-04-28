@@ -325,6 +325,50 @@ def ask():
         }), 500
 
 
+@app.route("/analyze-image", methods=["POST"])
+def analyze_image():
+    try:
+        if 'image' not in request.files:
+            flash('No image part in request.', 'danger')
+            return redirect(url_for('index'))
+
+        image = request.files['image']
+        prompt = request.form.get('image_prompt', '')
+
+        if image.filename == '':
+            flash('No selected image.', 'danger')
+            return redirect(url_for('index'))
+
+        if image and allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+
+            # Save image into uploads/images/
+            image_path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
+            image.save(image_path)
+
+            # Read image bytes to send to Ollama
+            with open(image_path, "rb") as img_file:
+                image_bytes = img_file.read()
+
+            # Send to Ollama for image analysis (Baklava or similar vision model)
+            print("🟡 Analyzing image using Baklava model")
+            response = ollama.generate(
+                model="baklava",
+                prompt=prompt or "Analyze the image and describe its contents.",
+                images=[image_bytes]
+            )
+
+            image_response = response.get('response', '[No response]')
+            return render_template("index.html", image_response=image_response)
+
+        else:
+            flash('Unsupported file type. Please upload JPG or PNG images.', 'danger')
+            return redirect(url_for('index'))
+
+    except Exception as e:
+        print(f"❌ Image Analysis Error: {e}")
+        flash('An error occurred while analyzing the image.', 'danger')
+        return redirect(url_for('index'))
 
 
 @app.route("/stats")

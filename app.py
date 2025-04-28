@@ -13,6 +13,8 @@ import time
 import json
 import datetime
 from werkzeug.utils import secure_filename
+import base64
+
 
 
 # app creation
@@ -325,6 +327,8 @@ def ask():
         }), 500
 
 
+import base64
+
 @app.route("/analyze-image", methods=["POST"])
 def analyze_image():
     try:
@@ -346,16 +350,16 @@ def analyze_image():
             image_path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
             image.save(image_path)
 
-            # Read image bytes to send to Ollama
+            # Base64 encode the image
             with open(image_path, "rb") as img_file:
-                image_bytes = img_file.read()
+                encoded_image = base64.b64encode(img_file.read()).decode('utf-8')
 
-            # Send to Ollama for image analysis (Baklava or similar vision model)
-            print("🟡 Analyzing image using Baklava model")
+            # Send to Ollama for image analysis (BakLLaVA model)
+            print("🟡 Analyzing image using BakLLaVA model")
             response = ollama.generate(
-                model="baklava",
+                model="bakllava",  # spelling must match your local ollama model name
                 prompt=prompt or "Analyze the image and describe its contents.",
-                images=[image_bytes]
+                images=[encoded_image]
             )
 
             image_response = response.get('response', '[No response]')
@@ -369,6 +373,7 @@ def analyze_image():
         print(f"❌ Image Analysis Error: {e}")
         flash('An error occurred while analyzing the image.', 'danger')
         return redirect(url_for('index'))
+
 
 
 @app.route("/stats")

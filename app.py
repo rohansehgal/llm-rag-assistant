@@ -235,13 +235,14 @@ def delete_file():
 def ask():
     import time
     from datetime import datetime
+
     file = request.files.get('file')
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file.save(os.path.join(UPLOAD_FOLDER_RAG, filename))
-    data = request.get_json()
-    prompt = data.get("prompt", "").strip()
-    model = data.get("model", "").strip()
+
+    prompt = request.form.get('prompt', '').strip()
+    model = request.form.get('models', '').strip()
 
     print("\n🟡 /ask called")
     print("🟡 Prompt:", prompt)
@@ -249,6 +250,8 @@ def ask():
 
     key = f"{prompt}|{model}"
     cache = load_cache()
+    
+    # (rest of your code is fine)
 
     # Handle cache hit or in-progress
     if key in cache:

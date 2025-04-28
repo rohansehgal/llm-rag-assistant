@@ -21,17 +21,10 @@
 
       <h1 class="mb-4">🧠 LLM + RAG Assistant</h1>
 
-      <!-- File Upload Form -->
-      <form action="/upload" method="post" enctype="multipart/form-data" class="mb-5">
-        <div class="mb-3">
-          <label for="file" class="form-label">Upload PDF for Knowledge Base:</label>
-          <input class="form-control" type="file" id="file" name="file" accept=".pdf" required>
-        </div>
-        <button class="btn btn-secondary" type="submit">Upload</button>
-      </form>
+  
 
       <!-- Prompt Form -->
-      <form id="qa-form" class="mb-5">
+      <form id="qa-form" class="mb-5" method="POST" enctype="multipart/form-data">
         <div class="mb-3">
           <label for="prompt" class="form-label">Enter your question:</label>
           <textarea class="form-control" id="prompt" name="prompt" rows="3" placeholder="Ask me anything..."></textarea>
@@ -95,131 +88,119 @@
   <!-- JavaScript -->
 
 
-<script>
-  function sanitizeModelName(name) {
-    return name.replace(/\./g, "").replace(/:/g, "");
-  }
-
-  const pollState = {}; // Tracks retries and animation state per model
-
-  function pollModel(prompt, model) {
-    const safeId = sanitizeModelName(model);
-    const dots = [".", "..", "..."];
-    let dotIndex = 0;
-
-    pollState[model] = {
-      interval: setInterval(() => {
-        const el = document.getElementById(`response-${safeId}`);
-        if (el && el.textContent.startsWith("Loading")) {
-          dotIndex = (dotIndex + 1) % dots.length;
-          el.textContent = "Loading" + dots[dotIndex];
-        }
-      }, 500)
-    };
-
-    function retryFetch() {
-      fetch("/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: prompt, model: model })
-      })
-      .then(res => res.json())
-      .then(data => {
-        const safe = sanitizeModelName(data.model);
-        const responseEl = document.getElementById(`response-${safe}`);
-
-        if (!responseEl) return;
-
-        if (data.answer === "Loading...") {
-          // Still not ready, retry later
-          setTimeout(retryFetch, 2000);
-        } else {
-          // Final answer received
-          clearInterval(pollState[model].interval);
-          responseEl.textContent = data.answer + ` (⏱ ${data.time_ms} ms)`;
-          responseEl.classList.remove("text-muted");
-
-          const updated = JSON.parse(localStorage.getItem("responses") || "{}");
-          updated[data.model] = data.answer + ` (⏱ ${data.time_ms} ms)`;
-          localStorage.setItem("responses", JSON.stringify(updated));
-        }
-      })
-      .catch(err => {
-        console.error("❌ Poll fetch failed:", err);
-      });
+  <script>
+    function sanitizeModelName(name) {
+      return name.replace(/\./g, "").replace(/:/g, "");
     }
-
-    retryFetch(); // Start polling
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const resultsDiv = document.getElementById("results");
-    const storedPrompt = localStorage.getItem("active_prompt");
-    const savedResponses = JSON.parse(localStorage.getItem("responses") || "{}");
-
-    if (storedPrompt) {
-      document.getElementById("prompt").value = storedPrompt;
+  
+    const pollState = {}; // Tracks retries and animation state per model
+  
+    function pollModel(prompt, model) {
+      const safeId = sanitizeModelName(model);
+      const dots = [".", "..", "..."];
+      let dotIndex = 0;
+  
+      pollState[model] = {
+        interval: setInterval(() => {
+          const el = document.getElementById(`response-${safeId}`);
+          if (el && el.textContent.startsWith("Loading")) {
+            dotIndex = (dotIndex + 1) % dots.length;
+            el.textContent = "Loading" + dots[dotIndex];
+          }
+        }, 500)
+      };
     }
-
-    if (storedPrompt && Object.keys(savedResponses).length > 0) {
-      Object.entries(savedResponses).forEach(([model, answer]) => {
-        const safeModelId = sanitizeModelName(model);
-        const isLoading = answer === "Loading...";
-
-        const card = document.createElement("div");
-        card.className = "card mb-3";
-        card.id = `card-${safeModelId}`;
-        card.innerHTML = `
-          <div class="card-header">Response from ${model}</div>
-          <div class="card-body">
-            <p class="card-text ${isLoading ? 'text-muted' : ''}" id="response-${safeModelId}">${answer}</p>
-          </div>
-        `;
-        resultsDiv.appendChild(card);
-
-        if (isLoading) {
-          pollModel(storedPrompt, model);
-        }
-      });
-    }
-  });
-
-  document.getElementById("qa-form").addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const prompt = document.getElementById("prompt").value.trim();
-    const selectedModels = Array.from(document.querySelectorAll('input[name="models"]:checked')).map(cb => cb.value);
-    const resultsDiv = document.getElementById("results");
-
-    localStorage.setItem("active_prompt", prompt);
-    localStorage.setItem("responses", "{}");
-    resultsDiv.innerHTML = "";
-
-    let responsesReturned = 0;
-
-    selectedModels.forEach(model => {
-      const safeModelId = sanitizeModelName(model);
-
+  
+    document.addEventListener("DOMContentLoaded", () => {
+      const resultsDiv = document.getElementById("results");
+      const storedPrompt = localStorage.getItem("active_prompt");
+      const savedResponses = JSON.parse(localStorage.getItem("responses") || "{}");
+  
+      if (storedPrompt) {
+        document.getElementById("prompt").value = storedPrompt;
+      }
+  
+      if (storedPrompt && Object.keys(savedResponses).length > 0) {
+        Object.entries(savedResponses).forEach(([model, answer]) => {
+          const safeModelId = sanitizeModelName(model);
+          const isLoading = answer === "Loading...";
+  
+          const card = document.createElement("div");
+          card.className = "card mb-3";
+          card.id = `card-${safeModelId}`;
+          card.innerHTML = `
+            <div class="card-header">Response from ${model}</div>
+            <div class="card-body">
+              <p class="card-text ${isLoading ? 'text-muted' : ''}" id="response-${safeModelId}">${answer}</p>
+            </div>
+          `;
+          resultsDiv.appendChild(card);
+  
+          if (isLoading) {
+            pollModel(storedPrompt, model);
+          }
+        });
+      }
+    });
+  
+    document.getElementById("qa-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+  
+      const form = document.getElementById('qa-form');
+      const formData = new FormData(form);
+  
+      const prompt = formData.get('prompt');
+      const selectedModel = formData.get('models'); // Only one model selected at a time
+      const resultsDiv = document.getElementById("results");
+  
+      localStorage.setItem("active_prompt", prompt);
+      localStorage.setItem("responses", "{}");
+      resultsDiv.innerHTML = "";
+  
+      const safeModelId = sanitizeModelName(selectedModel);
+  
       const card = document.createElement("div");
       card.className = "card mb-3";
       card.id = `card-${safeModelId}`;
       card.innerHTML = `
-        <div class="card-header">Response from ${model}</div>
+        <div class="card-header">Response from ${selectedModel}</div>
         <div class="card-body">
           <p class="card-text text-muted" id="response-${safeModelId}">Loading...</p>
         </div>
       `;
       resultsDiv.appendChild(card);
-
+  
       const saved = JSON.parse(localStorage.getItem("responses") || "{}");
-      saved[model] = "Loading...";
+      saved[selectedModel] = "Loading...";
       localStorage.setItem("responses", JSON.stringify(saved));
-
-      pollModel(prompt, model);
+  
+      pollModel(prompt, selectedModel);
+  
+      fetch("/ask", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        const safe = sanitizeModelName(data.model);
+        const responseEl = document.getElementById(`response-${safe}`);
+  
+        if (!responseEl) return;
+  
+        clearInterval(pollState[data.model]?.interval);
+        responseEl.textContent = data.answer + ` (⏱ ${data.time_ms} ms)`;
+        responseEl.classList.remove("text-muted");
+  
+        const updated = JSON.parse(localStorage.getItem("responses") || "{}");
+        updated[data.model] = data.answer + ` (⏱ ${data.time_ms} ms)`;
+        localStorage.setItem("responses", JSON.stringify(updated));
+      })
+      .catch(err => {
+        console.error("❌ Poll fetch failed:", err);
+      });
     });
-  });
-</script>
-
+  </script>
+  
 
 
 

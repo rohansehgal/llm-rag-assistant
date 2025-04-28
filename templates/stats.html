@@ -21,7 +21,6 @@
 
       <h1 class="mb-4">📊 Statistics</h1>
 
-      <!-- Statistics Table or Chart Placeholder -->
       <div class="table-responsive">
         <table class="table table-bordered align-middle">
           <thead class="table-light">
@@ -33,17 +32,23 @@
             </tr>
           </thead>
           <tbody>
-            {% for stat in statistics %}
+            {% for stat in stats %}
             <tr>
               <td>{{ stat.question }}</td>
               <td>{{ stat.timestamp }}</td>
               <td>{{ stat.model }}</td>
-              <td>{{ stat.response_time }}</td>
+              <td>{{ stat.response_time_ms }}</td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
+
+      {% if stats|length == 0 %}
+      <div class="alert alert-info mt-4" role="alert">
+        No statistics available yet.
+      </div>
+      {% endif %}
 
     </div>
 

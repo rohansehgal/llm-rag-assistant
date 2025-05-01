@@ -86,7 +86,7 @@ def save_stat(record):
     with open(STATS_FILE, "w") as f:
         json.dump(stats, f, indent=2)
 
-    print(f"📝 Logged stat: model={record['model']} | time={record['response_time_ms']} ms | question='{record['question']}'")
+    print(f"📝 Logged stat: model={record['model']} | time={record['response_time_ms']} ms | source={record.get('source')} | question='{record['question']}'")
 
 
 vector_index, chunks = load_index()
@@ -307,6 +307,7 @@ def ask():
             "model": model,
             "response_time_ms": time_ms,
             "timestamp": datetime.now().isoformat()
+            "source": "Text Analysis"
         })
 
         return jsonify({
@@ -332,6 +333,7 @@ import base64
 @app.route("/analyze-image", methods=["POST"])
 def analyze_image():
     try:
+        start_time = time.time()
         if 'image' not in request.files:
             flash('No image part in request.', 'danger')
             return redirect(url_for('index'))
@@ -363,6 +365,15 @@ def analyze_image():
             )
 
             image_response = response.get('response', '[No response]')
+            time_ms = int((time.time() - start_time) * 1000)
+            save_stat({
+                "question": prompt or "Image submitted without prompt",
+                "model": "baklava",
+                "response_time_ms": time_ms,
+                "timestamp": datetime.now().isoformat(),
+                "source": "Image Analysis"
+})
+
             return render_template("index.html", image_response=image_response)
 
         else:

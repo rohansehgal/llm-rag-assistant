@@ -26,6 +26,7 @@
           <thead class="table-light">
             <tr>
               <th>Question</th>
+              <th>Source</th>
               <th>Timestamp</th>
               <th>Model</th>
               <th>Response Time (ms)</th>
@@ -35,6 +36,7 @@
             {% for stat in stats %}
             <tr>
               <td>{{ stat.question }}</td>
+              <td>{{ stat.source or 'Unknown' }}</td>  <!-- fallback if source missing -->
               <td>{{ stat.timestamp }}</td>
               <td>{{ stat.model }}</td>
               <td>{{ stat.response_time_ms }}</td>

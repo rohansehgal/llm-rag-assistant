@@ -133,7 +133,7 @@ def upload():
                 'source': 'Manual Upload',
                 'type': filename.split('.')[-1].upper(),
                 'size': f"{round(os.path.getsize(path) / 1024, 2)} KB",
-                'upload_date': datetime.datetime.fromtimestamp(os.path.getmtime(path)).strftime('%Y-%m-%d'),
+                'upload_date': datetime.fromtimestamp(os.path.getmtime(path)).strftime('%Y-%m-%d'),
                 'folder': 'files'
             })
 
@@ -146,7 +146,7 @@ def upload():
                 'source': 'PDF Analysis',
                 'type': filename.split('.')[-1].upper(),
                 'size': f"{round(os.path.getsize(path) / 1024, 2)} KB",
-                'upload_date': datetime.datetime.fromtimestamp(os.path.getmtime(path)).strftime('%Y-%m-%d'),
+                'upload_date': datetime.fromtimestamp(os.path.getmtime(path)).strftime('%Y-%m-%d'),
                 'folder': 'rag'
             })
 
@@ -159,7 +159,7 @@ def upload():
                 'source': 'Image Analysis',
                 'type': filename.split('.')[-1].upper(),
                 'size': f"{round(os.path.getsize(path) / 1024, 2)} KB",
-                'upload_date': datetime.datetime.fromtimestamp(os.path.getmtime(path)).strftime('%Y-%m-%d'),
+                'upload_date': datetime.fromtimestamp(os.path.getmtime(path)).strftime('%Y-%m-%d'),
                 'folder': 'images'
             })
 

@@ -372,7 +372,7 @@ def analyze_image():
                 "response_time_ms": time_ms,
                 "timestamp": datetime.now().isoformat(),
                 "source": "Image Analysis"
-})
+        })
 
             return render_template("index.html", image_response=image_response)
 

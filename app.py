@@ -14,7 +14,8 @@ import json
 import datetime
 from werkzeug.utils import secure_filename
 import base64
-
+import time
+from datetime import datetime
 
 
 # app creation
@@ -235,8 +236,6 @@ def delete_file():
 
 @app.route("/ask", methods=["POST"])
 def ask():
-    import time
-    from datetime import datetime
 
     file = request.files.get('file')
     if file and allowed_file(file.filename):

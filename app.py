@@ -306,7 +306,7 @@ def ask():
             "question": prompt,
             "model": model,
             "response_time_ms": time_ms,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
             "source": "Text Analysis"
         })
 

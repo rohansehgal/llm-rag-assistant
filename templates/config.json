@@ -1,0 +1,13 @@
+{
+    "available_text_models": ["llama", "mistral", "phi"],
+    "available_image_models": ["bakllava", "llava-llama3"],
+    "allowed_text_models": ["llama", "mistral", "phi"],
+    "default_text_model": "llama",
+    "allowed_image_models": ["bakllava", "llava-llama3"],
+    "default_image_model": "bakllava",
+    "max_upload_size_mb": 25,
+    "enable_cache": true,
+    "enable_streaming": true,
+    "lock_prompt_during_execution": true
+  }
+  

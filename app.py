@@ -33,6 +33,26 @@ UPLOAD_FOLDER_IMAGES = 'uploads/images'
 ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png', 'gif', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'}
 MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
 CACHE_FILE = "query_cache.json"
+# Configuration file path
+CONFIG_FILE = "config.json"
+
+def load_config():
+    """Load settings from config.json"""
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as f:
+            config = json.load(f)
+            print("🔧 Loaded config from config.json:")
+            print(json.dumps(config, indent=2))
+            return config
+    print("⚠️ config.json not found. Using empty config.")
+    return {}
+
+
+def save_config(cfg):
+    """Persist settings to config.json"""
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(cfg, f, indent=2)
+
 
 # folder creation
 os.makedirs(UPLOAD_FOLDER_FILES, exist_ok=True)
@@ -200,14 +220,55 @@ def uploaded_file(folder, filename):
 
 
 
-@app.route('/settings')
+@app.route("/settings", methods=["GET", "POST"])
 def settings():
-    return render_template('settings.html', active_page='settings')
+    config = load_config()
+
+    # These are read-only and come from config.json
+    available_text_models = config.get("available_text_models", [])
+    available_image_models = config.get("available_image_models", [])
+
+    if request.method == "POST":
+        form = request.form
+
+        # Update editable settings
+        config["allowed_text_models"] = form.getlist("allowed_text_models")
+        config["default_text_model"] = form.get("default_text_model")
+        config["allowed_image_models"] = form.getlist("allowed_image_models")
+        config["default_image_model"] = form.get("default_image_model")
+        config["max_upload_size_mb"] = int(form.get("max_upload_size_mb", 25))
+        config["enable_cache"] = "enable_cache" in form
+        config["enable_streaming"] = "enable_streaming" in form
+        config["lock_prompt_during_execution"] = "lock_prompt_during_execution" in form
+
+        save_config(config)
+        flash("Settings updated successfully!", "success")
+        return redirect(url_for("settings"))
+
+    return render_template(
+        "settings.html",
+        config=config,
+        all_text_models=available_text_models,
+        all_image_models=available_image_models,
+        allowed_file_exts=", ".join(ALLOWED_EXTENSIONS),
+        image_exts=".jpg, .jpeg, .png",
+        active_page="settings"
+    )
+
 
 
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html")
+    config = load_config()
+    return render_template(
+        "index.html",
+        allowed_models=config.get("allowed_text_models", []),
+        default_model=config.get("default_text_model"),
+        allowed_image_models=config.get("allowed_image_models", []),
+        default_image_model=config.get("default_image_model"),
+        active_page="home"
+    )
+
 
 @app.route('/delete-file', methods=['POST'])
 def delete_file():
@@ -356,12 +417,14 @@ def analyze_image():
                 encoded_image = base64.b64encode(img_file.read()).decode('utf-8')
 
             # Send to Ollama for image analysis (BakLLaVA model)
-            print("🟡 Analyzing image using BakLLaVA model")
+            model = request.form.get("image_model", "bakllava")  # fallback to bakllava if none selected
+            print("🟡 Analyzing image using model", model)
+
             response = ollama.generate(
-                model="bakllava",  # spelling must match your local ollama model name
+                model=model,
                 prompt=prompt or "Analyze the image and describe its contents.",
                 images=[encoded_image]
-            )
+        )
 
             image_response = response.get('response', '[No response]')
             time_ms = int((time.time() - start_time) * 1000)

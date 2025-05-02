@@ -30,27 +30,28 @@
           <textarea class="form-control" id="prompt" name="prompt" rows="3" placeholder="Ask me anything..."></textarea>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label">Select Model:</label><br>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="models" value="llama3" id="model1" checked>
-            <label class="form-check-label" for="model1">LLaMA 3</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="models" value="mistral" id="model2">
-            <label class="form-check-label" for="model2">Mistral</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="models" value="phi3" id="model3">
-            <label class="form-check-label" for="model3">Phi-3</label>
-          </div>
-        </div>
-
-  <!-- 🔥 Missing File Upload Input -->
+  <!-- 🔥  File Upload Input -->
   <div class="mb-3">
     <label for="file" class="form-label">Attach a PDF for RAG (optional):</label>
     <input type="file" class="form-control" id="file" name="file" accept=".pdf">
   </div>
+
+  <div class="mb-3">
+    <label class="form-label">Select Model:</label><br>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="models" value="llama3" id="model1" checked>
+      <label class="form-check-label" for="model1">LLaMA 3</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="models" value="mistral" id="model2">
+      <label class="form-check-label" for="model2">Mistral</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="models" value="phi3" id="model3">
+      <label class="form-check-label" for="model3">Phi-3</label>
+    </div>
+  </div>
+  
         <button type="submit" class="btn btn-primary">Ask</button>
       </form>
 
@@ -59,7 +60,7 @@
 
       <!-- Image Analysis Section -->
       <hr class="my-5">
-      <h3 class="mb-4">🖼️ Analyze an Image</h3>
+      <h3 class="mb-4">Analyze an Image</h3>
 
       <form method="POST" action="/analyze-image" enctype="multipart/form-data" class="mb-4">
         <div class="mb-3">
@@ -68,9 +69,21 @@
         </div>
 
         <div class="mb-3">
-          <label for="image_prompt" class="form-label">Enter an optional prompt for the image:</label>
+          <label for="image_prompt" class="form-label">Enter a prompt for the image:</label>
           <input type="text" class="form-control" id="image_prompt" name="image_prompt" placeholder="e.g., What is shown in this image?" value="{{ image_prompt or '' }}">
         </div>
+
+        <div class="mb-3">
+          <label class="form-label">Select Image Model:</label><br>
+          {% for model in allowed_image_models %}
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="image_model" value="{{ model }}" id="image-model-{{ model }}"
+                     {% if model == default_image_model %}checked{% endif %}>
+              <label class="form-check-label" for="image-model-{{ model }}">{{ model | capitalize }}</label>
+            </div>
+          {% endfor %}
+        </div>
+        
 
         <button type="submit" class="btn btn-success">Analyze Image</button>
       </form>

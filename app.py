@@ -409,51 +409,54 @@ from flask import Response, stream_with_context
 def analyze_image():
     try:
         if 'image' not in request.files:
-            return "No image uploaded", 400
+            return "❌ No image uploaded", 400
 
         image = request.files['image']
-        prompt = request.form.get('image_prompt', '').strip()
+        prompt = request.form.get('image_prompt', 'Describe this image.')
 
         if image.filename == '':
-            return "No image selected", 400
+            return "❌ Empty filename", 400
 
-        if image and allowed_file(image.filename):
-            filename = secure_filename(image.filename)
-            image_path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
-            image.save(image_path)
+        if not allowed_file(image.filename):
+            return "❌ Unsupported file type", 400
 
-            with open(image_path, "rb") as img_file:
-                encoded_image = base64.b64encode(img_file.read()).decode('utf-8')
+        filename = secure_filename(image.filename)
+        image_path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
+        image.save(image_path)
 
-            model = request.form.get("image_model", "bakllava")
-            print("🟡 Streaming image analysis using model:", model)
+        with open(image_path, "rb") as img_file:
+            encoded_image = base64.b64encode(img_file.read()).decode('utf-8')
 
-            def stream_chunks():
-                full = ""
-                for chunk in ollama.chat(
-                    model=model,
-                    messages=[{"role": "user", "content": prompt or "Analyze the image and describe its contents."}],
-                    images=[encoded_image],
-                    stream=True
-                ):
-                    piece = chunk.get("message", {}).get("content", "")
-                    full += piece
-                    yield piece
-                save_stat({
-                    "question": prompt or "Image submitted without prompt",
-                    "model": model,
-                    "response_time_ms": 0,
-                    "timestamp": datetime.now().isoformat(),
-                    "source": "Image Analysis"
-                })
+        model = request.form.get("image_model", "bakllava")
+        print("🟡 Streaming image analysis using model:", model)
 
-            return Response(stream_with_context(stream_chunks()), content_type="text/event-stream")
+        def stream_chunks():
+            response = ollama.generate(
+                model=model,
+                prompt=prompt,
+                images=[encoded_image],
+                stream=True
+            )
 
-        return "Unsupported file type", 400
+            collected = ""
+            for chunk in response:
+                piece = chunk.get("response", "")
+                collected += piece
+                yield piece
+
+            save_stat({
+                "question": prompt,
+                "model": model,
+                "response_time_ms": 0,
+                "timestamp": datetime.now().isoformat(),
+                "source": "Image Analysis"
+            })
+
+        return Response(stream_chunks(), mimetype='text/plain')
 
     except Exception as e:
-        print(f"❌ Image streaming error: {e}")
-        return f"Error: {str(e)}", 500
+        print(f"❌ Error in /analyze-image: {e}")
+        return f"❌ Error: {e}", 500
 
 
 

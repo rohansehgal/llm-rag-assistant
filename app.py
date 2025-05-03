@@ -403,62 +403,57 @@ def ask():
 
 import base64
 
+from flask import Response, stream_with_context
+
 @app.route("/analyze-image", methods=["POST"])
 def analyze_image():
     try:
-        start_time = time.time()
         if 'image' not in request.files:
-            flash('No image part in request.', 'danger')
-            return redirect(url_for('index'))
+            return "No image uploaded", 400
 
         image = request.files['image']
-        prompt = request.form.get('image_prompt', '')
+        prompt = request.form.get('image_prompt', '').strip()
 
         if image.filename == '':
-            flash('No selected image.', 'danger')
-            return redirect(url_for('index'))
+            return "No image selected", 400
 
         if image and allowed_file(image.filename):
             filename = secure_filename(image.filename)
-
-            # Save image into uploads/images/
             image_path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
             image.save(image_path)
 
-            # Base64 encode the image
             with open(image_path, "rb") as img_file:
                 encoded_image = base64.b64encode(img_file.read()).decode('utf-8')
 
-            # Send to Ollama for image analysis (BakLLaVA model)
-            model = request.form.get("image_model", "bakllava")  # fallback to bakllava if none selected
-            print("🟡 Analyzing image using model", model)
+            model = request.form.get("image_model", "bakllava")
+            print("🟡 Streaming image analysis using model:", model)
 
-            response = ollama.generate(
-                model=model,
-                prompt=prompt or "Analyze the image and describe its contents.",
-                images=[encoded_image]
-        )
+            def stream_chunks():
+                full = ""
+                for chunk in ollama.chat(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt or "Analyze the image and describe its contents."}],
+                    images=[encoded_image],
+                    stream=True
+                ):
+                    piece = chunk.get("message", {}).get("content", "")
+                    full += piece
+                    yield piece
+                save_stat({
+                    "question": prompt or "Image submitted without prompt",
+                    "model": model,
+                    "response_time_ms": 0,
+                    "timestamp": datetime.now().isoformat(),
+                    "source": "Image Analysis"
+                })
 
-            image_response = response.get('response', '[No response]')
-            time_ms = int((time.time() - start_time) * 1000)
-            save_stat({
-                "question": prompt or "Image submitted without prompt",
-                "model": "baklava",
-                "response_time_ms": time_ms,
-                "timestamp": datetime.now().isoformat(),
-                "source": "Image Analysis"
-        })
+            return Response(stream_with_context(stream_chunks()), content_type="text/event-stream")
 
-            return render_template("index.html", image_response=image_response)
-
-        else:
-            flash('Unsupported file type. Please upload JPG or PNG images.', 'danger')
-            return redirect(url_for('index'))
+        return "Unsupported file type", 400
 
     except Exception as e:
-        print(f"❌ Image Analysis Error: {e}")
-        flash('An error occurred while analyzing the image.', 'danger')
-        return redirect(url_for('index'))
+        print(f"❌ Image streaming error: {e}")
+        return f"Error: {str(e)}", 500
 
 
 

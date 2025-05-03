@@ -111,23 +111,7 @@
       return name.replace(/\./g, "").replace(/:/g, "");
     }
   
-    const pollState = {}; // Tracks retries and animation state per model
-  
-    function pollModel(prompt, model) {
-      const safeId = sanitizeModelName(model);
-      const dots = [".", "..", "..."];
-      let dotIndex = 0;
-  
-      pollState[model] = {
-        interval: setInterval(() => {
-          const el = document.getElementById(`response-${safeId}`);
-          if (el && el.textContent.startsWith("Loading")) {
-            dotIndex = (dotIndex + 1) % dots.length;
-            el.textContent = "Loading" + dots[dotIndex];
-          }
-        }, 500)
-      };
-    }
+
   
     document.addEventListener("DOMContentLoaded", () => {
       const resultsDiv = document.getElementById("results");
@@ -141,7 +125,6 @@
       if (storedPrompt && Object.keys(savedResponses).length > 0) {
         Object.entries(savedResponses).forEach(([model, answer]) => {
           const safeModelId = sanitizeModelName(model);
-          const isLoading = answer === "Loading...";
   
           const card = document.createElement("div");
           card.className = "card mb-3";
@@ -154,9 +137,7 @@
           `;
           resultsDiv.appendChild(card);
   
-          if (isLoading) {
-            pollModel(storedPrompt, model);
-          }
+       
         });
       }
     });
@@ -192,7 +173,6 @@
       saved[selectedModel] = "Loading...";
       localStorage.setItem("responses", JSON.stringify(saved));
   
-      pollModel(prompt, selectedModel);
   
       fetch("/ask", {
   method: "POST",
@@ -207,8 +187,7 @@
   const responseEl = document.getElementById(`response-${safe}`);
   if (!responseEl) return;
 
-  // Stop polling spinner
-  clearInterval(pollState[selectedModel]?.interval);
+
 
   while (true) {
     const { done, value } = await reader.read();
@@ -234,7 +213,58 @@
 
   </script>
   
-
+  <script>
+    document.querySelector('form[action="/analyze-image"]').addEventListener("submit", function (e) {
+      e.preventDefault();
+    
+      const form = e.target;
+      const formData = new FormData(form);
+      const imagePrompt = formData.get("image_prompt") || "Analyzing image...";
+    
+      // Remove old card if exists
+      const oldCard = document.getElementById("image-analysis-result");
+      if (oldCard) oldCard.remove();
+    
+      // Add new card
+      const card = document.createElement("div");
+      card.className = "card mt-4";
+      card.id = "image-analysis-result";
+      card.innerHTML = `
+        <div class="card-header">Image Analysis Result</div>
+        <div class="card-body">
+          <p class="card-text text-muted" id="image-stream-response">Loading...</p>
+        </div>
+      `;
+      form.after(card);
+    
+      fetch("/analyze-image", {
+        method: "POST",
+        body: formData
+      })
+      .then(async (res) => {
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        const responseEl = document.getElementById("image-stream-response");
+        let responseText = "";
+    
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+    
+          const chunk = decoder.decode(value, { stream: true });
+          console.log("🔸 Image chunk received:", chunk);
+          responseText += chunk;
+          responseEl.textContent = responseText;
+        }
+    
+        responseEl.classList.remove("text-muted");
+      })
+      .catch((err) => {
+        console.error("❌ Image streaming failed:", err);
+      });
+    });
+    </script>
+    
 
 
 </body>

@@ -125,7 +125,8 @@
       if (storedPrompt && Object.keys(savedResponses).length > 0) {
         Object.entries(savedResponses).forEach(([model, answer]) => {
           const safeModelId = sanitizeModelName(model);
-  
+          const isLoading = answer === "Loading...";  // ✅ SHOULD BE HERE
+
           const card = document.createElement("div");
           card.className = "card mb-3";
           card.id = `card-${safeModelId}`;

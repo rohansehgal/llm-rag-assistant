@@ -215,6 +215,8 @@
     if (done) break;
 
     const chunk = decoder.decode(value, { stream: true });
+    console.log("🔹 Chunk received:", chunk); // ✅ ADD THIS LINE
+
     responseText += chunk;
     responseEl.textContent = responseText;
   }

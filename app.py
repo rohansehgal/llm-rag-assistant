@@ -2,6 +2,9 @@
 from concurrent.futures import ThreadPoolExecutor
 import functools
 from flask import Flask, request, render_template, redirect, url_for, flash, jsonify, send_from_directory
+# ✅ NEW: Required for streaming responses from Flask
+from flask import Response, stream_with_context
+
 import ollama
 import faiss
 import numpy as np
@@ -238,7 +241,6 @@ def settings():
         config["default_image_model"] = form.get("default_image_model")
         config["max_upload_size_mb"] = int(form.get("max_upload_size_mb", 25))
         config["enable_cache"] = "enable_cache" in form
-        config["enable_streaming"] = "enable_streaming" in form
         config["lock_prompt_during_execution"] = "lock_prompt_during_execution" in form
 
         save_config(config)
@@ -294,9 +296,9 @@ def delete_file():
     return jsonify({'message': 'File deleted successfully'}), 200
 
 
-
 @app.route("/ask", methods=["POST"])
 def ask():
+    """Handles model queries with caching and automatic streaming."""
 
     file = request.files.get('file')
     if file and allowed_file(file.filename):
@@ -312,80 +314,82 @@ def ask():
 
     key = f"{prompt}|{model}"
     cache = load_cache()
-    
-    # (rest of your code is fine)
 
-    # Handle cache hit or in-progress
-    if key in cache:
-        cached = cache[key]
-        if cached == "IN_PROGRESS":
-            print(f"⏳ Already in progress for: {key}")
-            return jsonify({
-                "model": model,
-                "answer": "Loading...",
-                "time_ms": 0
-            })
-        else:
-            print(f"⚡ Cache hit for: {key}")
-            return jsonify({
-                "model": model,
-                "answer": cached,
-                "time_ms": 0
-            })
+    # ✅ Return immediately if response is cached
+    if key in cache and cache[key] != "IN_PROGRESS":
+        print("⚡ Cache hit")
+        return jsonify({
+            "model": model,
+            "answer": cache[key],
+            "time_ms": 0
+        })
 
-    # Mark this query as in-progress
-    print(f"⚙️ Caching in-progress for: {key}")
+    # ✅ If response is in progress, notify frontend (for polling)
+    if cache.get(key) == "IN_PROGRESS":
+        print("⏳ Already processing")
+        return jsonify({
+            "model": model,
+            "answer": "Loading...",
+            "time_ms": 0
+        })
+
+    # ✅ Otherwise, mark as in progress
     cache[key] = "IN_PROGRESS"
     save_cache(cache)
 
-    # Build optional RAG context
+    # ✅ Build RAG context (if index is available)
     context = ""
     if vector_index and chunks:
         query_embedding = embedder.encode([prompt])
         scores, indices = vector_index.search(np.array(query_embedding), k=3)
         context = "\n".join([chunks[i] for i in indices[0]])
 
-    full_prompt = f"Context:\n{context}\n\nQuestion: {prompt}\n\nAnswer:"
+    messages = [
+        {
+            "role": "system",
+            "content": f"The following context may be helpful for answering the question:\n\n{context}"
+        },
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ]
 
-    try:
-        start_time = time.time()
-        future = executor.submit(functools.partial(ollama.generate, model=model, prompt=full_prompt))
-        print("waiting for ollama result")
-        result = dict(future.result())
-        print("ollama result recieved")
-        response_text = result.get("response", "[No response returned]")
-        time_ms = int((time.time() - start_time) * 1000)
+    def stream_response():
+        try:
+            response = ollama.chat(
+                model=model,
+                messages=messages,
+                stream=True
+            )
 
-        # Cache the final result
-        cache[key] = response_text
-        save_cache(cache)
-        print(f"✅ Cached response in {time_ms} ms for: {key}")
+            collected = ""
+            for chunk in response:
+                piece = chunk.get("message", {}).get("content", "")
+                collected += piece
+                yield piece  # ✅ Stream chunk to frontend
 
-        # Save stats
-        save_stat({
-            "question": prompt,
-            "model": model,
-            "response_time_ms": time_ms,
-            "timestamp": datetime.now().isoformat(),
-            "source": "Text Analysis"
-        })
+            # ✅ Cache the full streamed response
+            cache[key] = collected
+            save_cache(cache)
 
-        return jsonify({
-            "model": model,
-            "answer": response_text,
-            "time_ms": time_ms
-        })
+            # ✅ Log response time = 0 (since streaming)
+            save_stat({
+                "question": prompt,
+                "model": model,
+                "response_time_ms": 0,
+                "timestamp": datetime.now().isoformat(),
+                "source": "Text Analysis"
+            })
 
-    except Exception as e:
-        print(f"❌ Error while generating model response: {e}")
-        cache.pop(key, None)  # Clear in-progress on error
-        save_cache(cache)
+        except Exception as e:
+            print(f"❌ Streaming error: {e}")
+            cache.pop(key, None)  # Remove broken cache
+            save_cache(cache)
+            yield f"\n[Error: {str(e)}]"
 
-        return jsonify({
-            "model": model,
-            "answer": f"Error: {str(e)}",
-            "time_ms": 0
-        }), 500
+    # ✅ Return streamed response
+    return Response(stream_with_context(stream_response()), content_type="text/plain")
 
 
 import base64

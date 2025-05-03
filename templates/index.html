@@ -195,28 +195,40 @@
       pollModel(prompt, selectedModel);
   
       fetch("/ask", {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        const safe = sanitizeModelName(data.model);
-        const responseEl = document.getElementById(`response-${safe}`);
-  
-        if (!responseEl) return;
-  
-        clearInterval(pollState[data.model]?.interval);
-        responseEl.textContent = data.answer + ` (⏱ ${data.time_ms} ms)`;
-        responseEl.classList.remove("text-muted");
-  
-        const updated = JSON.parse(localStorage.getItem("responses") || "{}");
-        updated[data.model] = data.answer + ` (⏱ ${data.time_ms} ms)`;
-        localStorage.setItem("responses", JSON.stringify(updated));
-      })
-      .catch(err => {
-        console.error("❌ Poll fetch failed:", err);
-      });
-    });
+  method: "POST",
+  body: formData
+})
+.then(async (res) => {
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let responseText = "";
+
+  const safe = sanitizeModelName(selectedModel);
+  const responseEl = document.getElementById(`response-${safe}`);
+  if (!responseEl) return;
+
+  // Stop polling spinner
+  clearInterval(pollState[selectedModel]?.interval);
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const chunk = decoder.decode(value, { stream: true });
+    responseText += chunk;ß
+    responseEl.textContent = responseText;
+  }
+
+  // Save to localStorage after stream is complete
+  responseEl.classList.remove("text-muted");
+  const updated = JSON.parse(localStorage.getItem("responses") || "{}");
+  updated[selectedModel] = responseText;
+  localStorage.setItem("responses", JSON.stringify(updated));
+})
+.catch((err) => {
+  console.error("❌ Streaming fetch failed:", err);
+});
+
   </script>
   
 

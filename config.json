@@ -7,7 +7,6 @@
     "default_image_model": "bakllava",
     "max_upload_size_mb": 25,
     "enable_cache": true,
-    "enable_streaming": true,
     "lock_prompt_during_execution": true
   }
   

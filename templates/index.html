@@ -215,7 +215,7 @@
     if (done) break;
 
     const chunk = decoder.decode(value, { stream: true });
-    responseText += chunk;ß
+    responseText += chunk;
     responseEl.textContent = responseText;
   }
 
@@ -227,6 +227,7 @@
 })
 .catch((err) => {
   console.error("❌ Streaming fetch failed:", err);
+});
 });
 
   </script>

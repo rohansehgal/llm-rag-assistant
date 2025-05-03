@@ -354,7 +354,7 @@ def ask():
             "content": prompt
         }
     ]
-
+    
     def stream_response():
         try:
             response = ollama.chat(
@@ -366,14 +366,22 @@ def ask():
             collected = ""
             for chunk in response:
                 piece = chunk.get("message", {}).get("content", "")
+                if not piece:
+                    continue  # Skip empty chunks
+            
                 collected += piece
-                yield piece  # ✅ Stream chunk to frontend
 
-            # ✅ Cache the full streamed response
+                # 🪵 Debug: Print to server logs so we can verify backend is streaming
+                print(f"📤 Streaming chunk: {repr(piece)}")
+
+                # ✅ Yield each chunk (plus optional flush trick)
+                yield piece
+                time.sleep(0.01)  # 💤 Optional: Tiny delay to flush buffer
+
+            # Save full response after stream ends
             cache[key] = collected
             save_cache(cache)
 
-            # ✅ Log response time = 0 (since streaming)
             save_stat({
                 "question": prompt,
                 "model": model,
@@ -384,9 +392,10 @@ def ask():
 
         except Exception as e:
             print(f"❌ Streaming error: {e}")
-            cache.pop(key, None)  # Remove broken cache
+            cache.pop(key, None)
             save_cache(cache)
             yield f"\n[Error: {str(e)}]"
+
 
     # ✅ Return streamed response
     return Response(stream_with_context(stream_response()), content_type="text/plain")

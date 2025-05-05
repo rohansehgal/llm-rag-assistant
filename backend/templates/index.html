@@ -9,6 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; }
+    .disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body class="flex min-h-screen bg-white text-gray-900">
@@ -46,45 +50,57 @@
       </div>
 
       <!-- Model Selection -->
-<!-- Model Selection -->
-<div x-data="{ selected: '{{ default_text_model }}' }">
-  <label class="block text-lg font-semibold mb-2">Select Model:</label>
-  <div class="flex flex-wrap gap-4">
-    {% for model in allowed_models %}
-    <label :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'" class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="selected = '{{ model }}'">
-        <input type="radio" name="models" value="{{ 'llama3' if model == 'llama' else 'phi3' if model == 'phi' else model }}" class="sr-only" :checked="selected === '{{ model }}'">
-        <div class="font-semibold text-lg">
-          {% if model == 'llama' %}LLaMA 3{% elif model == 'phi' %}Phi-3{% else %}{{ model | capitalize }}{% endif %}
+      <div x-data="{ selected: '{{ default_text_model }}' }">
+        <label class="block text-lg font-semibold mb-2">Select Model:</label>
+        <div class="flex flex-wrap gap-4">
+          {% for model in allowed_models %}
+          <label :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'" class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="selected = '{{ model }}'">
+              <input type="radio" name="models" value="{{ 'llama3' if model == 'llama' else 'phi3' if model == 'phi' else model }}" class="sr-only" :checked="selected === '{{ model }}'">
+              <div class="font-semibold text-lg">
+                {% if model == 'llama' %}LLaMA 3{% elif model == 'phi' %}Phi-3{% else %}{{ model | capitalize }}{% endif %}
+              </div>
+              <div class="text-sm text-gray-500">Ollama Text Model</div>
+          </label>
+          {% endfor %}
         </div>
-        <div class="text-sm text-gray-500">Ollama Text Model</div>
-    </label>
-    {% endfor %}
-  </div>
-</div>
-
+      </div>
 
       <!-- Ask Button -->
-      <button type="submit" class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg">Ask</button>
+      <button type="submit" id="ask-button" class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg">Ask</button>
     </form>
 
     <!-- Results -->
     <div id="results" class="mt-10 space-y-4"></div>
-
   </main>
 
-  <!-- JS logic remains same -->
+  <!-- JavaScript -->
   <script>
     function sanitizeModelName(name) {
       return name.replace(/\./g, "").replace(/:/g, "");
     }
 
+    document.addEventListener("DOMContentLoaded", () => {
+      const storedPrompt = localStorage.getItem("active_prompt");
+      if (storedPrompt) {
+        document.getElementById("prompt").value = storedPrompt;
+      }
+    });
+
     document.getElementById("qa-form").addEventListener("submit", function (e) {
       e.preventDefault();
-      const form = document.getElementById('qa-form');
+
+      const form = document.getElementById("qa-form");
+      const promptInput = document.getElementById("prompt");
+      const askButton = document.getElementById("ask-button");
       const formData = new FormData(form);
-      const prompt = formData.get('prompt');
-      const selectedModel = formData.get('models');
+      const prompt = formData.get("prompt");
+      const selectedModel = formData.get("models");
       const resultsDiv = document.getElementById("results");
+
+      // 🔒 Lock UI
+      form.classList.add("disabled");
+      promptInput.disabled = true;
+      askButton.disabled = true;
 
       localStorage.setItem("active_prompt", prompt);
       localStorage.setItem("responses", "{}");
@@ -119,6 +135,11 @@
         }
       }).catch(err => {
         console.error("Streaming failed:", err);
+      }).finally(() => {
+        // 🔓 Unlock UI
+        form.classList.remove("disabled");
+        promptInput.disabled = false;
+        askButton.disabled = false;
       });
     });
   </script>

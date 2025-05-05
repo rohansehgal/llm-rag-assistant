@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Text Analysis</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     body { font-family: 'Inter', sans-serif; }
   </style>
@@ -21,57 +21,67 @@
   <!-- Main Content -->
   <main class="flex-1 p-8 overflow-y-auto">
     <h1 class="text-4xl font-bold mb-2">Text Analysis</h1>
-    <p class="text-lg text-gray-500 mb-8">Enter your query, upload a file (optional), and select a model to receive a streaming response.</p>
+    <p class="text-lg text-gray-500 mb-8">
+      Enter your query, upload a file (optional), and select a model to receive a streaming response.
+    </p>
 
-    <!-- Form -->
-    <form id="qa-form" class="space-y-8" method="POST" enctype="multipart/form-data">
-      <!-- Prompt -->
+    <form id="qa-form" class="space-y-8" method="POST" enctype="multipart/form-data" x-data="{ selected: '{{ default_text_model }}', disabled: false }">
+      
+      <!-- Prompt Input -->
       <div>
         <label for="prompt" class="block text-lg font-semibold mb-2">Enter your question:</label>
-        <textarea class="w-full p-4 border rounded-lg text-base" id="prompt" name="prompt" rows="3" placeholder="Ask me anything..."></textarea>
+        <textarea id="prompt" name="prompt" rows="3" placeholder="Ask me anything..."
+          class="w-full p-4 border rounded-lg text-base"></textarea>
       </div>
 
-      <!-- Upload -->
+      <!-- File Upload -->
       <div>
         <label class="block text-lg font-semibold mb-2">Attach a PDF for RAG (optional):</label>
         <label class="block border-2 border-dashed rounded-lg p-8 text-center text-gray-500 cursor-pointer hover:border-gray-400">
-          <svg class="mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="40" height="40">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4-4m0 0l-4 4m4-4v12" />
+          <svg class="mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" width="40" height="40">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4-4m0 0l-4 4m4-4v12" />
           </svg>
           <span class="block font-medium text-base">Drag and drop a PDF, or click to browse</span>
           <span class="block text-sm">Supports .PDF files up to 25MB</span>
-          <input type="file" id="file" name="file" accept=".pdf" class="hidden">
+          <input type="file" id="file" name="file" accept=".pdf" class="hidden" />
         </label>
         <p id="file-feedback" class="mt-2 text-sm text-gray-500"></p>
       </div>
 
-      <!-- Model Selection -->
-      <div x-data="{ selected: '{{ default_text_model }}', disabled: false }" x-bind:class="{ 'opacity-50 pointer-events-none': disabled }" id="model-select">
+      <!-- Model Selector -->
+      <div :class="{ 'opacity-50 pointer-events-none': disabled }" id="model-select">
         <label class="block text-lg font-semibold mb-2">Select Model:</label>
         <div class="flex flex-wrap gap-4">
           {% for model in allowed_models %}
-          <label :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'" class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="if (!disabled) selected = '{{ model }}'">
-              <input type="radio" name="models" value="{{ 'llama3' if model == 'llama' else 'phi3' if model == 'phi' else model }}" class="sr-only" :checked="selected === '{{ model }}'">
-              <div class="font-semibold text-lg">
-                {% if model == 'llama' %}LLaMA 3{% elif model == 'phi' %}Phi-3{% else %}{{ model | capitalize }}{% endif %}
-              </div>
-              <div class="text-sm text-gray-500">Ollama Text Model</div>
+          <label
+            :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'"
+            class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all"
+            @click="if (!disabled) selected = '{{ model }}'">
+            <input type="radio" name="models" value="{{ 'llama3' if model == 'llama' else 'phi3' if model == 'phi' else model }}"
+              class="sr-only" :checked="selected === '{{ model }}'" />
+            <div class="font-semibold text-lg">
+              {% if model == 'llama' %}LLaMA 3{% elif model == 'phi' %}Phi-3{% else %}{{ model | capitalize }}{% endif %}
+            </div>
+            <div class="text-sm text-gray-500">Ollama Text Model</div>
           </label>
           {% endfor %}
         </div>
-        <!-- ✅ Fix: Include selected model in submission -->
-  <input type="hidden" name="models" :value="selected">
+        <!-- Hidden synced model field -->
+        <input type="hidden" name="models" :value="selected">
       </div>
 
       <!-- Ask Button -->
-      <button type="submit" id="ask-button" class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>Ask</button>
+      <button type="submit" id="ask-button"
+        class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+        :disabled="true">Ask</button>
     </form>
 
     <!-- Results -->
     <div id="results" class="mt-10 space-y-4"></div>
   </main>
 
-  <!-- JS logic -->
   <script>
     function sanitizeModelName(name) {
       return name.replace(/\./g, "").replace(/:/g, "");
@@ -80,11 +90,19 @@
     const promptInput = document.getElementById("prompt");
     const askButton = document.getElementById("ask-button");
 
+    // Enable Ask only if prompt has text
     promptInput.addEventListener("input", () => {
       askButton.disabled = promptInput.value.trim() === "";
     });
 
-    // Restore previous prompt and responses
+    // File upload feedback
+    document.getElementById("file").addEventListener("change", function () {
+      const file = this.files[0];
+      const feedback = document.getElementById("file-feedback");
+      feedback.textContent = file ? `File: ${file.name} Upload successful.` : "";
+    });
+
+    // Restore history from localStorage
     document.addEventListener("DOMContentLoaded", () => {
       const storedPrompt = localStorage.getItem("active_prompt");
       const savedResponses = JSON.parse(localStorage.getItem("responses") || "{}");
@@ -110,29 +128,12 @@
       }
     });
 
-    document.getElementById("file").addEventListener("change", function () {
-      const file = this.files[0];
-      const feedback = document.getElementById("file-feedback");
-      feedback.textContent = file ? `File: ${file.name} Upload successful.` : "";
-    });
-
     document.getElementById("qa-form").addEventListener("submit", function (e) {
       e.preventDefault();
       const form = document.getElementById("qa-form");
       const formData = new FormData(form);
-      const modelSection = document.getElementById("model-select").__x;
-      const prompt = formData.get("prompt");
       const selectedModel = formData.get("models");
       const resultsDiv = document.getElementById("results");
-
-      localStorage.setItem("active_prompt", prompt);
-      localStorage.setItem("responses", "{}");
-      resultsDiv.innerHTML = "";
-
-      promptInput.disabled = true;
-      promptInput.classList.add("bg-gray-100", "text-gray-400", "cursor-not-allowed");
-      askButton.disabled = true;
-      modelSection.disabled = true;
 
       const safeModelId = sanitizeModelName(selectedModel);
       const card = document.createElement("div");
@@ -142,7 +143,20 @@
         <div class="p-4 border-b font-semibold">Response from ${selectedModel}</div>
         <div class="p-4 text-base text-gray-800" id="response-${safeModelId}">Loading...</div>
       `;
+      resultsDiv.innerHTML = "";
       resultsDiv.appendChild(card);
+
+      // Save to localStorage
+      const prompt = formData.get("prompt");
+      localStorage.setItem("active_prompt", prompt);
+      localStorage.setItem("responses", "{}");
+
+      // Disable UI
+      const modelSelector = document.getElementById("model-select");
+      promptInput.disabled = true;
+      promptInput.classList.add("bg-gray-100", "text-gray-400", "cursor-not-allowed");
+      modelSelector.classList.add("opacity-50", "pointer-events-none");
+      askButton.disabled = true;
 
       fetch("/ask", {
         method: "POST",
@@ -152,7 +166,6 @@
         const decoder = new TextDecoder("utf-8");
         let responseText = "";
         const responseEl = document.getElementById(`response-${safeModelId}`);
-        if (!responseEl) return;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -162,20 +175,18 @@
           responseEl.textContent = responseText;
         }
 
-        const saved = JSON.parse(localStorage.getItem("responses") || "{}");
-        saved[selectedModel] = responseText;
-        localStorage.setItem("responses", JSON.stringify(saved));
+        // Save response
+        const updated = JSON.parse(localStorage.getItem("responses") || "{}");
+        updated[selectedModel] = responseText;
+        localStorage.setItem("responses", JSON.stringify(updated));
 
+        // Re-enable UI
         promptInput.disabled = false;
         promptInput.classList.remove("bg-gray-100", "text-gray-400", "cursor-not-allowed");
-        modelSection.disabled = false;
+        modelSelector.classList.remove("opacity-50", "pointer-events-none");
         askButton.disabled = promptInput.value.trim() === "";
-      }).catch(err => {
+      }).catch((err) => {
         console.error("Streaming failed:", err);
-        promptInput.disabled = false;
-        promptInput.classList.remove("bg-gray-100", "text-gray-400", "cursor-not-allowed");
-        modelSection.disabled = false;
-        askButton.disabled = promptInput.value.trim() === "";
       });
     });
   </script>

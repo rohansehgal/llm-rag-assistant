@@ -36,14 +36,15 @@ executor = ThreadPoolExecutor(max_workers=3)  # You can adjust the number of wor
 INDEX_PATH = "vector_index.faiss"
 CHUNKS_PATH = "chunks.pkl"
 STATS_FILE = "stats.json"
-UPLOAD_FOLDER_FILES = 'uploads/files'
-UPLOAD_FOLDER_RAG = 'uploads/rag'
-UPLOAD_FOLDER_IMAGES = 'uploads/images'
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+UPLOAD_FOLDER_FILES = os.path.join(BASE_DIR, "uploads", "files")
+UPLOAD_FOLDER_RAG = os.path.join(BASE_DIR, "uploads", "rag")
+UPLOAD_FOLDER_IMAGES = os.path.join(BASE_DIR, "uploads", "images")
 ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png', 'gif', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'}
 MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
 CACHE_FILE = "query_cache.json"
 # Configuration file path
-CONFIG_FILE = "config.json"
+CONFIG_FILE = os.path.join(os.path.dirname(__file__), "..", "config.json")
 
 def load_config():
     """Load settings from config.json"""

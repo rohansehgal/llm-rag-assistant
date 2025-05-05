@@ -78,12 +78,11 @@
     const promptInput = document.getElementById("prompt");
     const askButton = document.getElementById("ask-button");
 
-    // Enable Ask only if prompt has content
     promptInput.addEventListener("input", () => {
       askButton.disabled = promptInput.value.trim() === "";
     });
 
-    // Restore last prompt and responses
+    // Restore previous prompt and responses
     document.addEventListener("DOMContentLoaded", () => {
       const storedPrompt = localStorage.getItem("active_prompt");
       const savedResponses = JSON.parse(localStorage.getItem("responses") || "{}");
@@ -112,20 +111,16 @@
     document.getElementById("file").addEventListener("change", function () {
       const file = this.files[0];
       const feedback = document.getElementById("file-feedback");
-      if (file) {
-        feedback.textContent = `File: ${file.name} Upload successful.`;
-      } else {
-        feedback.textContent = "";
-      }
+      feedback.textContent = file ? `File: ${file.name} Upload successful.` : "";
     });
 
     document.getElementById("qa-form").addEventListener("submit", function (e) {
       e.preventDefault();
-      const form = document.getElementById('qa-form');
+      const form = document.getElementById("qa-form");
       const formData = new FormData(form);
       const modelSection = document.getElementById("model-select").__x;
-      const prompt = formData.get('prompt');
-      const selectedModel = formData.get('models');
+      const prompt = formData.get("prompt");
+      const selectedModel = formData.get("models");
       const resultsDiv = document.getElementById("results");
 
       localStorage.setItem("active_prompt", prompt);
@@ -165,7 +160,6 @@
           responseEl.textContent = responseText;
         }
 
-        // Save response to localStorage
         const saved = JSON.parse(localStorage.getItem("responses") || "{}");
         saved[selectedModel] = responseText;
         localStorage.setItem("responses", JSON.stringify(saved));

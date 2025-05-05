@@ -19,7 +19,8 @@
 
   <!-- Main Content -->
   <main class="flex-1 p-8 overflow-y-auto">
-    <h1 class="text-3xl font-bold mb-6">🧠 LLM + RAG Assistant</h1>
+    <h1 class="text-3xl font-bold mb-2">Text Analysis</h1>
+    <p class="text-gray-500 mb-6">Enter your query, upload a file (optional), and select a model to receive a streaming response.</p>
 
     <!-- Prompt Form -->
     <form id="qa-form" method="POST" enctype="multipart/form-data" class="space-y-6">
@@ -30,31 +31,30 @@
 
       <div>
         <label for="file" class="block text-lg font-medium mb-2">Attach a PDF for RAG (optional):</label>
-        <input type="file" id="file" name="file" accept=".pdf" class="w-full border p-2 rounded">
+        <label class="block border-2 border-dashed rounded-lg p-8 text-center text-gray-500 cursor-pointer hover:border-gray-400">
+          <svg class="mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="40" height="40">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4-4m0 0l-4 4m4-4v12" />
+          </svg>
+          <span class="block font-medium">Drag and drop a PDF, or click to browse</span>
+          <span class="block text-sm">Supports .PDF files up to 25MB</span>
+          <input type="file" id="file" name="file" accept=".pdf" class="hidden">
+        </label>
       </div>
 
       <div>
         <label class="block text-lg font-medium mb-2">Select Model:</label>
-        <div class="flex flex-wrap gap-4">
-          <label class="border rounded p-4 flex-1 cursor-pointer hover:bg-gray-50">
-            <input type="radio" name="models" value="llama3" class="sr-only" checked>
-            <div class="font-semibold">LLaMA 3</div>
-            <div class="text-sm text-gray-500">Fast responses</div>
-          </label>
-          <label class="border rounded p-4 flex-1 cursor-pointer hover:bg-gray-50">
-            <input type="radio" name="models" value="mistral" class="sr-only">
-            <div class="font-semibold">Mistral</div>
-            <div class="text-sm text-gray-500">Creative content</div>
-          </label>
-          <label class="border rounded p-4 flex-1 cursor-pointer hover:bg-gray-50">
-            <input type="radio" name="models" value="phi3" class="sr-only">
-            <div class="font-semibold">Phi-3</div>
-            <div class="text-sm text-gray-500">Reasoning focus</div>
-          </label>
+        <div class="flex flex-wrap gap-4" x-data="{ selected: 'llama3' }">
+          <template x-for="model in [{ value: 'llama3', label: 'LLaMA 3', desc: 'Fast responses' }, { value: 'mistral', label: 'Mistral', desc: 'Creative content' }, { value: 'phi3', label: 'Phi-3', desc: 'Reasoning focus' }]" :key="model.value">
+            <label :class="selected === model.value ? 'border-2 border-blue-500 bg-blue-50' : 'border'" class="rounded p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="selected = model.value">
+              <input type="radio" name="models" :value="model.value" class="sr-only" :checked="selected === model.value">
+              <div class="font-semibold" x-text="model.label"></div>
+              <div class="text-sm text-gray-500" x-text="model.desc"></div>
+            </label>
+          </template>
         </div>
       </div>
 
-      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded">Ask</button>
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded">Ask</button>
     </form>
 
     <!-- Results Section -->
@@ -67,7 +67,14 @@
     <form method="POST" action="/analyze-image" enctype="multipart/form-data" class="space-y-6">
       <div>
         <label for="image" class="block text-lg font-medium mb-2">Upload an Image (.jpg, .png):</label>
-        <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png" required class="w-full border p-2 rounded">
+        <label class="block border-2 border-dashed rounded-lg p-8 text-center text-gray-500 cursor-pointer hover:border-gray-400">
+          <svg class="mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="40" height="40">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4-4m0 0l-4 4m4-4v12" />
+          </svg>
+          <span class="block font-medium">Drag and drop an image, or click to browse</span>
+          <span class="block text-sm">Supports JPG, PNG, GIF up to 10MB</span>
+          <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png" required class="hidden">
+        </label>
       </div>
 
       <div>
@@ -77,18 +84,18 @@
 
       <div>
         <label class="block text-lg font-medium mb-2">Select Image Model:</label>
-        <div class="flex flex-wrap gap-4">
-          {% for model in allowed_image_models %}
-          <label class="border rounded p-4 flex-1 cursor-pointer hover:bg-gray-50">
-            <input class="sr-only" type="radio" name="image_model" value="{{ model }}" id="image-model-{{ model }}"
-              {% if model == default_image_model %}checked{% endif %}>
-            <div class="font-semibold">{{ model | capitalize }}</div>
-          </label>
-          {% endfor %}
+        <div class="flex flex-wrap gap-4" x-data="{ selected: 'llama3' }">
+          <template x-for="model in [{ value: 'llama3', label: 'LLaMA 3', desc: 'Fast responses' }, { value: 'mistral', label: 'Mistral', desc: 'Creative content' }, { value: 'phi3', label: 'Phi-3', desc: 'Reasoning focus' }]" :key="model.value">
+            <label :class="selected === model.value ? 'border-2 border-blue-500 bg-blue-50' : 'border'" class="rounded p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="selected = model.value">
+              <input type="radio" name="image_model" :value="model.value" class="sr-only" :checked="selected === model.value">
+              <div class="font-semibold" x-text="model.label"></div>
+              <div class="text-sm text-gray-500" x-text="model.desc"></div>
+            </label>
+          </template>
         </div>
       </div>
 
-      <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-2 rounded">Analyze Image</button>
+      <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-3 rounded">Analyze Image</button>
     </form>
 
     {% if image_response %}
@@ -98,7 +105,7 @@
     </div>
     {% endif %}
   </main>
-  
+
 <!-- JavaScript Section will start below here -->
 
   <!-- JavaScript -->

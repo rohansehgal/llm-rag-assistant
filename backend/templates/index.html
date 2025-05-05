@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>LLM + RAG Assistant</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-      body { font-family: 'Inter', sans-serif; }
-    </style>
-  </head>
-  
+<head>
+  <meta charset="UTF-8">
+  <title>LLM + RAG Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
 <body class="flex min-h-screen bg-white text-gray-900">
 
   <!-- Sidebar -->
@@ -21,94 +20,52 @@
 
   <!-- Main Content -->
   <main class="flex-1 p-8 overflow-y-auto">
-    <h1 class="text-3xl font-bold mb-2">Text Analysis</h1>
-    <p class="text-gray-500 mb-6">Enter your query, upload a file (optional), and select a model to receive a streaming response.</p>
+    <h1 class="text-4xl font-bold mb-2">Image Analysis</h1>
+    <p class="text-lg text-gray-500 mb-8">Upload an image, enter a prompt, and select a model to receive a streaming response.</p>
 
-    <!-- Prompt Form -->
-    <form id="qa-form" method="POST" enctype="multipart/form-data" class="space-y-6">
+    <!-- Image Analysis Form -->
+    <form method="POST" action="/analyze-image" enctype="multipart/form-data" class="space-y-8">
       <div>
-        <label for="prompt" class="block text-lg font-medium mb-2">Enter your question:</label>
-        <textarea id="prompt" name="prompt" rows="3" placeholder="Ask me anything..." class="w-full p-3 border rounded"></textarea>
-      </div>
-
-      <div>
-        <label for="file" class="block text-lg font-medium mb-2">Attach a PDF for RAG (optional):</label>
+        <label for="image" class="block text-lg font-semibold mb-2">Upload an image to analyze:</label>
         <label class="block border-2 border-dashed rounded-lg p-8 text-center text-gray-500 cursor-pointer hover:border-gray-400">
           <svg class="mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="40" height="40">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4-4m0 0l-4 4m4-4v12" />
           </svg>
-          <span class="block font-medium">Drag and drop a PDF, or click to browse</span>
-          <span class="block text-sm">Supports .PDF files up to 25MB</span>
-          <input type="file" id="file" name="file" accept=".pdf" class="hidden">
-        </label>
-      </div>
-
-      <div>
-        <label class="block text-lg font-medium mb-2">Select Model:</label>
-        <div class="flex flex-wrap gap-4" x-data="{ selected: 'llama3' }">
-          <template x-for="model in [{ value: 'llama3', label: 'LLaMA 3', desc: 'Fast responses' }, { value: 'mistral', label: 'Mistral', desc: 'Creative content' }, { value: 'phi3', label: 'Phi-3', desc: 'Reasoning focus' }]" :key="model.value">
-            <label :class="selected === model.value ? 'border-2 border-blue-500 bg-blue-50' : 'border'" class="rounded p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="selected = model.value">
-              <input type="radio" name="models" :value="model.value" class="sr-only" :checked="selected === model.value">
-              <div class="font-semibold" x-text="model.label"></div>
-              <div class="text-sm text-gray-500" x-text="model.desc"></div>
-            </label>
-          </template>
-        </div>
-      </div>
-
-      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded">Ask</button>
-    </form>
-
-    <!-- Results Section -->
-    <div id="results" class="my-10"></div>
-
-    <!-- Image Analysis Section -->
-    <hr class="my-10">
-    <h3 class="text-2xl font-semibold mb-4">Analyze an Image</h3>
-
-    <form method="POST" action="/analyze-image" enctype="multipart/form-data" class="space-y-6">
-      <div>
-        <label for="image" class="block text-lg font-medium mb-2">Upload an Image (.jpg, .png):</label>
-        <label class="block border-2 border-dashed rounded-lg p-8 text-center text-gray-500 cursor-pointer hover:border-gray-400">
-          <svg class="mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="40" height="40">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4-4m0 0l-4 4m4-4v12" />
-          </svg>
-          <span class="block font-medium">Drag and drop an image, or click to browse</span>
+          <span class="block font-medium text-base">Drag and drop an image, or click to browse</span>
           <span class="block text-sm">Supports JPG, PNG, GIF up to 10MB</span>
-          <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png" required class="hidden">
+          <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.gif" class="hidden">
         </label>
       </div>
 
       <div>
-        <label for="image_prompt" class="block text-lg font-medium mb-2">Enter a prompt for the image:</label>
-        <input type="text" id="image_prompt" name="image_prompt" placeholder="e.g., What is shown in this image?" value="{{ image_prompt or '' }}" class="w-full border p-3 rounded">
+        <label for="image_prompt" class="block text-lg font-semibold mb-2">Enter a prompt for the image:</label>
+        <input type="text" id="image_prompt" name="image_prompt" placeholder="e.g., What is shown in this image?" class="w-full p-4 border rounded-lg text-base">
       </div>
 
-      <div>
-        <label class="block text-lg font-medium mb-2">Select Image Model:</label>
-        <div class="flex flex-wrap gap-4" x-data="{ selected: 'llama3' }">
-          <template x-for="model in [{ value: 'llama3', label: 'LLaMA 3', desc: 'Fast responses' }, { value: 'mistral', label: 'Mistral', desc: 'Creative content' }, { value: 'phi3', label: 'Phi-3', desc: 'Reasoning focus' }]" :key="model.value">
-            <label :class="selected === model.value ? 'border-2 border-blue-500 bg-blue-50' : 'border'" class="rounded p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="selected = model.value">
-              <input type="radio" name="image_model" :value="model.value" class="sr-only" :checked="selected === model.value">
-              <div class="font-semibold" x-text="model.label"></div>
-              <div class="text-sm text-gray-500" x-text="model.desc"></div>
+      <div x-data="{ selected: '{{ default_image_model }}' }">
+        <label class="block text-lg font-semibold mb-2">Select Image Model:</label>
+        <div class="flex flex-wrap gap-4">
+          {% for model in allowed_image_models %}
+            <label :class="selected === '{{ model }}' ? 'border-2 border-gray-600 bg-gray-100' : 'border'" class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="selected = '{{ model }}'">
+              <input type="radio" name="image_model" value="{{ model }}" class="sr-only" :checked="selected === '{{ model }}'">
+              <div class="font-semibold text-lg">{{ model | capitalize }}</div>
+              <div class="text-sm text-gray-500">Ollama Image Model</div>
             </label>
-          </template>
+          {% endfor %}
         </div>
       </div>
 
-      <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-3 rounded">Analyze Image</button>
+      <button type="submit" class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg">Analyze Image</button>
     </form>
 
     {% if image_response %}
-    <div class="border rounded p-4 shadow mt-6 bg-white">
-      <h4 class="text-lg font-semibold mb-2">Image Analysis Result</h4>
-      <p class="text-gray-700">{{ image_response }}</p>
+    <div class="card mt-10 border rounded-lg shadow">
+      <div class="p-4 border-b font-semibold">Image Analysis Result</div>
+      <div class="p-4 text-base text-gray-800">{{ image_response }}</div>
     </div>
     {% endif %}
   </main>
-
-<!-- JavaScript Section will start below here -->
+!-- JavaScript Section will start below here -->
 
   <!-- JavaScript -->
 

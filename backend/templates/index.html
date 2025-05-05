@@ -42,7 +42,7 @@
           <span class="block text-sm">Supports .PDF files up to 25MB</span>
           <input type="file" id="file" name="file" accept=".pdf" class="hidden">
         </label>
-        <p id="file-feedback" class="mt-2 text-sm text-green-600"></p>
+        <p id="file-feedback" class="mt-2 text-sm text-gray-500"></p>
       </div>
 
       <!-- Model Selection -->
@@ -80,7 +80,7 @@
       const file = this.files[0];
       const feedback = document.getElementById("file-feedback");
       if (file) {
-        feedback.textContent = `✅ File: ${file.name} Upload successful.`;
+        feedback.textContent = `File: ${file.name} Upload successful.`;
       } else {
         feedback.textContent = "";
       }

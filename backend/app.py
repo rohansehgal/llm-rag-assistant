@@ -10,7 +10,9 @@ import faiss
 import numpy as np
 import pickle
 from sentence_transformers import SentenceTransformer
+import sys
 import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import fitz  # PyMuPDF
 import time
 import json
@@ -22,7 +24,11 @@ from datetime import datetime
 
 
 # app creation
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder="templates",
+    static_folder="static"
+)
 app.secret_key = 'your_secret_key'
 
 # configurations

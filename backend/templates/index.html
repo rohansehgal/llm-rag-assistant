@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>LLM + RAG Assistant</title>
+  <title>Text Analysis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -20,217 +20,103 @@
 
   <!-- Main Content -->
   <main class="flex-1 p-8 overflow-y-auto">
-    <h1 class="text-4xl font-bold mb-2">Image Analysis</h1>
-    <p class="text-lg text-gray-500 mb-8">Upload an image, enter a prompt, and select a model to receive a streaming response.</p>
+    <h1 class="text-4xl font-bold mb-2">Text Analysis</h1>
+    <p class="text-lg text-gray-500 mb-8">Enter your query, upload a file (optional), and select a model to receive a streaming response.</p>
 
-    <!-- Image Analysis Form -->
-    <form method="POST" action="/analyze-image" enctype="multipart/form-data" class="space-y-8">
+    <!-- Form -->
+    <form id="qa-form" class="space-y-8" method="POST" enctype="multipart/form-data">
+      
+      <!-- Prompt -->
       <div>
-        <label for="image" class="block text-lg font-semibold mb-2">Upload an image to analyze:</label>
+        <label for="prompt" class="block text-lg font-semibold mb-2">Enter your question:</label>
+        <textarea class="w-full p-4 border rounded-lg text-base" id="prompt" name="prompt" rows="3" placeholder="Ask me anything..."></textarea>
+      </div>
+
+      <!-- Upload -->
+      <div>
+        <label class="block text-lg font-semibold mb-2">Attach a PDF for RAG (optional):</label>
         <label class="block border-2 border-dashed rounded-lg p-8 text-center text-gray-500 cursor-pointer hover:border-gray-400">
           <svg class="mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="40" height="40">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4-4m0 0l-4 4m4-4v12" />
           </svg>
-          <span class="block font-medium text-base">Drag and drop an image, or click to browse</span>
-          <span class="block text-sm">Supports JPG, PNG, GIF up to 10MB</span>
-          <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.gif" class="hidden">
+          <span class="block font-medium text-base">Drag and drop a PDF, or click to browse</span>
+          <span class="block text-sm">Supports .PDF files up to 25MB</span>
+          <input type="file" id="file" name="file" accept=".pdf" class="hidden">
         </label>
       </div>
 
-      <div>
-        <label for="image_prompt" class="block text-lg font-semibold mb-2">Enter a prompt for the image:</label>
-        <input type="text" id="image_prompt" name="image_prompt" placeholder="e.g., What is shown in this image?" class="w-full p-4 border rounded-lg text-base">
-      </div>
-
-      <div x-data="{ selected: '{{ default_image_model }}' }">
-        <label class="block text-lg font-semibold mb-2">Select Image Model:</label>
+      <!-- Model Selection -->
+      <div x-data="{ selected: '{{ default_text_model }}' }">
+        <label class="block text-lg font-semibold mb-2">Select Model:</label>
         <div class="flex flex-wrap gap-4">
-          {% for model in allowed_image_models %}
-            <label :class="selected === '{{ model }}' ? 'border-2 border-gray-600 bg-gray-100' : 'border'" class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="selected = '{{ model }}'">
-              <input type="radio" name="image_model" value="{{ model }}" class="sr-only" :checked="selected === '{{ model }}'">
+          {% for model in allowed_text_models %}
+            <label :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'" class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="selected = '{{ model }}'">
+              <input type="radio" name="models" value="{{ model }}" class="sr-only" :checked="selected === '{{ model }}'">
               <div class="font-semibold text-lg">{{ model | capitalize }}</div>
-              <div class="text-sm text-gray-500">Ollama Image Model</div>
+              <div class="text-sm text-gray-500">Ollama Text Model</div>
             </label>
           {% endfor %}
         </div>
       </div>
 
-      <button type="submit" class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg">Analyze Image</button>
+      <!-- Ask Button -->
+      <button type="submit" class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg">Ask</button>
     </form>
 
-    {% if image_response %}
-    <div class="card mt-10 border rounded-lg shadow">
-      <div class="p-4 border-b font-semibold">Image Analysis Result</div>
-      <div class="p-4 text-base text-gray-800">{{ image_response }}</div>
-    </div>
-    {% endif %}
+    <!-- Results -->
+    <div id="results" class="mt-10 space-y-4"></div>
+
   </main>
-<-- JavaScript Section will start below here -->
 
-  <!-- JavaScript -->
-
-
+  <!-- JS logic remains same -->
   <script>
     function sanitizeModelName(name) {
       return name.replace(/\./g, "").replace(/:/g, "");
     }
-  
 
-  
-    document.addEventListener("DOMContentLoaded", () => {
-      const resultsDiv = document.getElementById("results");
-      const storedPrompt = localStorage.getItem("active_prompt");
-      const savedResponses = JSON.parse(localStorage.getItem("responses") || "{}");
-  
-      if (storedPrompt) {
-        document.getElementById("prompt").value = storedPrompt;
-      }
-  
-      if (storedPrompt && Object.keys(savedResponses).length > 0) {
-        Object.entries(savedResponses).forEach(([model, answer]) => {
-          const safeModelId = sanitizeModelName(model);
-          const isLoading = answer === "Loading...";  // ✅ SHOULD BE HERE
-
-          const card = document.createElement("div");
-          card.className = "card mb-3";
-          card.id = `card-${safeModelId}`;
-          card.innerHTML = `
-            <div class="card-header">Response from ${model}</div>
-            <div class="card-body">
-              <p class="card-text ${isLoading ? 'text-muted' : ''}" id="response-${safeModelId}">${answer}</p>
-            </div>
-          `;
-          resultsDiv.appendChild(card);
-  
-       
-        });
-      }
-    });
-  
     document.getElementById("qa-form").addEventListener("submit", function (e) {
       e.preventDefault();
-  
       const form = document.getElementById('qa-form');
       const formData = new FormData(form);
-  
       const prompt = formData.get('prompt');
-      const selectedModel = formData.get('models'); // Only one model selected at a time
+      const selectedModel = formData.get('models');
       const resultsDiv = document.getElementById("results");
-  
+
       localStorage.setItem("active_prompt", prompt);
       localStorage.setItem("responses", "{}");
       resultsDiv.innerHTML = "";
-  
+
       const safeModelId = sanitizeModelName(selectedModel);
-  
       const card = document.createElement("div");
-      card.className = "card mb-3";
+      card.className = "card border rounded-lg shadow";
       card.id = `card-${safeModelId}`;
       card.innerHTML = `
-        <div class="card-header">Response from ${selectedModel}</div>
-        <div class="card-body">
-          <p class="card-text text-muted" id="response-${safeModelId}">Loading...</p>
-        </div>
+        <div class="p-4 border-b font-semibold">Response from ${selectedModel}</div>
+        <div class="p-4 text-base text-gray-800" id="response-${safeModelId}">Loading...</div>
       `;
       resultsDiv.appendChild(card);
-  
-      const saved = JSON.parse(localStorage.getItem("responses") || "{}");
-      saved[selectedModel] = "Loading...";
-      localStorage.setItem("responses", JSON.stringify(saved));
-  
-  
+
       fetch("/ask", {
-  method: "POST",
-  body: formData
-})
-.then(async (res) => {
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder("utf-8");
-  let responseText = "";
-
-  const safe = sanitizeModelName(selectedModel);
-  const responseEl = document.getElementById(`response-${safe}`);
-  if (!responseEl) return;
-
-
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    const chunk = decoder.decode(value, { stream: true });
-    console.log("🔹 Chunk received:", chunk); // ✅ ADD THIS LINE
-
-    responseText += chunk;
-    responseEl.textContent = responseText;
-  }
-
-  // Save to localStorage after stream is complete
-  responseEl.classList.remove("text-muted");
-  const updated = JSON.parse(localStorage.getItem("responses") || "{}");
-  updated[selectedModel] = responseText;
-  localStorage.setItem("responses", JSON.stringify(updated));
-})
-.catch((err) => {
-  console.error("❌ Streaming fetch failed:", err);
-});
-});
-
-  </script>
-  
-  <script>
-    document.querySelector('form[action="/analyze-image"]').addEventListener("submit", function (e) {
-      e.preventDefault();
-    
-      const form = e.target;
-      const formData = new FormData(form);
-      const imagePrompt = formData.get("image_prompt") || "Analyzing image...";
-    
-      // Remove old card if exists
-      const oldCard = document.getElementById("image-analysis-result");
-      if (oldCard) oldCard.remove();
-    
-      // Add new card
-      const card = document.createElement("div");
-      card.className = "card mt-4";
-      card.id = "image-analysis-result";
-      card.innerHTML = `
-        <div class="card-header">Image Analysis Result</div>
-        <div class="card-body">
-          <p class="card-text text-muted" id="image-stream-response">Loading...</p>
-        </div>
-      `;
-      form.after(card);
-    
-      fetch("/analyze-image", {
         method: "POST",
         body: formData
-      })
-      .then(async (res) => {
+      }).then(async (res) => {
         const reader = res.body.getReader();
         const decoder = new TextDecoder("utf-8");
-        const responseEl = document.getElementById("image-stream-response");
         let responseText = "";
-    
+        const responseEl = document.getElementById(`response-${safeModelId}`);
+        if (!responseEl) return;
+
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-    
           const chunk = decoder.decode(value, { stream: true });
-          console.log("🔸 Image chunk received:", chunk);
           responseText += chunk;
           responseEl.textContent = responseText;
         }
-    
-        responseEl.classList.remove("text-muted");
-      })
-      .catch((err) => {
-        console.error("❌ Image streaming failed:", err);
+      }).catch(err => {
+        console.error("Streaming failed:", err);
       });
     });
-    </script>
-    
-
-
+  </script>
 </body>
 </html>

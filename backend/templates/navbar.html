@@ -1,38 +1,50 @@
 <!-- templates/navbar.html -->
 
-<!-- Sidebar Toggle Button (Visible Only on Mobile) -->
-<nav class="navbar navbar-light bg-light d-md-none">
-  <div class="container-fluid">
-    <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
-      ☰ Menu
-    </button>
-  </div>
+<nav class="space-y-4 text-sm text-gray-700">
+  <!-- Title -->
+  <div class="text-2xl font-bold text-black mb-6">LLM Platform</div>
+
+  <!-- Nav Links -->
+  <ul class="space-y-2">
+    <li>
+      <a href="/" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-200 {% if active_page == 'home' %}bg-white font-semibold border-l-4 border-black{% endif %}">
+        <svg class="w-5 h-5 mr-3 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Home
+      </a>
+    </li>
+    <li>
+      <a href="/analyze-image" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-200 {% if active_page == 'image' %}bg-white font-semibold border-l-4 border-black{% endif %}">
+        <svg class="w-5 h-5 mr-3 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M4 16l4-4a3 3 0 014.2 0l4 4m-4-4l2-2a2 2 0 112.8 2.8l-1.4 1.4m-3.4 2.6H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-6z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Image Analysis
+      </a>
+    </li>
+    <li>
+      <a href="/upload" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-200 {% if active_page == 'upload' %}bg-white font-semibold border-l-4 border-black{% endif %}">
+        <svg class="w-5 h-5 mr-3 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M4 4v16h16V4H4zm4 9h8M12 9v6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Upload Manager
+      </a>
+    </li>
+    <li>
+      <a href="/stats" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-200 {% if active_page == 'stats' %}bg-white font-semibold border-l-4 border-black{% endif %}">
+        <svg class="w-5 h-5 mr-3 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M11 12h2m-2 4h2m-6-8h2m-2 4h2m8-4h2m-2 4h2m-2 4h2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Statistics
+      </a>
+    </li>
+    <li>
+      <a href="/settings" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-200 {% if active_page == 'settings' %}bg-white font-semibold border-l-4 border-black{% endif %}">
+        <svg class="w-5 h-5 mr-3 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 6V4m0 16v-2m8-6h2m-18 0H2m15.364-5.364l1.414-1.414M4.222 19.778l1.414-1.414m0-12.728L4.222 4.222m14.142 14.142l-1.414-1.414" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Settings
+      </a>
+    </li>
+  </ul>
 </nav>
-
-<!-- Sidebar (Offcanvas for Mobile, Static for Desktop) -->
-<div class="offcanvas-md offcanvas-start bg-light" tabindex="-1" id="sidebar">
-  <div class="offcanvas-header d-md-none">
-    <h5 class="offcanvas-title">Navigation</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-
-  <div class="offcanvas-body p-0">
-    <div class="list-group list-group-flush">
-      <a href="/" class="list-group-item list-group-item-action {% if active_page == 'home' %}active{% endif %}">
-        🏠 Home
-      </a>
-
-      <a href="/upload" class="list-group-item list-group-item-action {% if active_page == 'upload' %}active{% endif %}">
-        📂 Upload Manager
-      </a>
-
-      <a href="/stats" class="list-group-item list-group-item-action {% if active_page == 'stats' %}active{% endif %}">
-        📊 Statistics
-      </a>
-
-      <a href="/settings" class="list-group-item list-group-item-action {% if active_page == 'settings' %}active{% endif %}">
-        ⚙️ Settings
-      </a>
-    </div>
-  </div>
-</div>

@@ -62,7 +62,7 @@
       </div>
 
       <!-- Ask Button -->
-      <button type="submit" class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg">Ask</button>
+      <button type="submit" id="ask-button" class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>Ask</button>
     </form>
 
     <!-- Results -->
@@ -74,6 +74,13 @@
     function sanitizeModelName(name) {
       return name.replace(/\./g, "").replace(/:/g, "");
     }
+
+    const promptInput = document.getElementById("prompt");
+    const askButton = document.getElementById("ask-button");
+
+    promptInput.addEventListener("input", () => {
+      askButton.disabled = promptInput.value.trim() === "";
+    });
 
     document.getElementById("file").addEventListener("change", function () {
       const file = this.files[0];
@@ -89,7 +96,6 @@
       e.preventDefault();
       const form = document.getElementById('qa-form');
       const formData = new FormData(form);
-      const promptInput = document.getElementById("prompt");
       const modelSection = document.getElementById("model-select").__x;
       const prompt = formData.get('prompt');
       const selectedModel = formData.get('models');
@@ -101,6 +107,7 @@
 
       promptInput.disabled = true;
       promptInput.classList.add("bg-gray-100", "text-gray-400", "cursor-not-allowed");
+      askButton.disabled = true;
       modelSection.disabled = true;
 
       const safeModelId = sanitizeModelName(selectedModel);
@@ -134,11 +141,13 @@
         promptInput.disabled = false;
         promptInput.classList.remove("bg-gray-100", "text-gray-400", "cursor-not-allowed");
         modelSection.disabled = false;
+        askButton.disabled = promptInput.value.trim() === "";
       }).catch(err => {
         console.error("Streaming failed:", err);
         promptInput.disabled = false;
         promptInput.classList.remove("bg-gray-100", "text-gray-400", "cursor-not-allowed");
         modelSection.disabled = false;
+        askButton.disabled = promptInput.value.trim() === "";
       });
     });
   </script>

@@ -46,11 +46,11 @@
       </div>
 
       <!-- Model Selection -->
-      <div x-data="{ selected: '{{ default_text_model }}' }">
+      <div x-data="{ selected: '{{ default_text_model }}', disabled: false }" x-bind:class="{ 'opacity-50 pointer-events-none': disabled }" id="model-select">
         <label class="block text-lg font-semibold mb-2">Select Model:</label>
         <div class="flex flex-wrap gap-4">
           {% for model in allowed_models %}
-          <label :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'" class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="selected = '{{ model }}'">
+          <label :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'" class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="if (!disabled) selected = '{{ model }}'">
               <input type="radio" name="models" value="{{ 'llama3' if model == 'llama' else 'phi3' if model == 'phi' else model }}" class="sr-only" :checked="selected === '{{ model }}'">
               <div class="font-semibold text-lg">
                 {% if model == 'llama' %}LLaMA 3{% elif model == 'phi' %}Phi-3{% else %}{{ model | capitalize }}{% endif %}
@@ -67,7 +67,6 @@
 
     <!-- Results -->
     <div id="results" class="mt-10 space-y-4"></div>
-
   </main>
 
   <!-- JS logic -->
@@ -91,6 +90,7 @@
       const form = document.getElementById('qa-form');
       const formData = new FormData(form);
       const promptInput = document.getElementById("prompt");
+      const modelSection = document.getElementById("model-select").__x;
       const prompt = formData.get('prompt');
       const selectedModel = formData.get('models');
       const resultsDiv = document.getElementById("results");
@@ -101,6 +101,7 @@
 
       promptInput.disabled = true;
       promptInput.classList.add("bg-gray-100", "text-gray-400", "cursor-not-allowed");
+      modelSection.disabled = true;
 
       const safeModelId = sanitizeModelName(selectedModel);
       const card = document.createElement("div");
@@ -132,10 +133,12 @@
 
         promptInput.disabled = false;
         promptInput.classList.remove("bg-gray-100", "text-gray-400", "cursor-not-allowed");
+        modelSection.disabled = false;
       }).catch(err => {
         console.error("Streaming failed:", err);
         promptInput.disabled = false;
         promptInput.classList.remove("bg-gray-100", "text-gray-400", "cursor-not-allowed");
+        modelSection.disabled = false;
       });
     });
   </script>

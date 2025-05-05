@@ -59,6 +59,8 @@
           </label>
           {% endfor %}
         </div>
+        <!-- ✅ Fix: Include selected model in submission -->
+  <input type="hidden" name="models" :value="selected">
       </div>
 
       <!-- Ask Button -->

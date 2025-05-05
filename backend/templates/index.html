@@ -78,8 +78,35 @@
     const promptInput = document.getElementById("prompt");
     const askButton = document.getElementById("ask-button");
 
+    // Enable Ask only if prompt has content
     promptInput.addEventListener("input", () => {
       askButton.disabled = promptInput.value.trim() === "";
+    });
+
+    // Restore last prompt and responses
+    document.addEventListener("DOMContentLoaded", () => {
+      const storedPrompt = localStorage.getItem("active_prompt");
+      const savedResponses = JSON.parse(localStorage.getItem("responses") || "{}");
+      const resultsDiv = document.getElementById("results");
+
+      if (storedPrompt) {
+        promptInput.value = storedPrompt;
+        askButton.disabled = storedPrompt.trim() === "";
+      }
+
+      if (Object.keys(savedResponses).length > 0) {
+        Object.entries(savedResponses).forEach(([model, answer]) => {
+          const safeModelId = sanitizeModelName(model);
+          const card = document.createElement("div");
+          card.className = "card border rounded-lg shadow";
+          card.id = `card-${safeModelId}`;
+          card.innerHTML = `
+            <div class="p-4 border-b font-semibold">Response from ${model}</div>
+            <div class="p-4 text-base text-gray-800" id="response-${safeModelId}">${answer}</div>
+          `;
+          resultsDiv.appendChild(card);
+        });
+      }
     });
 
     document.getElementById("file").addEventListener("change", function () {
@@ -137,6 +164,11 @@
           responseText += chunk;
           responseEl.textContent = responseText;
         }
+
+        // Save response to localStorage
+        const saved = JSON.parse(localStorage.getItem("responses") || "{}");
+        saved[selectedModel] = responseText;
+        localStorage.setItem("responses", JSON.stringify(saved));
 
         promptInput.disabled = false;
         promptInput.classList.remove("bg-gray-100", "text-gray-400", "cursor-not-allowed");

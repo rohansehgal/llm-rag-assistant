@@ -46,18 +46,22 @@
       </div>
 
       <!-- Model Selection -->
-      <div x-data="{ selected: '{{ default_text_model }}' }">
-        <label class="block text-lg font-semibold mb-2">Select Model:</label>
-        <div class="flex flex-wrap gap-4">
-          {% for model in allowed_models %}
-          <label :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'" class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="selected = '{{ model }}'">
-              <input type="radio" name="models" value="{{ model }}" class="sr-only" :checked="selected === '{{ model }}'">
-              <div class="font-semibold text-lg">{{ model | capitalize }}</div>
-              <div class="text-sm text-gray-500">Ollama Text Model</div>
-            </label>
-          {% endfor %}
+<!-- Model Selection -->
+<div x-data="{ selected: '{{ default_text_model }}' }">
+  <label class="block text-lg font-semibold mb-2">Select Model:</label>
+  <div class="flex flex-wrap gap-4">
+    {% for model in allowed_models %}
+    <label :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'" class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all" @click="selected = '{{ model }}'">
+        <input type="radio" name="models" value="{{ 'llama3' if model == 'llama' else 'phi3' if model == 'phi' else model }}" class="sr-only" :checked="selected === '{{ model }}'">
+        <div class="font-semibold text-lg">
+          {% if model == 'llama' %}LLaMA 3{% elif model == 'phi' %}Phi-3{% else %}{{ model | capitalize }}{% endif %}
         </div>
-      </div>
+        <div class="text-sm text-gray-500">Ollama Text Model</div>
+    </label>
+    {% endfor %}
+  </div>
+</div>
+
 
       <!-- Ask Button -->
       <button type="submit" class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg">Ask</button>

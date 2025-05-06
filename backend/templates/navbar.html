@@ -1,29 +1,45 @@
 <!-- templates/navbar.html -->
 
-<div class="h-full bg-gray-50 border-r p-4 flex flex-col space-y-2 w-64 text-sm">
-  <div class="text-xl font-semibold mb-6">SecureAI</div>
+<!-- Sidebar -->
+<aside class="h-full p-4 bg-gray-100 border-r text-gray-900 text-base font-medium">
+  <!-- App Logo / Title -->
+  <div class="text-2xl font-bold mb-6 pl-2">SecureAI</div>
 
-  <a href="/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition {{ 'bg-white border border-gray-300' if active_page == 'home' else '' }}">
-    <!-- Home Icon (Lucide) -->
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-gray-600" fill="none" viewBox="0 0 24 24"><path d="M3 9L12 2l9 7v11a2 2 0 0 1-2 2h-5v-7H10v7H5a2 2 0 0 1-2-2z"/></svg>
-    <span>Home</span>
-  </a>
+  <!-- Navigation Links -->
+  <nav class="space-y-2">
+    <a href="/" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:bg-gray-200 {% if active_page == 'home' %}bg-gray-200{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6" />
+      </svg>
+      <span>Home</span>
+    </a>
 
-  <a href="/upload" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition {{ 'bg-white border border-gray-300' if active_page == 'upload' else '' }}">
-    <!-- Upload Icon (Lucide) -->
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-gray-600" fill="none" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-    <span>Upload Manager</span>
-  </a>
+    <a href="/upload" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:bg-gray-200 {% if active_page == 'upload' %}bg-gray-200{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a1 1 0 001 1h3m10-2h3a1 1 0 001-1v-1m-4 4H8m4-4v-9m0 0l-3 3m3-3l3 3" />
+      </svg>
+      <span>Upload Manager</span>
+    </a>
 
-  <a href="/stats" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition {{ 'bg-white border border-gray-300' if active_page == 'stats' else '' }}">
-    <!-- Bar Chart Icon (Lucide) -->
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-gray-600" fill="none" viewBox="0 0 24 24"><line x1="3" x2="3" y1="3" y2="21"/><line x1="3" x2="21" y1="21" y2="21"/><rect x="7" y="10" width="3" height="7"/><rect x="14" y="6" width="3" height="11"/></svg>
-    <span>Statistics</span>
-  </a>
+    <a href="/stats" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:bg-gray-200 {% if active_page == 'stats' %}bg-gray-200{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3v18M5 12h14M5 6h14M5 18h14" />
+      </svg>
+      <span>Statistics</span>
+    </a>
 
-  <a href="/settings" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition {{ 'bg-white border border-gray-300' if active_page == 'settings' else '' }}">
-    <!-- Settings Icon (Lucide) -->
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-gray-600" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 10.5 4.6V4a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09A1.65 1.65 0 0 0 19.4 15z"/></svg>
-    <span>Settings</span>
-  </a>
-</div>
+    <a href="/settings" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:bg-gray-200 {% if active_page == 'settings' %}bg-gray-200{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 16v-2m8-8h2M4 12H2m15.364-6.364l1.414 1.414M6.222 17.778l1.414-1.414m0-8.485l-1.414-1.414M17.778 17.778l-1.414-1.414" />
+      </svg>
+      <span>Settings</span>
+    </a>
+
+    <a href="/image" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:bg-gray-200 {% if active_page == 'image' %}bg-gray-200{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm3 4a2 2 0 104 0 2 2 0 00-4 0zm0 10l4-4 3 3 5-5 4 4" />
+      </svg>
+      <span>Image Analysis</span>
+    </a>
+  </nav>
+</aside>

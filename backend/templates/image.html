@@ -35,8 +35,14 @@
             </svg>
             <span class="block font-medium text-base">Drag and drop an image, or click to browse</span>
             <span class="block text-sm">Supports .jpg, .jpeg, .png, .gif (≤25MB)</span>
-            <input type="file" name="image" id="image" accept=".jpg,.jpeg,.png,.gif" required class="hidden" />
+            <input type="file" name="image" id="image" accept=".jpg,.jpeg,.png,.gif" required class="hidden" onchange="previewImage(event)" />
           </label>
+
+          <!-- ✅ Image Preview -->
+          <div id="preview-container" class="mt-4 hidden">
+            <p class="text-sm text-gray-600 mb-2">Preview:</p>
+            <img id="image-preview" src="#" alt="Preview" class="w-64 rounded-xl border shadow" />
+          </div>
         </div>
 
         <!-- Prompt Input -->
@@ -78,6 +84,24 @@
   </div>
 
   <script>
+    function previewImage(event) {
+      const previewContainer = document.getElementById("preview-container");
+      const preview = document.getElementById("image-preview");
+      const file = event.target.files[0];
+
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          preview.src = e.target.result;
+          previewContainer.classList.remove("hidden");
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.src = "#";
+        previewContainer.classList.add("hidden");
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const storedPrompt = localStorage.getItem("last_image_prompt");
       const storedModel = localStorage.getItem("last_image_model");

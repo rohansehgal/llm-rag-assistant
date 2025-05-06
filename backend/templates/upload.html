@@ -49,6 +49,9 @@ OTHER:
 
 <!-- templates/upload.html -->
 
+
+<!-- templates/upload.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,21 +87,31 @@ OTHER:
         <table id="uploaded-files-table" class="min-w-full text-sm text-left">
   <thead class="bg-gray-100 text-xs text-gray-700 uppercase">
     <tr class="cursor-pointer">
-      <th class="px-4 py-3 flex items-center gap-1" onclick="sortTable(0, this)">
-        File Name <span class="sort-icon">⇅</span>
-      </th>
-      <th class="px-4 py-3 flex items-center gap-1" onclick="sortTable(1, this)">
-        Upload Source <span class="sort-icon">⇅</span>
-      </th>
-      <th class="px-4 py-3 flex items-center gap-1" onclick="sortTable(2, this)">
-        Type <span class="sort-icon">⇅</span>
-      </th>
-      <th class="px-4 py-3 flex items-center gap-1" onclick="sortTable(3, this)">
-        Size <span class="sort-icon">⇅</span>
-      </th>
-      <th class="px-4 py-3 flex items-center gap-1" onclick="sortTable(4, this)">
-        Upload Date <span class="sort-icon">⇅</span>
-      </th>
+      <th class="px-4 py-3" onclick="sortTable($1, this)">
+  <div class="inline-flex items-center gap-1">
+    $2 <span class="sort-icon text-xs">⇅</span>
+  </div>
+</th>
+      <th class="px-4 py-3" onclick="sortTable($1, this)">
+  <div class="inline-flex items-center gap-1">
+    $2 <span class="sort-icon text-xs">⇅</span>
+  </div>
+</th>
+      <th class="px-4 py-3" onclick="sortTable($1, this)">
+  <div class="inline-flex items-center gap-1">
+    $2 <span class="sort-icon text-xs">⇅</span>
+  </div>
+</th>
+      <th class="px-4 py-3" onclick="sortTable($1, this)">
+  <div class="inline-flex items-center gap-1">
+    $2 <span class="sort-icon text-xs">⇅</span>
+  </div>
+</th>
+      <th class="px-4 py-3" onclick="sortTable($1, this)">
+  <div class="inline-flex items-center gap-1">
+    $2 <span class="sort-icon text-xs">⇅</span>
+  </div>
+</th>
       <th class="px-4 py-3">Actions</th>
     </tr>
   </thead>
@@ -150,6 +163,8 @@ OTHER:
 
   <!-- JavaScript -->
   <script>
+    let currentSortIndex = null;
+    let currentSortDir = 'asc';
     const maxFileSize = 25 * 1024 * 1024;
     const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
 

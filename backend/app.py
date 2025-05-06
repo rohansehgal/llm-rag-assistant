@@ -465,6 +465,15 @@ def analyze_image():
         print(f"❌ Error in /analyze-image: {e}")
         return f"❌ Error: {e}", 500
 
+@app.route("/image", methods=["GET"])
+def image_page():
+    config = load_config()
+    return render_template(
+        "image.html",
+        allowed_models=config.get("allowed_image_models", []),
+        default_image_model=config.get("default_image_model", ""),
+        active_page="image"
+    )
 
 
 @app.route("/stats")

@@ -443,6 +443,11 @@ def ask():
     ]
     print("🧠 Final context sent to model:\n", context[:1000], "...\n")
     print(f"🧠 Trying again Final context sent to model:\n{context[:1000]}...\n")
+    print("🧠 Final context sent to model:")
+    print(context)
+    print(f"🧠 Final context sent to model (len={len(context)}):\n{context}")
+
+
 
 
     

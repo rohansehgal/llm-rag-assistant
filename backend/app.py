@@ -93,13 +93,20 @@ def save_cache(cache):
 
 
 def load_index():
+    print(f"📂 Checking for {INDEX_PATH} and {CHUNKS_PATH}...")
     if os.path.exists(INDEX_PATH) and os.path.exists(CHUNKS_PATH):
-        index = faiss.read_index(INDEX_PATH)
-        with open(CHUNKS_PATH, "rb") as f:
-            chunks = pickle.load(f)
-        return index, chunks
+        try:
+            index = faiss.read_index(INDEX_PATH)
+            with open(CHUNKS_PATH, "rb") as f:
+                chunks = pickle.load(f)
+            print(f"✅ Loaded FAISS index with {index.ntotal} vectors and {len(chunks)} chunks.")
+            return index, chunks
+        except Exception as e:
+            print(f"❌ Error loading FAISS index or chunks: {e}")
     else:
-        return None, []
+        print("❌ One or both files do not exist.")
+    return None, []
+
 
 def load_stats():
     if os.path.exists(STATS_FILE):

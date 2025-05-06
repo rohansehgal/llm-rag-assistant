@@ -47,21 +47,19 @@
           <!-- Image Model Selection -->
           <div>
             <label class="block font-medium mb-2">Select Model:</label>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex gap-6">
               {% for model in allowed_image_models %}
-              <label class="border rounded-xl p-4 flex flex-col gap-1 cursor-pointer hover:border-blue-500 transition">
-                <input type="radio" name="image_model" value="{{ model }}" class="hidden" {% if model == default_image_model %}checked{% endif %} />
-                <span class="text-base font-semibold">{{ model | capitalize }}</span>
-                <span class="text-sm text-gray-500">Ollama Image Model</span>
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="image_model" value="{{ model }}" class="form-radio text-blue-600" {% if model == default_image_model %}checked{% endif %}>
+                <span class="text-sm text-gray-700">{{ model | capitalize }}</span>
               </label>
               {% endfor %}
             </div>
           </div>
 
+          <!-- Analyze Button -->
           <div class="text-right">
-            <button type="submit" class="inline-flex items-center gap-2 bg-gray-800 text-white px-6 py-2 rounded-xl hover:bg-gray-700">
-              <span>Analyze</span>
-            </button>
+            <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-blue-700 transition text-sm font-medium">Analyze</button>
           </div>
         </form>
 

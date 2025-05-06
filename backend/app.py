@@ -437,6 +437,8 @@ def ask():
             "content": prompt
         }
     ]
+    print("🧠 Final context sent to model:\n", context[:1000], "...\n")
+
     
     def stream_response():
         try:

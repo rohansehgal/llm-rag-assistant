@@ -36,8 +36,9 @@ app.secret_key = 'your_secret_key'
 
 # configurations
 executor = ThreadPoolExecutor(max_workers=3)  # You can adjust the number of workers as needed
-INDEX_PATH = "vector_index.faiss"
-CHUNKS_PATH = "chunks.pkl"
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+INDEX_PATH = os.path.join(APP_DIR, "vector_index.faiss")
+CHUNKS_PATH = os.path.join(APP_DIR, "chunks.pkl")
 STATS_FILE = "stats.json"
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 UPLOAD_FOLDER_FILES = os.path.join(BASE_DIR, "uploads", "files")

@@ -60,8 +60,11 @@ BACKLOG (Not Implemented Yet):
     </style>
   </head>
   
-  <body x-data="{ open: false }" class="bg-gray-50 font-sans text-gray-800">
-    <div class="flex flex-col md:flex-row min-h-screen">
+  <body x-data="{ open: false }"
+  @click.away="open = false"
+  @keydown.escape.window="open = false"
+  class="bg-gray-50 font-sans text-gray-800">
+<div class="flex flex-col md:flex-row min-h-screen">
 
       <!-- Sidebar -->
       {% include 'navbar.html' %}

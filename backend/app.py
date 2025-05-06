@@ -23,6 +23,7 @@ import time
 from datetime import datetime
 from docx import Document
 import json
+import subprocess
 
 
 
@@ -610,49 +611,28 @@ def stats():
     stats_data = load_stats()
     return render_template("stats.html", stats=stats_data)
 
+
+
 @app.route("/rebuild-index", methods=["POST"])
 def rebuild_index():
-    """Manual trigger to regenerate the FAISS index from knowledge base files."""
+    """Manual trigger to regenerate the FAISS index by calling prepare_data.py"""
+    print("📍 Index generation started via prepare_data.py...")
     try:
-        print("📍 Index generation started...")
+        result = subprocess.run(["python3", "prepare_data.py"], capture_output=True, text=True)
 
-        # Gather files from knowledge base folders
-        paths = get_all_rag_documents()
-        all_text = []
-
-        for path in paths:
-            text = extract_text_from_file(path)
-            if text:
-                all_text.append(text)
-
-        # Chunking
-        from langchain.text_splitter import RecursiveCharacterTextSplitter
-        splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
-        all_chunks = []
-        for doc in all_text:
-            all_chunks.extend(splitter.split_text(doc))
-
-        if not all_chunks:
-            return jsonify({"status": "error", "message": "⚠️ No valid text found in documents."}), 200
-
-        # Embedding
-        embeddings = embedder.encode(all_chunks)
-
-        # FAISS Index creation
-        index = faiss.IndexFlatL2(embeddings.shape[1])
-        index.add(np.array(embeddings))
-
-        # Save index and chunks
-        with open("chunks.pkl", "wb") as f:
-            pickle.dump(all_chunks, f)
-        faiss.write_index(index, "vector_index.faiss")
-
-        print("✅ Index generated successfully.")
-        return jsonify({"status": "success", "message": "✅ Index generated successfully!"}), 200
+        if result.returncode == 0:
+            print("✅ prepare_data.py executed successfully.")
+            print(result.stdout)
+            return jsonify({"status": "success", "message": "✅ Index generated successfully!"})
+        else:
+            print("❌ prepare_data.py returned an error:")
+            print(result.stderr)
+            return jsonify({"status": "error", "message": "❌ Index generation failed."})
 
     except Exception as e:
-        print(f"❌ Index generation error: {e}")
-        return jsonify({"status": "error", "message": "❌ Index generation failed due to internal error."}), 500
+        print(f"❌ Exception during index generation: {e}")
+        return jsonify({"status": "error", "message": "❌ Internal error occurred."})
+
 
 
 

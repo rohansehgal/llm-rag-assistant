@@ -59,9 +59,11 @@ def extract_text_from_excel(filepath):
 
 def collect_text_from_folder(folder):
     combined_text = ""
+    processed_files = []
+
     if not os.path.exists(folder):
         print(f"⚠️ Folder does not exist: {folder}")
-        return combined_text
+        return combined_text, processed_files
 
     for filename in os.listdir(folder):
         filepath = os.path.join(folder, filename)
@@ -70,26 +72,33 @@ def collect_text_from_folder(folder):
             continue
 
         print(f"🔍 Processing {filename}")
+        processed_files.append(filename)
 
-        if ext == ".pdf":
-            combined_text += extract_text_from_pdf(filepath) + "\n"
-        elif ext == ".txt":
-            try:
+        try:
+            if ext == ".pdf":
+                combined_text += extract_text_from_pdf(filepath) + "\n"
+            elif ext == ".txt":
                 with open(filepath, "r", encoding="utf-8") as f:
                     combined_text += f.read() + "\n"
-            except Exception as e:
-                print(f"⚠️ Failed to read TXT: {filename} — {e}")
-        elif ext == ".docx":
-            combined_text += extract_text_from_docx(filepath) + "\n"
-        elif ext == ".pptx":
-            combined_text += extract_text_from_pptx(filepath) + "\n"
-        elif ext in {".xls", ".xlsx"}:
-            combined_text += extract_text_from_excel(filepath) + "\n"
+            elif ext == ".docx":
+                combined_text += extract_text_from_docx(filepath) + "\n"
+            elif ext == ".pptx":
+                combined_text += extract_text_from_pptx(filepath) + "\n"
+            elif ext in {".xls", ".xlsx"}:
+                combined_text += extract_text_from_excel(filepath) + "\n"
+        except Exception as e:
+            print(f"⚠️ Failed to process {filename}: {e}")
 
-    return combined_text
+    return combined_text, processed_files
+
 
 # Aggregate all RAG-eligible content
-all_text = collect_text_from_folder(UPLOAD_FOLDER_FILES) + collect_text_from_folder(UPLOAD_FOLDER_RAG)
+text1, files1 = collect_text_from_folder(UPLOAD_FOLDER_FILES)
+text2, files2 = collect_text_from_folder(UPLOAD_FOLDER_RAG)
+all_text = text1 + text2
+all_files = files1 + files2
+
+print(f"📄 Indexed {len(all_files)} files: {all_files}")
 
 print(f"🗂️ Found {len(all_text.split())} words of raw text.")
 

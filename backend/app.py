@@ -22,6 +22,8 @@ import base64
 import time
 from datetime import datetime
 from docx import Document
+import json
+
 
 
 # app creation
@@ -446,6 +448,8 @@ def ask():
     
     def stream_response():
         try:
+            print("📨 Final messages to model:")
+            print(json.dumps(messages, indent=2)[:1500])
             response = ollama.chat(
                 model=model,
                 messages=messages,

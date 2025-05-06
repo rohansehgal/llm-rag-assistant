@@ -11,76 +11,74 @@
     body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
-<body class="flex min-h-screen bg-white text-gray-900">
+<body class="bg-gray-50 font-sans text-gray-800">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-full md:w-1/4 lg:w-1/5 border-r bg-white">
+      {% include 'navbar.html' %}
+    </aside>
 
-  <!-- Sidebar -->
-  <aside class="w-64 p-4 bg-gray-100 border-r">
-    {% include 'navbar.html' %}
-  </aside>
+    <!-- Main Content -->
+    <main class="flex-1 p-6 overflow-y-auto">
+      <h1 class="text-3xl font-semibold mb-2">📝 Text Analysis</h1>
+      <p class="text-lg text-gray-500 mb-8">
+        Enter your query, upload a file (optional), and select a model to receive a streaming response.
+      </p>
 
-  <!-- Main Content -->
-  <main class="flex-1 p-8 overflow-y-auto">
-    <h1 class="text-4xl font-bold mb-2">Text Analysis</h1>
-    <p class="text-lg text-gray-500 mb-8">
-      Enter your query, upload a file (optional), and select a model to receive a streaming response.
-    </p>
-
-    <form id="qa-form" class="space-y-8" method="POST" enctype="multipart/form-data" x-data="{ selected: '{{ default_text_model }}', disabled: false }">
-      
-      <!-- Prompt Input -->
-      <div>
-        <label for="prompt" class="block text-lg font-semibold mb-2">Enter your question:</label>
-        <textarea id="prompt" name="prompt" rows="3" placeholder="Ask me anything..."
-          class="w-full p-4 border rounded-lg text-base"></textarea>
-      </div>
-
-      <!-- File Upload -->
-      <div>
-        <label class="block text-lg font-semibold mb-2">Attach a PDF for RAG (optional):</label>
-        <label class="block border-2 border-dashed rounded-lg p-8 text-center text-gray-500 cursor-pointer hover:border-gray-400">
-          <svg class="mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor" width="40" height="40">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4-4m0 0l-4 4m4-4v12" />
-          </svg>
-          <span class="block font-medium text-base">Drag and drop a PDF, or click to browse</span>
-          <span class="block text-sm">Supports .PDF files up to 25MB</span>
-          <input type="file" id="file" name="file" accept=".pdf" class="hidden" />
-        </label>
-        <p id="file-feedback" class="mt-2 text-sm text-gray-500"></p>
-      </div>
-
-      <!-- Model Selector -->
-      <div :class="{ 'opacity-50 pointer-events-none': disabled }" id="model-select">
-        <label class="block text-lg font-semibold mb-2">Select Model:</label>
-        <div class="flex flex-wrap gap-4">
-          {% for model in allowed_models %}
-          <label
-            :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'"
-            class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all"
-            @click="if (!disabled) selected = '{{ model }}'">
-            <input type="radio" name="models" value="{{ 'llama3' if model == 'llama' else 'phi3' if model == 'phi' else model }}"
-              class="sr-only" :checked="selected === '{{ model }}'" />
-            <div class="font-semibold text-lg">
-              {% if model == 'llama' %}LLaMA 3{% elif model == 'phi' %}Phi-3{% else %}{{ model | capitalize }}{% endif %}
-            </div>
-            <div class="text-sm text-gray-500">Ollama Text Model</div>
-          </label>
-          {% endfor %}
+      <form id="qa-form" class="space-y-8" method="POST" enctype="multipart/form-data" x-data="{ selected: '{{ default_text_model }}', disabled: false }">
+        <!-- Prompt Input -->
+        <div>
+          <label for="prompt" class="block text-lg font-semibold mb-2">Enter your question:</label>
+          <textarea id="prompt" name="prompt" rows="3" placeholder="Ask me anything..." class="w-full p-4 border rounded-lg text-base"></textarea>
         </div>
-        <!-- Hidden synced model field -->
-        <input type="hidden" name="models" :value="selected">
-      </div>
 
-      <!-- Ask Button -->
-      <button type="submit" id="ask-button"
-        class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-        :disabled="true">Ask</button>
-    </form>
+        <!-- File Upload -->
+        <div>
+          <label class="block text-lg font-semibold mb-2">Attach a PDF for RAG (optional):</label>
+          <label class="block border-2 border-dashed rounded-lg p-8 text-center text-gray-500 cursor-pointer hover:border-gray-400">
+            <svg class="mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" width="40" height="40">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4-4m0 0l-4 4m4-4v12" />
+            </svg>
+            <span class="block font-medium text-base">Drag and drop a PDF, or click to browse</span>
+            <span class="block text-sm">Supports .PDF files up to 25MB</span>
+            <input type="file" id="file" name="file" accept=".pdf" class="hidden" />
+          </label>
+          <p id="file-feedback" class="mt-2 text-sm text-gray-500"></p>
+        </div>
 
-    <!-- Results -->
-    <div id="results" class="mt-10 space-y-4"></div>
-  </main>
+        <!-- Model Selector -->
+        <div :class="{ 'opacity-50 pointer-events-none': disabled }" id="model-select">
+          <label class="block text-lg font-semibold mb-2">Select Model:</label>
+          <div class="flex flex-wrap gap-4">
+            {% for model in allowed_models %}
+            <label
+              :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'"
+              class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all"
+              @click="if (!disabled) selected = '{{ model }}'">
+              <input type="radio" name="models" value="{{ 'llama3' if model == 'llama' else 'phi3' if model == 'phi' else model }}"
+                class="sr-only" :checked="selected === '{{ model }}'" />
+              <div class="font-semibold text-lg">
+                {% if model == 'llama' %}LLaMA 3{% elif model == 'phi' %}Phi-3{% else %}{{ model | capitalize }}{% endif %}
+              </div>
+              <div class="text-sm text-gray-500">Ollama Text Model</div>
+            </label>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="models" :value="selected">
+        </div>
+
+        <!-- Ask Button -->
+        <button type="submit" id="ask-button"
+          class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="true">Ask</button>
+      </form>
+
+      <!-- Results -->
+      <div id="results" class="mt-10 space-y-4"></div>
+    </main>
+  </div>
 
   <script>
     function sanitizeModelName(name) {
@@ -175,12 +173,10 @@
           responseEl.textContent = responseText;
         }
 
-        // Save response
         const updated = JSON.parse(localStorage.getItem("responses") || "{}");
         updated[selectedModel] = responseText;
         localStorage.setItem("responses", JSON.stringify(updated));
 
-        // Re-enable UI
         promptInput.disabled = false;
         promptInput.classList.remove("bg-gray-100", "text-gray-400", "cursor-not-allowed");
         modelSelector.classList.remove("opacity-50", "pointer-events-none");

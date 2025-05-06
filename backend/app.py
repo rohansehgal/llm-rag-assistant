@@ -618,7 +618,7 @@ def rebuild_index():
     """Manual trigger to regenerate the FAISS index by calling prepare_data.py"""
     print("📍 Index generation started via prepare_data.py...")
     try:
-        result = subprocess.run(["python3", "prepare_data.py"], capture_output=True, text=True)
+        result = subprocess.run(["python3", "backend/prepare_data.py"], capture_output=True, text=True)
 
         if result.returncode == 0:
             print("✅ prepare_data.py executed successfully.")

@@ -61,7 +61,7 @@
       <div>
         <label class="block text-lg font-semibold mb-2">Select Model:</label>
         <div class="flex flex-wrap gap-4">
-          {% for model in allowed_image_models %}
+          {% for model in allowed_models %}
           <label
             :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'"
             class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all"

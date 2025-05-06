@@ -44,6 +44,7 @@ OTHER:
 ==============================================
 
 
+
 <!-- templates/upload.html -->
 
 <!DOCTYPE html>
@@ -215,7 +216,7 @@ OTHER:
   }
   th.querySelector('.sort-icon').textContent = currentSortDir === 'asc' ? '↑' : '↓';
       const table = document.getElementById("uploaded-files-table");
-      let switching = true, dir = "asc", switchcount = 0;
+      let switching = true, dir = currentSortDir, switchcount = 0;
       while (switching) {
         switching = false;
         const rows = table.rows;
@@ -223,8 +224,8 @@ OTHER:
           let shouldSwitch = false;
           const x = rows[i].getElementsByTagName("TD")[n];
           const y = rows[i + 1].getElementsByTagName("TD")[n];
-          if ((dir === "asc" && x.innerText.toLowerCase() > y.innerText.toLowerCase()) ||
-              (dir === "desc" && x.innerText.toLowerCase() < y.innerText.toLowerCase())) {
+          if ((dir === "asc" && x.innerText.trim().toLowerCase() > y.innerText.trim().toLowerCase()) ||
+            (dir === "desc" && x.innerText.trim().toLowerCase() < y.innerText.trim().toLowerCase())) {
             shouldSwitch = true;
             break;
           }
@@ -234,7 +235,8 @@ OTHER:
           switching = true;
           switchcount++;
         } else if (switchcount === 0 && dir === "asc") {
-          dir = "desc";
+        dir = "desc";
+        currentSortDir = "desc";
           switching = true;
         }
       }
@@ -242,4 +244,3 @@ OTHER:
   </script>
 </body>
 </html>
-

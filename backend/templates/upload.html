@@ -81,7 +81,8 @@ OTHER:
     </button>
   </form>
 
-  <!-- Generate Index -->
+  <!-- Generate Index button and status messages (simplified) -->
+<div x-data="{ status: '', message: '', loading: false }" class="flex items-center space-x-4 mt-2">
   <button
     @click="
       loading = true;
@@ -103,20 +104,20 @@ OTHER:
     class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition"
     :disabled="loading"
   >
-    <template x-if="!loading">Generate Index</template>
-    <template x-if="loading">Generating...</template>
+    Generate Index
   </button>
+
+  <!-- Status message -->
+  <div x-show="message" class="text-sm px-4 py-2 rounded font-medium"
+       :class="{
+         'bg-blue-100 text-blue-800': status === 'info',
+         'bg-green-100 text-green-800': status === 'success',
+         'bg-red-100 text-red-800': status === 'error'
+       }"
+       x-text="message">
+  </div>
 </div>
 
-<!-- Status Message -->
-<div x-show="message" class="text-sm px-4 py-2 rounded font-medium"
-     :class="{
-       'bg-blue-100 text-blue-800': status === 'info',
-       'bg-green-100 text-green-800': status === 'success',
-       'bg-red-100 text-red-800': status === 'error'
-     }"
-     x-text="message">
-</div>
 
 
 

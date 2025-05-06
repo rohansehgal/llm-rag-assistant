@@ -42,12 +42,6 @@ OTHER:
 - Fully mobile responsive layout
 
 ==============================================
--->
-<!-- templates/upload.html -->
-
-
-
-<!-- templates/upload.html -->
 
 
 <!-- templates/upload.html -->
@@ -86,34 +80,35 @@ OTHER:
       <div class="overflow-x-auto bg-white shadow-sm border rounded-lg">
         <table id="uploaded-files-table" class="min-w-full text-sm text-left">
   <thead class="bg-gray-100 text-xs text-gray-700 uppercase">
-    <tr class="cursor-pointer">
-      <th class="px-4 py-3" onclick="sortTable($1, this)">
-  <div class="inline-flex items-center gap-1">
-    $2 <span class="sort-icon text-xs">⇅</span>
-  </div>
-</th>
-      <th class="px-4 py-3" onclick="sortTable($1, this)">
-  <div class="inline-flex items-center gap-1">
-    $2 <span class="sort-icon text-xs">⇅</span>
-  </div>
-</th>
-      <th class="px-4 py-3" onclick="sortTable($1, this)">
-  <div class="inline-flex items-center gap-1">
-    $2 <span class="sort-icon text-xs">⇅</span>
-  </div>
-</th>
-      <th class="px-4 py-3" onclick="sortTable($1, this)">
-  <div class="inline-flex items-center gap-1">
-    $2 <span class="sort-icon text-xs">⇅</span>
-  </div>
-</th>
-      <th class="px-4 py-3" onclick="sortTable($1, this)">
-  <div class="inline-flex items-center gap-1">
-    $2 <span class="sort-icon text-xs">⇅</span>
-  </div>
-</th>
-      <th class="px-4 py-3">Actions</th>
-    </tr>
+  <tr class="cursor-pointer">
+    <th class="px-4 py-3" onclick="sortTable(0, this)">
+      <div class="inline-flex items-center gap-1">
+        File Name <span class="sort-icon text-xs">⇅</span>
+      </div>
+    </th>
+    <th class="px-4 py-3" onclick="sortTable(1, this)">
+      <div class="inline-flex items-center gap-1">
+        Upload Source <span class="sort-icon text-xs">⇅</span>
+      </div>
+    </th>
+    <th class="px-4 py-3" onclick="sortTable(2, this)">
+      <div class="inline-flex items-center gap-1">
+        Type <span class="sort-icon text-xs">⇅</span>
+      </div>
+    </th>
+    <th class="px-4 py-3" onclick="sortTable(3, this)">
+      <div class="inline-flex items-center gap-1">
+        Size <span class="sort-icon text-xs">⇅</span>
+      </div>
+    </th>
+    <th class="px-4 py-3" onclick="sortTable(4, this)">
+      <div class="inline-flex items-center gap-1">
+        Upload Date <span class="sort-icon text-xs">⇅</span>
+      </div>
+    </th>
+    <th class="px-4 py-3">Actions</th>
+  </tr>
+</thead>
   </thead>
   <tbody class="divide-y divide-gray-200">
             {% for file in uploaded_files %}
@@ -247,3 +242,4 @@ OTHER:
   </script>
 </body>
 </html>
+

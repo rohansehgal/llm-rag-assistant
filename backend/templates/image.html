@@ -2,17 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Image Analysis - LLM Assistant</title>
+  <title>Image Analysis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-800">
+<body class="bg-gray-50 text-gray-800 font-sans">
   <div class="flex min-h-screen">
     <!-- Sidebar -->
     <aside class="w-full md:w-1/4 lg:w-1/5 border-r bg-white">
@@ -22,66 +21,68 @@
     <!-- Main Content -->
     <main class="flex-1 p-6 overflow-y-auto">
       <h1 class="text-3xl font-semibold mb-2">Image Analysis</h1>
-      <p class="text-lg text-gray-500 mb-8">Upload an image, enter a prompt, and choose a model to receive streamed visual analysis.</p>
+      <p class="text-lg text-gray-500 mb-8">Upload an image, enter a prompt, select a model, and receive a streaming response.</p>
 
-      <form method="POST" action="/analyze-image" enctype="multipart/form-data" class="space-y-8" id="image-analysis-form" x-data="{ selected: '{{ default_image_model }}' }">
-        <!-- Image Upload -->
+      <form method="POST" action="/analyze-image" enctype="multipart/form-data" class="space-y-8" x-data="{ selected: '{{ default_image_model }}' }" id="image-analysis-form">
+        <!-- Upload Field -->
         <div>
           <label class="block text-lg font-semibold mb-2">Upload Image:</label>
-          <label for="image" class="block border-2 border-dashed rounded-lg p-8 text-center text-gray-500 cursor-pointer hover:border-gray-400 bg-white">
-            <i data-lucide="upload" class="w-6 h-6 mx-auto mb-2 text-gray-500"></i>
-            <span class="block font-medium text-base">Click to upload or drag & drop</span>
-            <span class="block text-sm">Supported: .jpg, .jpeg, .png, .gif (≤25MB)</span>
+          <label class="block border-2 border-dashed rounded-lg p-8 text-center text-gray-500 cursor-pointer hover:border-gray-400">
+            <svg class="mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" width="40" height="40">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4-4m0 0l-4 4m4-4v12" />
+            </svg>
+            <span class="block font-medium text-base">Drag and drop an image, or click to browse</span>
+            <span class="block text-sm">Supports .jpg, .jpeg, .png, .gif (≤25MB)</span>
             <input type="file" name="image" id="image" accept=".jpg,.jpeg,.png,.gif" required class="hidden" />
           </label>
         </div>
 
-        <!-- Prompt -->
+        <!-- Prompt Input -->
         <div>
-          <label for="image_prompt" class="block text-lg font-semibold mb-2">Prompt:</label>
-          <textarea id="image_prompt" name="image_prompt" rows="3" placeholder="e.g. What is shown in this image?" class="w-full p-4 border rounded-lg text-base">{{ image_prompt or '' }}</textarea>
+          <label for="image_prompt" class="block text-lg font-semibold mb-2">Describe what you want to know:</label>
+          <textarea id="image_prompt" name="image_prompt" rows="3" placeholder="e.g. What is shown in this image?"
+            class="w-full p-4 border rounded-lg text-base">{{ image_prompt or '' }}</textarea>
         </div>
 
         <!-- Model Selector -->
-        <div id="model-select">
-          <label class="block text-lg font-semibold mb-2">Select Model:</label>
+        <div>
+          <label class="block text-lg font-semibold mb-2">Select Image Model:</label>
           <div class="flex flex-wrap gap-4">
-            {% for model in allowed_image_models %}
+            {% for model in allowed_models %}
             <label
               :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'"
               class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all"
               @click="selected = '{{ model }}'">
-              <input type="radio" name="image_model" value="{{ model }}" class="sr-only" :checked="selected === '{{ model }}'" />
+              <input type="radio" name="image_model" value="{{ model }}" class="sr-only"
+                :checked="selected === '{{ model }}'" />
               <div class="font-semibold text-lg">{{ model | capitalize }}</div>
               <div class="text-sm text-gray-500">Ollama Image Model</div>
             </label>
             {% endfor %}
           </div>
-          <input type="hidden" name="image_model" :value="selected" />
+          <input type="hidden" name="image_model" :value="selected">
         </div>
 
         <!-- Analyze Button -->
-        <div>
-          <button type="submit"
-            class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg transition">
-            Analyze
-          </button>
-        </div>
+        <button type="submit"
+          class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+          Analyze
+        </button>
       </form>
 
-      <!-- Streamed response area -->
+      <!-- Streamed Response -->
       <div id="image-stream-result" class="mt-10 space-y-4"></div>
     </main>
   </div>
 
   <script>
-    lucide.createIcons();
-
     document.addEventListener("DOMContentLoaded", () => {
-      const promptInput = document.getElementById("image_prompt");
       const storedPrompt = localStorage.getItem("last_image_prompt");
       const storedModel = localStorage.getItem("last_image_model");
       const storedResponse = localStorage.getItem("last_image_response");
+      const promptInput = document.getElementById("image_prompt");
 
       if (storedPrompt) promptInput.value = storedPrompt;
 
@@ -102,7 +103,8 @@
       localStorage.setItem("last_image_model", model);
       localStorage.setItem("last_image_response", "Loading...");
 
-      document.getElementById("image-stream-result").innerHTML = "";
+      const resultContainer = document.getElementById("image-stream-result");
+      resultContainer.innerHTML = "";
       renderResponseCard(model, "Loading...");
 
       fetch("/analyze-image", {
@@ -112,7 +114,6 @@
         const reader = res.body.getReader();
         const decoder = new TextDecoder("utf-8");
         let responseText = "";
-
         const responseEl = document.getElementById("image-response-text");
 
         while (true) {
@@ -125,17 +126,16 @@
 
         localStorage.setItem("last_image_response", responseText);
       }).catch((err) => {
-        console.error("❌ Image streaming error:", err);
+        console.error("❌ Streaming failed:", err);
       });
     });
 
     function renderResponseCard(model, text) {
-      document.getElementById("image-stream-result").innerHTML = `
-        <div class="bg-white shadow rounded-xl p-4 mt-6">
-          <div class="flex justify-between items-center mb-2">
-            <h2 class="text-base font-semibold text-gray-800">Response from ${model || "(none)"}</h2>
-          </div>
-          <p class="text-sm text-gray-700 whitespace-pre-wrap" id="image-response-text">${text}</p>
+      const container = document.getElementById("image-stream-result");
+      container.innerHTML = `
+        <div class="card border rounded-lg shadow">
+          <div class="p-4 border-b font-semibold">Response from ${model || "(none)"}</div>
+          <div class="p-4 text-base text-gray-800" id="image-response-text">${text}</div>
         </div>
       `;
     }

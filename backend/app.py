@@ -124,6 +124,17 @@ def save_stat(record):
 
 
 vector_index, chunks = load_index()
+
+if vector_index is None:
+    print("⚠️ vector_index is NOT loaded.")
+else:
+    print(f"✅ vector_index loaded successfully. Index type: {type(vector_index)}")
+
+if not chunks:
+    print("⚠️ chunks are empty or not loaded.")
+else:
+    print(f"✅ chunks loaded successfully. Total chunks: {len(chunks)}")
+
 embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 def split_text(text, chunk_size=500, overlap=100):
@@ -425,11 +436,19 @@ def ask():
     # ✅ Build RAG context (if index is available)
     context = ""
     if vector_index and chunks:
-        query_embedding = embedder.encode([prompt])
-        scores, indices = vector_index.search(np.array(query_embedding), k=3)
-        prebuilt_context = "\n".join([chunks[i] for i in indices[0]])
-        print(f"🧩 Prebuilt context: {prebuilt_context[:500]}")
-        context = dynamic_context + "\n" + prebuilt_context if dynamic_context else prebuilt_context
+        try:
+            query_embedding = embedder.encode([prompt])
+            scores, indices = vector_index.search(np.array(query_embedding), k=3)
+            prebuilt_context = "\n".join([chunks[i] for i in indices[0]])
+            print(f"🧩 Prebuilt context: {prebuilt_context[:500]}")
+            context = dynamic_context + "\n" + prebuilt_context if dynamic_context else prebuilt_context
+        except Exception as e:
+            print(f"❌ Error retrieving from vector index: {e}")
+            context = dynamic_context  # Fallback
+    else:
+        print("⚠️ vector_index or chunks missing; using only dynamic context.")
+        context = dynamic_context
+
 
     messages = [
         {

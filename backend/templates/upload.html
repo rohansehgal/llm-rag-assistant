@@ -45,6 +45,10 @@ OTHER:
 -->
 <!-- templates/upload.html -->
 
+
+
+<!-- templates/upload.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,22 +82,27 @@ OTHER:
       <!-- Uploaded Files Table -->
       <div class="overflow-x-auto bg-white shadow-sm border rounded-lg">
         <table id="uploaded-files-table" class="min-w-full text-sm text-left">
-          
-<script>
-  let currentSortIndex = null;
-  let currentSortDir = 'asc';
-</script>
-              <th class="px-4 py-3 flex items-center gap-1" onclick="sortTable($1, this)">$2
-  <span class="sort-icon">⇅</span>
-</th>
-              <th class="px-4 py-3" onclick="sortTable(1)">Upload Source</th>
-              <th class="px-4 py-3" onclick="sortTable(2)">Type</th>
-              <th class="px-4 py-3" onclick="sortTable(3)">Size</th>
-              <th class="px-4 py-3" onclick="sortTable(4)">Upload Date</th>
-              <th class="px-4 py-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
+  <thead class="bg-gray-100 text-xs text-gray-700 uppercase">
+    <tr class="cursor-pointer">
+      <th class="px-4 py-3 flex items-center gap-1" onclick="sortTable(0, this)">
+        File Name <span class="sort-icon">⇅</span>
+      </th>
+      <th class="px-4 py-3 flex items-center gap-1" onclick="sortTable(1, this)">
+        Upload Source <span class="sort-icon">⇅</span>
+      </th>
+      <th class="px-4 py-3 flex items-center gap-1" onclick="sortTable(2, this)">
+        Type <span class="sort-icon">⇅</span>
+      </th>
+      <th class="px-4 py-3 flex items-center gap-1" onclick="sortTable(3, this)">
+        Size <span class="sort-icon">⇅</span>
+      </th>
+      <th class="px-4 py-3 flex items-center gap-1" onclick="sortTable(4, this)">
+        Upload Date <span class="sort-icon">⇅</span>
+      </th>
+      <th class="px-4 py-3">Actions</th>
+    </tr>
+  </thead>
+  <tbody class="divide-y divide-gray-200">
             {% for file in uploaded_files %}
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3 font-medium flex items-center gap-2">
@@ -223,4 +232,3 @@ OTHER:
   </script>
 </body>
 </html>
-

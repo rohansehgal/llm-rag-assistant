@@ -21,6 +21,7 @@ from werkzeug.utils import secure_filename
 import base64
 import time
 from datetime import datetime
+from docx import Document
 
 
 # app creation
@@ -129,6 +130,28 @@ def split_text(text, chunk_size=500, overlap=100):
     for i in range(0, len(words), chunk_size - overlap):
         result.append(" ".join(words[i:i+chunk_size]))
     return result
+
+
+def extract_text_from_file(path):
+    """Extracts text from PDF, DOCX, or TXT files."""
+    ext = path.lower().split('.')[-1]
+    text = ""
+
+    try:
+        if ext == "pdf":
+            with fitz.open(path) as doc:
+                for page in doc:
+                    text += page.get_text()
+        elif ext == "docx":
+            doc = Document(path)
+            text = "\n".join([para.text for para in doc.paragraphs])
+        elif ext == "txt":
+            with open(path, "r", encoding="utf-8") as f:
+                text = f.read()
+    except Exception as e:
+        print(f"❌ Error reading {path}: {e}")
+    
+    return text
 
 
 def get_all_rag_documents():
@@ -308,9 +331,36 @@ def ask():
     """Handles model queries with caching and automatic streaming."""
 
     file = request.files.get('file')
+    
+    uploaded_text = ""
+    dynamic_chunks = []
+    dynamic_context = ""
+
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(UPLOAD_FOLDER_RAG, filename))
+        uploaded_path = os.path.join(UPLOAD_FOLDER_RAG, filename)
+        file.save(uploaded_path)
+
+    # 🧠 Extract + split uploaded file content
+    uploaded_text = extract_text_from_file(uploaded_path)
+    if uploaded_text:
+        from langchain.text_splitter import RecursiveCharacterTextSplitter
+        splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+        dynamic_chunks = splitter.split_text(uploaded_text)
+        print(f"🟡 Extracted {len(dynamic_chunks)} chunks from uploaded file.")
+
+    # 🧠 Embed and select top 10 chunks
+    if dynamic_chunks:
+        try:
+            query_embedding = embedder.encode([prompt])
+            chunk_embeddings = embedder.encode(dynamic_chunks)
+            distances = np.linalg.norm(chunk_embeddings - query_embedding, axis=1)
+            top_indices = distances.argsort()[:10]
+            dynamic_context = "\n".join([dynamic_chunks[i] for i in top_indices])
+            print(f"📌 Selected top {len(top_indices)} relevant chunks for dynamic RAG context.")
+
+        except Exception as e:
+            print(f"❌ Error embedding uploaded file: {e}")
 
     prompt = request.form.get('prompt', '').strip()
     model = request.form.get('models', '').strip()
@@ -349,7 +399,8 @@ def ask():
     if vector_index and chunks:
         query_embedding = embedder.encode([prompt])
         scores, indices = vector_index.search(np.array(query_embedding), k=3)
-        context = "\n".join([chunks[i] for i in indices[0]])
+        prebuilt_context = "\n".join([chunks[i] for i in indices[0]])
+        context = dynamic_context + "\n" + prebuilt_context if dynamic_context else prebuilt_context
 
     messages = [
         {

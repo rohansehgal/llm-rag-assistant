@@ -336,6 +336,32 @@ def ask():
     dynamic_chunks = []
     dynamic_context = ""
 
+    prompt = request.form.get('prompt', '').strip()
+    model = request.form.get('models', '').strip()
+
+    # 🐛 Debug logs for input validation
+    print(f"🟢 Model received: {repr(model)}")
+    print(f"🟢 Prompt received: {repr(prompt)}")
+
+
+    # 🚫 Validate prompt and model input
+    if not model:
+        print("❌ No model selected.")
+        return jsonify({
+            "model": "",
+            "answer": "[Error: No model selected.]",
+            "time_ms": 0
+        })
+
+    if not prompt:
+        print("❌ Prompt is empty.")
+        return jsonify({
+            "model": model,
+            "answer": "[Error: Prompt cannot be empty.]",
+            "time_ms": 0
+        })
+
+
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         uploaded_path = os.path.join(UPLOAD_FOLDER_RAG, filename)
@@ -362,8 +388,7 @@ def ask():
         except Exception as e:
             print(f"❌ Error embedding uploaded file: {e}")
 
-    prompt = request.form.get('prompt', '').strip()
-    model = request.form.get('models', '').strip()
+
 
     print("\n🟡 /ask called")
     print("🟡 Prompt:", prompt)

@@ -72,17 +72,20 @@ OTHER:
           <div class="flex space-x-4 mb-2">
 
       <!-- Upload + Generate Index buttons in same row -->
-<div class="flex space-x-4 mb-2" x-data="{ status: '', message: '', loading: false }">
+
+      <!-- Upload + Generate Index buttons in same row -->
+<div class="flex items-center space-x-4 mb-4" x-data="{ status: '', message: '', loading: false }">
   <!-- Upload New File -->
   <form id="upload-form" method="POST" action="/upload" enctype="multipart/form-data">
     <input type="file" name="file" multiple hidden onchange="this.form.submit()">
-    <button type="button" onclick="this.previousElementSibling.click()" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition">
+    <button type="button"
+            onclick="this.previousElementSibling.click()"
+            class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition">
       Upload New File
     </button>
   </form>
 
-  <!-- Generate Index button and status messages (simplified) -->
-<div class="flex items-center space-x-4 ">
+  <!-- Generate Index -->
   <button
     @click="
       loading = true;
@@ -107,7 +110,7 @@ OTHER:
     Generate Index
   </button>
 
-  <!-- Status message -->
+  <!-- Status Message -->
   <div x-show="message" class="text-sm px-4 py-2 rounded font-medium"
        :class="{
          'bg-blue-100 text-blue-800': status === 'info',

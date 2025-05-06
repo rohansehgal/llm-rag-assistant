@@ -20,7 +20,6 @@
       <!-- Main Content -->
       <main class="flex-1 p-6 overflow-y-auto">
         <h1 class="text-3xl font-semibold mb-2 flex items-center gap-2">
-          
           <span>Image Analysis</span>
         </h1>
         <p class="text-gray-600 mb-6">Upload an image, provide a prompt, select a model, and stream the visual analysis.</p>
@@ -61,19 +60,97 @@
 
           <div class="text-right">
             <button type="submit" class="inline-flex items-center gap-2 bg-gray-800 text-white px-6 py-2 rounded-xl hover:bg-gray-700">
-              <i data-lucide="scan-line"></i>
               <span>Analyze</span>
             </button>
           </div>
         </form>
 
-        <!-- Streamed response (client-side JS appends here) -->
+        <!-- Streamed response -->
         <div id="image-stream-result" class="mt-6"></div>
       </main>
     </div>
 
     <script>
       lucide.createIcons();
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedImagePrompt = localStorage.getItem("last_image_prompt") || "";
+        const savedImageModel = localStorage.getItem("last_image_model");
+        const savedImageResponse = localStorage.getItem("last_image_response");
+
+        if (savedImagePrompt) {
+          document.getElementById("image_prompt").value = savedImagePrompt;
+        }
+
+        if (savedImageModel) {
+          const inputs = document.querySelectorAll("input[name='image_model']");
+          inputs.forEach(input => {
+            if (input.value === savedImageModel) {
+              input.checked = true;
+            }
+          });
+        }
+
+        if (savedImagePrompt && savedImageResponse) {
+          renderResponseCard(savedImageModel, savedImageResponse);
+        }
+      });
+
+      document.getElementById("image-analysis-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const formData = new FormData(form);
+        const prompt = formData.get("image_prompt");
+        const selectedModel = formData.get("image_model");
+
+        localStorage.setItem("last_image_prompt", prompt);
+        localStorage.setItem("last_image_model", selectedModel);
+        localStorage.setItem("last_image_response", "Loading...");
+
+        document.getElementById("image-stream-result").innerHTML = "";
+        renderResponseCard(selectedModel, "Loading...");
+
+        fetch("/analyze-image", {
+          method: "POST",
+          body: formData
+        })
+        .then(async (res) => {
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder("utf-8");
+          let responseText = "";
+
+          const responseEl = document.getElementById("image-response-text");
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            console.log("📸 Chunk:", chunk);
+            responseText += chunk;
+            responseEl.textContent = responseText;
+          }
+
+          localStorage.setItem("last_image_response", responseText);
+        })
+        .catch((err) => {
+          console.error("❌ Streaming failed:", err);
+        });
+      });
+
+      function renderResponseCard(model, text) {
+        const container = document.getElementById("image-stream-result");
+        container.innerHTML = `
+          <div class="mt-6">
+            <div class="card bg-white shadow rounded-xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <h2 class="text-base font-semibold text-gray-800">Response from ${model}</h2>
+              </div>
+              <p class="text-sm text-gray-700 whitespace-pre-wrap" id="image-response-text">${text}</p>
+            </div>
+          </div>
+        `;
+      }
     </script>
   </body>
 </html>

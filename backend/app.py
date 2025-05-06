@@ -384,6 +384,7 @@ def ask():
             top_indices = distances.argsort()[:10]
             dynamic_context = "\n".join([dynamic_chunks[i] for i in top_indices])
             print(f"📌 Selected top {len(top_indices)} relevant chunks for dynamic RAG context.")
+            print(f"🆕 Dynamic context: {dynamic_context[:500]}")
 
         except Exception as e:
             print(f"❌ Error embedding uploaded file: {e}")
@@ -425,6 +426,7 @@ def ask():
         query_embedding = embedder.encode([prompt])
         scores, indices = vector_index.search(np.array(query_embedding), k=3)
         prebuilt_context = "\n".join([chunks[i] for i in indices[0]])
+        print(f"🧩 Prebuilt context: {prebuilt_context[:500]}")
         context = dynamic_context + "\n" + prebuilt_context if dynamic_context else prebuilt_context
 
     messages = [
@@ -438,6 +440,8 @@ def ask():
         }
     ]
     print("🧠 Final context sent to model:\n", context[:1000], "...\n")
+    print(f"🧠 Trying again Final context sent to model:\n{context[:1000]}...\n")
+
 
     
     def stream_response():

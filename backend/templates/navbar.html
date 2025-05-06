@@ -1,59 +1,49 @@
 <!-- templates/navbar.html -->
+<div x-data="{ open: false }" class="relative h-full">
+  <!-- Toggle button (only visible on small screens) -->
+  <button @click="open = !open" class="md:hidden p-3">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+    </svg>
+  </button>
 
-<!-- Sidebar -->
-<aside class="h-full p-4 bg-gray-100 border-r text-gray-900 text-base font-medium">
-  <!-- App Logo / Title -->
-  <div class="text-2xl font-bold mb-6 pl-2">SecureAI</div>
+  <!-- Sidebar -->
+  <aside
+    class="fixed inset-y-0 left-0 w-64 bg-gray-100 border-r text-gray-900 text-base font-medium transform transition-transform duration-300 ease-in-out
+           z-50 md:static md:translate-x-0"
+    :class="{ '-translate-x-full': !open, 'translate-x-0': open }"
+  >
+    <div class="p-4 text-2xl font-bold mb-6">SecureAI</div>
 
-  <!-- Navigation Links -->
-  <nav class="space-y-2">
-    <!-- Home -->
-    <a href="/" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:bg-gray-200 {% if active_page == 'home' %}bg-gray-200{% endif %}">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9L12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-      <span>Home</span>
-    </a>
+    <nav class="space-y-2 px-4">
+      <a href="/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'home' %}bg-gray-200{% endif %}">
+        <i data-lucide="home" class="w-5 h-5 text-gray-600"></i>
+        <span>Home</span>
+      </a>
+      <a href="/upload" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'upload' %}bg-gray-200{% endif %}">
+        <i data-lucide="upload" class="w-5 h-5 text-gray-600"></i>
+        <span>Upload Manager</span>
+      </a>
+      <a href="/stats" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'stats' %}bg-gray-200{% endif %}">
+        <i data-lucide="bar-chart" class="w-5 h-5 text-gray-600"></i>
+        <span>Statistics</span>
+      </a>
+      <a href="/settings" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'settings' %}bg-gray-200{% endif %}">
+        <i data-lucide="settings" class="w-5 h-5 text-gray-600"></i>
+        <span>Settings</span>
+      </a>
+      <a href="/image" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'image' %}bg-gray-200{% endif %}">
+        <i data-lucide="image" class="w-5 h-5 text-gray-600"></i>
+        <span>Image Analysis</span>
+      </a>
+    </nav>
+  </aside>
+</div>
 
-    <!-- Upload Manager -->
-    <a href="/upload" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:bg-gray-200 {% if active_page == 'upload' %}bg-gray-200{% endif %}">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="17 8 12 3 7 8"/>
-        <line x1="12" y1="3" x2="12" y2="15"/>
-      </svg>
-      <span>Upload Manager</span>
-    </a>
-
-    <!-- Statistics -->
-    <a href="/stats" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:bg-gray-200 {% if active_page == 'stats' %}bg-gray-200{% endif %}">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="3" y1="3" x2="3" y2="21"/>
-        <line x1="9" y1="10" x2="9" y2="21"/>
-        <line x1="15" y1="6" x2="15" y2="21"/>
-        <line x1="21" y1="14" x2="21" y2="21"/>
-      </svg>
-      <span>Statistics</span>
-    </a>
-
-    <!-- Settings -->
-    <a href="/settings" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:bg-gray-200 {% if active_page == 'settings' %}bg-gray-200{% endif %}">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 9 3.6V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09A1.65 1.65 0 0 0 20.4 12h.1a2 2 0 0 1 0 4h-.1a1.65 1.65 0 0 0-1 1.51z"/>
-      </svg>
-      <span>Settings</span>
-    </a>
-
-    <!-- Image Analysis -->
-    <a href="/image" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:bg-gray-200 {% if active_page == 'image' %}bg-gray-200{% endif %}">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-        <circle cx="8.5" cy="8.5" r="1.5"/>
-        <polyline points="21 15 16 10 5 21"/>
-      </svg>
-      <span>Image Analysis</span>
-    </a>
-  </nav>
-</aside>
+<script>
+  document.addEventListener("alpine:init", () => {
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  });
+</script>

@@ -441,11 +441,12 @@ def ask():
             "content": prompt
         }
     ]
-    print("🧠 Final context sent to model:\n", context[:1000], "...\n")
-    print(f"🧠 Trying again Final context sent to model:\n{context[:1000]}...\n")
-    print("🧠 Final context sent to model:")
-    print(context)
-    print(f"🧠 Final context sent to model (len={len(context)}):\n{context}")
+    # More precise logging
+    if not context.strip():
+        print("🧠 Final context sent to model is EMPTY.")
+    else:
+        print(f"🧠 Final context sent to model (len={len(context)}):")
+        print(context[:1000] + ("..." if len(context) > 1000 else ""))
 
 
 
@@ -454,7 +455,9 @@ def ask():
     def stream_response():
         try:
             print("📨 Final messages to model:")
-            print(json.dumps(messages, indent=2)[:1500])
+            for m in messages:
+                print(f"- {m['role']}: {m['content'][:500]}" + ("..." if len(m['content']) > 500 else ""))
+
             response = ollama.chat(
                 model=model,
                 messages=messages,

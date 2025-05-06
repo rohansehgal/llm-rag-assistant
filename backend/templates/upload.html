@@ -47,6 +47,9 @@ OTHER:
 
 <!-- templates/upload.html -->
 
+
+<!-- templates/upload.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -219,7 +222,8 @@ OTHER:
       let switching = true, dir = currentSortDir, switchcount = 0;
       while (switching) {
         switching = false;
-        const rows = table.rows;
+        const tbody = table.querySelector("tbody");
+      const rows = Array.from(tbody.rows);
         for (let i = 1; i < (rows.length - 1); i++) {
           let shouldSwitch = false;
           const x = rows[i].getElementsByTagName("TD")[n];
@@ -231,7 +235,7 @@ OTHER:
           }
         }
         if (shouldSwitch) {
-          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          tbody.insertBefore(rows[i + 1], rows[i]);
           switching = true;
           switchcount++;
         } else if (switchcount === 0 && dir === "asc") {

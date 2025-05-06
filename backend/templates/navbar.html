@@ -16,23 +16,23 @@
     <div class="p-4 text-2xl font-bold mb-6">SecureAI</div>
 
     <nav class="space-y-2 px-4">
-      <a href="/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'home' %}bg-gray-200{% endif %}">
+      <a href="/" @click="open = false" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'home' %}bg-gray-200{% endif %}">
         <i data-lucide="home" class="w-5 h-5 text-gray-600"></i>
         <span>Home</span>
       </a>
-      <a href="/upload" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'upload' %}bg-gray-200{% endif %}">
+      <a href="/upload" @click="open = false" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'upload' %}bg-gray-200{% endif %}">
         <i data-lucide="upload" class="w-5 h-5 text-gray-600"></i>
         <span>Upload Manager</span>
       </a>
-      <a href="/stats" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'stats' %}bg-gray-200{% endif %}">
+      <a href="/stats" @click="open = false" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'stats' %}bg-gray-200{% endif %}">
         <i data-lucide="bar-chart" class="w-5 h-5 text-gray-600"></i>
         <span>Statistics</span>
       </a>
-      <a href="/settings" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'settings' %}bg-gray-200{% endif %}">
+      <a href="/settings" @click="open = false" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'settings' %}bg-gray-200{% endif %}">
         <i data-lucide="settings" class="w-5 h-5 text-gray-600"></i>
         <span>Settings</span>
       </a>
-      <a href="/image" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'image' %}bg-gray-200{% endif %}">
+      <a href="/image" @click="open = false" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'image' %}bg-gray-200{% endif %}">
         <i data-lucide="image" class="w-5 h-5 text-gray-600"></i>
         <span>Image Analysis</span>
       </a>

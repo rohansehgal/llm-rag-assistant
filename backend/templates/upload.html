@@ -43,9 +43,6 @@ OTHER:
 
 ==============================================
 -->
-
-<!-- templates/upload.html -->
-
 <!-- templates/upload.html -->
 
 <!DOCTYPE html>
@@ -81,9 +78,14 @@ OTHER:
       <!-- Uploaded Files Table -->
       <div class="overflow-x-auto bg-white shadow-sm border rounded-lg">
         <table id="uploaded-files-table" class="min-w-full text-sm text-left">
-          <thead class="bg-gray-100 text-xs text-gray-700 uppercase">
-            <tr class="cursor-pointer">
-              <th class="px-4 py-3" onclick="sortTable(0)">File Name</th>
+          
+<script>
+  let currentSortIndex = null;
+  let currentSortDir = 'asc';
+</script>
+              <th class="px-4 py-3 flex items-center gap-1" onclick="sortTable($1, this)">$2
+  <span class="sort-icon">⇅</span>
+</th>
               <th class="px-4 py-3" onclick="sortTable(1)">Upload Source</th>
               <th class="px-4 py-3" onclick="sortTable(2)">Type</th>
               <th class="px-4 py-3" onclick="sortTable(3)">Size</th>
@@ -183,7 +185,16 @@ OTHER:
       }
     }
 
-    function sortTable(n) {
+    function sortTable(n, th) {
+  const headers = document.querySelectorAll('#uploaded-files-table th');
+  headers.forEach(header => header.querySelector('.sort-icon').textContent = '⇅');
+  if (currentSortIndex === n) {
+    currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    currentSortIndex = n;
+    currentSortDir = 'asc';
+  }
+  th.querySelector('.sort-icon').textContent = currentSortDir === 'asc' ? '↑' : '↓';
       const table = document.getElementById("uploaded-files-table");
       let switching = true, dir = "asc", switchcount = 0;
       while (switching) {
@@ -212,3 +223,4 @@ OTHER:
   </script>
 </body>
 </html>
+

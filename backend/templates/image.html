@@ -1,0 +1,129 @@
+<!-- templates/image.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Image Analysis</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-full md:w-1/4 lg:w-1/5 border-r bg-white">
+      {% include 'navbar.html' %}
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 overflow-x-auto">
+      <h1 class="text-3xl font-bold mb-4">🖼️ Image Analysis</h1>
+      <p class="text-lg text-gray-600 mb-6">Upload an image, select a model, and stream the visual analysis.</p>
+
+      <form id="image-form" class="space-y-6" method="POST" enctype="multipart/form-data" x-data="{ selected: '{{ default_image_model }}', disabled: false, preview: null }">
+
+        <!-- Image Upload -->
+        <div class="relative border-2 border-dashed border-gray-300 p-6 rounded-lg text-center hover:border-gray-400 transition-all cursor-pointer"
+             @dragover.prevent
+             @drop.prevent="preview = URL.createObjectURL($event.dataTransfer.files[0]); $refs.imageFile.files = $event.dataTransfer.files">
+          <input x-ref="imageFile" id="image" name="image" type="file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                 @change="preview = $event.target.files.length ? URL.createObjectURL($event.target.files[0]) : null">
+          <template x-if="preview">
+            <img :src="preview" alt="Preview" class="mx-auto h-48 object-contain rounded mb-2" />
+          </template>
+          <template x-if="!preview">
+            <div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4-4m0 0l-4 4m4-4v12"/>
+              </svg>
+              <p class="mt-2 text-sm text-gray-600">Drag & drop an image or click to upload</p>
+            </div>
+          </template>
+        </div>
+
+        <!-- Model Selector -->
+        <div :class="{ 'opacity-50 pointer-events-none': disabled }" id="model-select">
+          <label class="block text-lg font-semibold mb-2">Select Model:</label>
+          <div class="flex flex-wrap gap-4">
+            {% for model in allowed_models %}
+            <label
+              :class="selected === '{{ model }}' ? 'border-2 border-gray-400 bg-gray-100' : 'border border-gray-300'"
+              class="rounded-lg p-4 flex-1 cursor-pointer hover:bg-gray-50 transition-all"
+              @click="if (!disabled) selected = '{{ model }}'">
+              <input type="radio" name="models" value="{{ model }}" class="sr-only" :checked="selected === '{{ model }}'" />
+              <div class="font-semibold text-lg">{{ model | capitalize }}</div>
+              <div class="text-sm text-gray-500">Ollama Image Model</div>
+            </label>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="models" :value="selected">
+        </div>
+
+        <!-- Analyze Button -->
+        <button type="submit" id="analyze-button"
+          class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold text-lg py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="!preview">Analyze</button>
+      </form>
+
+      <!-- Results -->
+      <div id="results" class="mt-10 space-y-4"></div>
+    </main>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    function sanitizeModelName(name) {
+      return name.replace(/\./g, "").replace(/:/g, "");
+    }
+
+    const analyzeButton = document.getElementById("analyze-button");
+    const form = document.getElementById("image-form");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const selectedModel = formData.get("models");
+      const resultsDiv = document.getElementById("results");
+      const safeModelId = sanitizeModelName(selectedModel);
+
+      const card = document.createElement("div");
+      card.className = "card border rounded-lg shadow";
+      card.id = `card-${safeModelId}`;
+      card.innerHTML = `
+        <div class="p-4 border-b font-semibold">Response from ${selectedModel}</div>
+        <div class="p-4 text-base text-gray-800" id="response-${safeModelId}">Loading...</div>
+      `;
+      resultsDiv.innerHTML = "";
+      resultsDiv.appendChild(card);
+
+      form.querySelectorAll("input, button").forEach(el => el.disabled = true);
+      form.querySelector("#model-select").classList.add("opacity-50", "pointer-events-none");
+
+      fetch("/analyze-image", {
+        method: "POST",
+        body: formData
+      }).then(async (res) => {
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let responseText = "";
+        const responseEl = document.getElementById(`response-${safeModelId}`);
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          responseText += chunk;
+          responseEl.textContent = responseText;
+        }
+
+        form.querySelectorAll("input, button").forEach(el => el.disabled = false);
+        form.querySelector("#model-select").classList.remove("opacity-50", "pointer-events-none");
+      }).catch((err) => {
+        console.error("Streaming failed:", err);
+      });
+    });
+  </script>
+</body>
+</html>

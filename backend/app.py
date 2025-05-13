@@ -401,12 +401,20 @@ def ask():
         file.save(uploaded_path)
 
     # 🧠 Extract + split uploaded file content
-    uploaded_text = extract_text_from_file(uploaded_path)
-    if uploaded_text:
-        from langchain.text_splitter import RecursiveCharacterTextSplitter
-        splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
-        dynamic_chunks = splitter.split_text(uploaded_text)
-        print(f"🟡 Extracted {len(dynamic_chunks)} chunks from uploaded file.")
+    uploaded_path = None
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        uploaded_path = os.path.join(UPLOAD_FOLDER_RAG, filename)
+        file.save(uploaded_path)
+
+    # 🧠 Extract + split uploaded file content only if uploaded_path exists
+    if uploaded_path:
+        uploaded_text = extract_text_from_file(uploaded_path)    
+        if uploaded_text:
+            from langchain.text_splitter import RecursiveCharacterTextSplitter
+            splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+            dynamic_chunks = splitter.split_text(uploaded_text)
+            print(f"🟡 Extracted {len(dynamic_chunks)} chunks from uploaded file.")
 
     # 🧠 Embed and select top 10 chunks
     if dynamic_chunks:

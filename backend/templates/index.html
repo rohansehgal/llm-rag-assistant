@@ -123,7 +123,7 @@
           card.id = `card-${safeModelId}`;
           card.innerHTML = `
             <div class="p-4 border-b font-semibold">Response from ${model}</div>
-            <div class="p-4 text-base text-gray-800" id="response-${safeModelId}">${answer}</div>
+<div class="p-4 text-base text-gray-800 prose max-w-none" id="response-${safeModelId}">${answer}</div>
           `;
           resultsDiv.appendChild(card);
         });
@@ -143,7 +143,7 @@
       card.id = `card-${safeModelId}`;
       card.innerHTML = `
         <div class="p-4 border-b font-semibold">Response from ${selectedModel}</div>
-        <div class="p-4 text-base text-gray-800" id="response-${safeModelId}">Loading...</div>
+  <div class="p-4 text-base text-gray-800 prose max-w-none" id="response-${safeModelId}">Loading...</div>
       `;
       resultsDiv.innerHTML = "";
       resultsDiv.appendChild(card);
@@ -174,7 +174,7 @@
           if (done) break;
           const chunk = decoder.decode(value, { stream: true });
           responseText += chunk;
-          responseEl.textContent = responseText;
+          responseEl.innerHTML = responseText;
         }
 
         const updated = JSON.parse(localStorage.getItem("responses") || "{}");

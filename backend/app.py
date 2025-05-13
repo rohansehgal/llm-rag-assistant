@@ -25,6 +25,9 @@ from docx import Document
 import json
 import subprocess
 
+import markdown
+
+
 
 
 # app creation
@@ -516,8 +519,11 @@ def ask():
                 time.sleep(0.01)  # 💤 Optional: Tiny delay to flush buffer
 
             # Save full response after stream ends
-            cache[key] = collected
+            # Convert to HTML after full stream
+            html_response = markdown.markdown(collected)
+            cache[key] = html_response
             save_cache(cache)
+            print("✅ Streaming complete. Final response:")
 
             save_stat({
                 "question": prompt,

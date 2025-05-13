@@ -170,12 +170,22 @@
         const responseEl = document.getElementById(`response-${safeModelId}`);
 
         while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          responseText += chunk;
-          responseEl.innerHTML = responseText;
-        }
+  const { done, value } = await reader.read();
+  if (done) break;
+  const chunk = decoder.decode(value, { stream: true });
+  responseText += chunk;
+  responseEl.textContent = responseText; // render raw markdown during stream
+}
+
+// 🎯 Overwrite with final rendered HTML after streaming
+const cacheResponse = await fetch("/cache", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ prompt: promptInput.value.trim(), model: selectedModel })
+});
+const final = await cacheResponse.json();
+responseEl.innerHTML = final.answer;
+
 
         const updated = JSON.parse(localStorage.getItem("responses") || "{}");
         updated[selectedModel] = responseText;

@@ -648,6 +648,17 @@ def rebuild_index():
         return jsonify({"status": "error", "message": "❌ Internal error occurred."})
 
 
+@app.route("/cache", methods=["POST"])
+def get_cached_response():
+    data = request.get_json()
+    prompt = data.get("prompt", "").strip()
+    model = data.get("model", "").strip()
+    key = f"{prompt}|{model}"
+    cache = load_cache()
+    return jsonify({
+        "answer": cache.get(key, "[No cached response]")
+    })
+
 
 
 

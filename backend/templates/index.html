@@ -222,5 +222,42 @@ responseEl.innerHTML = final.answer;
     lucide.createIcons();
   </script>
   
+  <!-- 🔧 Project Creation Modal -->
+<div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-xl shadow border border-gray-200 bg-white">
+
+      <div class="modal-header border-b px-4 py-3">
+        <h5 class="modal-title text-lg font-semibold text-gray-800" id="projectModalLabel">Create New Project</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body px-4 py-4">
+        <label for="projectNameInput" class="block text-sm font-medium text-gray-700 mb-1">Project name</label>
+        <input type="text" id="projectNameInput" class="form-control w-full rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+               placeholder="e.g. Risk Audit 2025" />
+
+        <p class="text-xs text-gray-500 mt-2">
+          Projects help organize your documents and instructions into a step-by-step workflow.
+        </p>
+      </div>
+
+      <div class="modal-footer border-t px-4 py-3 flex justify-end gap-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-sm bg-gray-900 text-white hover:bg-gray-800 px-4 py-2 rounded-md"
+                onclick="createProject()">Create Project</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  function openProjectModal() {
+    const modal = new bootstrap.Modal(document.getElementById('projectModal'));
+    modal.show();
+  }
+</script>
+
 </body>
 </html>

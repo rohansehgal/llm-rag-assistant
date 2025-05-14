@@ -16,6 +16,7 @@
     <div class="p-4 text-2xl font-bold mb-6">SecureAI</div>
 
     <nav class="space-y-2 px-4">
+      <!-- Home, Upload, etc. -->
       <a href="/" @click="open = false" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-200 transition-all {% if active_page == 'home' %}bg-gray-200{% endif %}">
         <i data-lucide="home" class="w-5 h-5 text-gray-600"></i>
         <span>Home</span>
@@ -36,7 +37,19 @@
         <i data-lucide="image" class="w-5 h-5 text-gray-600"></i>
         <span>Image Analysis</span>
       </a>
+    
+      <!-- 🔹 Projects Section -->
+      <div class="flex items-center justify-between px-3 py-2 text-gray-700 font-medium">
+        <span>📁 Projects</span>
+        <button class="text-gray-500 hover:text-gray-800" title="Create New Project" onclick="openProjectModal()">
+          <i data-lucide="plus" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="project-list" class="space-y-1 ps-6">
+        <!-- Dynamic project links will be inserted here -->
+      </div>
     </nav>
+    
   </aside>
 </div>
 

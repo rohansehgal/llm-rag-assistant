@@ -26,6 +26,7 @@ import json
 import subprocess
 
 import markdown
+import re
 
 
 
@@ -53,6 +54,15 @@ MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
 CACHE_FILE = "query_cache.json"
 # Configuration file path
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "..", "config.json")
+
+# Project root path
+PROJECTS_DIR = os.path.join(BASE_DIR, "projects")
+os.makedirs(PROJECTS_DIR, exist_ok=True)
+
+def slugify(name):
+    """Convert a project name to a safe folder name"""
+    return re.sub(r'[^a-zA-Z0-9\-]', '-', name.strip().lower()).replace(' ', '-')
+
 
 def load_config():
     """Load settings from config.json"""
@@ -319,6 +329,44 @@ def settings():
         image_exts=".jpg, .jpeg, .png",
         active_page="settings"
     )
+
+
+@app.route("/projects", methods=["POST"])
+def create_project():
+    data = request.get_json()
+    name = data.get("name", "").strip()
+
+    if not name:
+        return jsonify({"success": False, "error": "Project name is required"}), 400
+
+    slug = slugify(name)
+    project_path = os.path.join(PROJECTS_DIR, slug)
+
+    if os.path.exists(project_path):
+        return jsonify({"success": False, "error": "A project with this name already exists"}), 409
+
+    # Create subfolders
+    os.makedirs(os.path.join(project_path, "files"), exist_ok=True)
+    os.makedirs(os.path.join(project_path, "outputs"), exist_ok=True)
+
+    # Load global model config (if available)
+    config = load_config()
+    default_text_model = config.get("default_text_model", "llama3")
+    default_image_model = config.get("default_image_model", "bakllava")
+
+    metadata = {
+        "name": name,
+        "slug": slug,
+        "created_at": datetime.now().isoformat(),
+        "text_model": default_text_model,
+        "image_model": default_image_model
+    }
+
+    with open(os.path.join(project_path, "metadata.json"), "w") as f:
+        json.dump(metadata, f, indent=2)
+
+    print(f"✅ Project created: {name} → {slug}")
+    return jsonify({"success": True, "slug": slug})
 
 
 

@@ -14,7 +14,7 @@ function createProject() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          window.location.href = `/project/${encodeURIComponent(name)}`;
+            window.location.href = `/project/${encodeURIComponent(data.slug)}`;
         } else {
           alert(data.error || "Project creation failed.");
         }

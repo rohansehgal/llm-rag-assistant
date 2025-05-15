@@ -1,3 +1,7 @@
+console.log("✅ project_sidebar.js loaded");
+const list = document.getElementById("project-list");
+console.log("✅ project-list element:", list);
+
 document.addEventListener("alpine:init", () => {
     Alpine.effect(() => {
       const list = document.getElementById("project-list");

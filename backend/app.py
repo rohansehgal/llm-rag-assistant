@@ -31,14 +31,7 @@ import re
 
 
 
-# app creation
-app = Flask(
-    __name__,
-    template_folder="templates",
-    static_folder="static",
-    static_url_path="/static"
-)
-app.secret_key = 'your_secret_key'
+
 
 # configurations
 executor = ThreadPoolExecutor(max_workers=3)  # You can adjust the number of workers as needed
@@ -59,6 +52,15 @@ CONFIG_FILE = os.path.join(os.path.dirname(__file__), "..", "config.json")
 # Project root path
 PROJECTS_DIR = os.path.join(BASE_DIR, "projects")
 os.makedirs(PROJECTS_DIR, exist_ok=True)
+
+# app creation
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "backend", "templates"),
+    static_folder=os.path.join(BASE_DIR, "static"),
+    static_url_path="/static"
+)
+app.secret_key = 'your_secret_key'
 
 def slugify(name):
     """Convert a project name to a safe folder name"""

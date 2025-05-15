@@ -387,6 +387,20 @@ def list_projects():
 
     return jsonify(results)
 
+@app.route("/project/<slug>")
+def project_dashboard(slug):
+    """Render the project dashboard UI"""
+    project_path = os.path.join(PROJECTS_DIR, slug)
+    meta_path = os.path.join(project_path, "metadata.json")
+
+    if not os.path.exists(meta_path):
+        return "Project not found", 404
+
+    with open(meta_path) as f:
+        metadata = json.load(f)
+
+    return render_template("project.html", project_name=metadata["name"], project_slug=slug)
+
 
 
 @app.route("/", methods=["GET"])

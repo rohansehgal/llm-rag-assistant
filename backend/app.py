@@ -368,6 +368,25 @@ def create_project():
     print(f"✅ Project created: {name} → {slug}")
     return jsonify({"success": True, "slug": slug})
 
+@app.route("/projects", methods=["GET"])
+def list_projects():
+    """Return all available projects (for the sidebar)"""
+    results = []
+
+    for slug in os.listdir(PROJECTS_DIR):
+        project_path = os.path.join(PROJECTS_DIR, slug)
+        meta_path = os.path.join(project_path, "metadata.json")
+
+        if os.path.isdir(project_path) and os.path.exists(meta_path):
+            with open(meta_path) as f:
+                meta = json.load(f)
+                results.append({
+                    "name": meta.get("name", slug),
+                    "slug": slug
+                })
+
+    return jsonify(results)
+
 
 
 @app.route("/", methods=["GET"])

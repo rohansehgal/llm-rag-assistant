@@ -1,0 +1,80 @@
+<!-- 🔹 Project Instructions Section -->
+<section class="bg-white border rounded-lg shadow p-6 mb-8">
+    <h2 class="text-xl font-semibold mb-1 flex items-center gap-2">
+      <i data-lucide="clipboard-list" class="w-5 h-5 text-gray-600"></i>
+      Project Instructions
+    </h2>
+    <p class="text-sm text-gray-500 mb-6">Define and run step-by-step tasks for this project.</p>
+  
+    <!-- Accordion Wrapper -->
+    <div x-data="{ open: 'none' }" class="space-y-4">
+  
+      <!-- Step 1: Plan -->
+      <div class="border rounded-md">
+        <button @click="open = open === 'plan' ? null : 'plan'"
+                class="flex justify-between items-center w-full px-4 py-3 text-left text-base font-medium hover:bg-gray-50">
+          <span class="flex items-center gap-2">
+            Plan
+            <span class="text-xs font-semibold bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Completed</span>
+          </span>
+          <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transform"
+             :class="{ 'rotate-180': open === 'plan' }"></i>
+        </button>
+        <div x-show="open === 'plan'" x-collapse class="border-t px-4 py-4 space-y-4 text-sm text-gray-800">
+          <div>Instruction goes here (e.g., summarize key risks in site notes)</div>
+          <div class="flex justify-between items-center">
+            <button class="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+              <i data-lucide="pencil" class="w-4 h-4"></i> Edit Instructions
+            </button>
+            <button class="flex items-center gap-2 px-4 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800">
+              <i data-lucide="play" class="w-4 h-4"></i> Generate Plan
+            </button>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Step 2: Write -->
+      <div class="border rounded-md">
+        <button @click="open = open === 'write' ? null : 'write'"
+                class="flex justify-between items-center w-full px-4 py-3 text-left text-base font-medium hover:bg-gray-50">
+          <span>Write</span>
+          <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transform"
+             :class="{ 'rotate-180': open === 'write' }"></i>
+        </button>
+        <div x-show="open === 'write'" x-collapse class="border-t px-4 py-4 space-y-4 text-sm text-gray-800">
+          <textarea class="w-full border rounded-md p-2 text-sm" placeholder="Write instruction..."></textarea>
+          <div class="flex justify-between items-center">
+            <button class="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+              <i data-lucide="plus" class="w-4 h-4"></i> Add Write Instructions
+            </button>
+            <button class="flex items-center gap-2 px-4 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800">
+              <i data-lucide="play" class="w-4 h-4"></i> Generate Write
+            </button>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Step 3: Check -->
+      <div class="border rounded-md">
+        <button @click="open = open === 'check' ? null : 'check'"
+                class="flex justify-between items-center w-full px-4 py-3 text-left text-base font-medium hover:bg-gray-50">
+          <span>Check</span>
+          <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transform"
+             :class="{ 'rotate-180': open === 'check' }"></i>
+        </button>
+        <div x-show="open === 'check'" x-collapse class="border-t px-4 py-4 space-y-4 text-sm text-gray-800">
+          <textarea class="w-full border rounded-md p-2 text-sm" placeholder="Check instruction..."></textarea>
+          <div class="flex justify-between items-center">
+            <button class="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+              <i data-lucide="plus" class="w-4 h-4"></i> Add Check Instructions
+            </button>
+            <button class="flex items-center gap-2 px-4 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800">
+              <i data-lucide="play" class="w-4 h-4"></i> Generate Check
+            </button>
+          </div>
+        </div>
+      </div>
+  
+    </div>
+  </section>
+  

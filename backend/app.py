@@ -405,6 +405,23 @@ def project_dashboard(slug):
     return render_template("project.html", project_name=metadata["name"], project_slug=slug)
 
 
+@app.route("/project/<slug>/instructions")
+def get_instructions(slug):
+    path = os.path.join("projects", slug, "instructions.json")
+    if not os.path.exists(path):
+        return jsonify({})
+    with open(path) as f:
+        return jsonify(json.load(f))
+
+
+@app.route("/project/<slug>/instructions", methods=["POST"])
+def save_instructions(slug):
+    data = request.get_json()
+    path = os.path.join("projects", slug, "instructions.json")
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2)
+    return jsonify({"status": "success"})
+
 
 @app.route("/", methods=["GET"])
 def index():

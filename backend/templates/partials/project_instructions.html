@@ -9,29 +9,85 @@
     <!-- Accordion Wrapper -->
     <div x-data="{ open: 'none' }" class="space-y-4">
   
-      <!-- Step 1: Plan -->
-      <div class="border rounded-md">
-        <button @click="open = open === 'plan' ? null : 'plan'"
-                class="flex justify-between items-center w-full px-4 py-3 text-left text-base font-medium hover:bg-gray-50">
-          <span class="flex items-center gap-2">
-            Plan
-            <span class="text-xs font-semibold bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Completed</span>
-          </span>
-          <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transform"
-             :class="{ 'rotate-180': open === 'plan' }"></i>
+<!-- Step 1: Plan -->
+<div class="border rounded-md">
+    <button @click="open = open === 'plan' ? null : 'plan'"
+            class="flex justify-between items-center w-full px-4 py-3 text-left text-base font-medium hover:bg-gray-50">
+      <span>Plan</span>
+      <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transform"
+         :class="{ 'rotate-180': open === 'plan' }"></i>
+    </button>
+  
+    <div x-show="open === 'plan'" x-collapse class="border-t px-4 py-4 text-sm text-gray-800"
+         x-data="{
+           mode: 'view',
+           value: '',
+           saved: false,
+           load() {
+             fetch(`/project/{{ project_slug }}/instructions`)
+               .then(res => res.json())
+               .then(data => {
+                 this.value = data.plan || '';
+                 this.saved = !!this.value;
+               });
+           },
+           save() {
+             fetch(`/project/{{ project_slug }}/instructions`, {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({ plan: this.value })
+             }).then(res => res.json())
+               .then(res => {
+                 if (res.status === 'success') {
+                   this.saved = true;
+                   this.mode = 'view';
+                 }
+               });
+           }
+         }"
+         x-init="load()"
+         class="space-y-3"
+    >
+  
+      <!-- Add Button -->
+      <template x-if="!saved && mode === 'view'">
+        <button @click="mode = 'edit'" class="border rounded px-4 py-2 text-sm flex items-center gap-2">
+          <i data-lucide='plus' class="w-4 h-4"></i> Add Plan Instructions
         </button>
-        <div x-show="open === 'plan'" x-collapse class="border-t px-4 py-4 space-y-4 text-sm text-gray-800">
-          <div>Instruction goes here (e.g., summarize key risks in site notes)</div>
-          <div class="flex justify-between items-center">
-            <button class="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-              <i data-lucide="pencil" class="w-4 h-4"></i> Edit Instructions
-            </button>
-            <button class="flex items-center gap-2 px-4 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800">
-              <i data-lucide="play" class="w-4 h-4"></i> Generate Plan
+      </template>
+  
+      <!-- Edit Mode -->
+      <template x-if="mode === 'edit'">
+        <div>
+          <textarea x-model="value" rows="5" class="w-full border rounded p-2 mb-3" placeholder="Enter Plan instructions..."></textarea>
+          <div class="flex justify-end gap-2">
+            <button @click="mode = 'view'" class="px-4 py-2 border text-sm rounded-md">Cancel</button>
+            <button @click="save()" class="px-4 py-2 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800">
+              <i data-lucide="save" class="w-4 h-4 mr-1"></i> Save
             </button>
           </div>
         </div>
-      </div>
+      </template>
+  
+      <!-- View Mode -->
+      <template x-if="saved && mode === 'view'">
+        <div class="space-y-3">
+          <div class="bg-gray-50 border border-gray-200 p-3 rounded text-sm whitespace-pre-wrap">
+            <span x-text="value"></span>
+          </div>
+          <div class="flex justify-between">
+            <button @click="mode = 'edit'" class="flex items-center gap-1 text-sm border px-3 py-1 rounded">
+              <i data-lucide="pencil" class="w-4 h-4"></i> Edit Instructions
+            </button>
+            <button class="flex items-center gap-1 bg-black text-white text-sm px-3 py-1 rounded">
+              <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Generate Plan
+            </button>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+  
   
       <!-- Step 2: Write -->
       <div class="border rounded-md">

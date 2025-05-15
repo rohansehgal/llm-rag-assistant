@@ -44,7 +44,7 @@
     <i data-lucide="folder" class="w-5 h-5 text-gray-600 group-hover:text-gray-800"></i>
     <span>Projects</span>
   </div>
-  <button class="text-gray-500 hover:text-gray-800" title="Create New Project" onclick="openProjectModal()">
+  <button class="text-gray-500 hover:text-gray-800" title="Create New Project" @click="$dispatch('open-project-modal')">
     <i data-lucide="plus" class="w-4 h-4"></i>
   </button>
 </div>

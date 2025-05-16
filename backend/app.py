@@ -1,7 +1,7 @@
 # Imports 
 from concurrent.futures import ThreadPoolExecutor
 import functools
-from flask import Flask, request, render_template, redirect, url_for, flash, jsonify, send_from_directory
+from flask import Flask, request, render_template, redirect, url_for, flash, jsonify, send_from_directory, abort
 # ✅ NEW: Required for streaming responses from Flask
 from flask import Response, stream_with_context
 
@@ -858,6 +858,20 @@ def get_cached_response():
         "answer": cache.get(key, "[No cached response]")
     })
 
+
+@app.route("/project/<slug>/files/<filename>")
+def serve_project_file(slug, filename):
+    """Serve project-uploaded files using the same logic as the upload route."""
+    # Sanitize filename to prevent path traversal
+    safe_filename = secure_filename(filename)
+
+    file_dir = os.path.join("projects", slug, "files")
+    full_path = os.path.join(file_dir, safe_filename)
+
+    if not os.path.exists(full_path):
+        abort(404)
+
+    return send_from_directory(file_dir, safe_filename)
 
 
 

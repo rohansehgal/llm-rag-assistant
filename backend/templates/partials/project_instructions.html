@@ -13,7 +13,12 @@
 <div class="border rounded-md">
     <button @click="open = open === 'plan' ? null : 'plan'"
             class="flex justify-between items-center w-full px-4 py-3 text-left text-base font-medium hover:bg-gray-50">
-      <span>Plan</span>
+            <div class="flex items-center gap-2">
+              <span>Plan</span>
+              <span x-show="saved" class="text-green-700 text-xs bg-green-100 font-medium px-2 py-0.5 rounded-full">
+                Completed
+              </span>
+            </div>
       <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transform"
          :class="{ 'rotate-180': open === 'plan' }"></i>
     </button>

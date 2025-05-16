@@ -417,10 +417,27 @@ def get_instructions(slug):
 @app.route("/project/<slug>/instructions", methods=["POST"])
 def save_instructions(slug):
     data = request.get_json()
-    path = os.path.join("projects", slug, "instructions.json")
-    with open(path, "w") as f:
-        json.dump(data, f, indent=2)
+    if not data:
+        return jsonify({"status": "error", "message": "Missing JSON payload"}), 400
+
+    project_path = os.path.join("projects", slug)
+    instructions_path = os.path.join(project_path, "instructions.json")
+
+    # Load existing instructions if file exists
+    instructions = {}
+    if os.path.exists(instructions_path):
+        with open(instructions_path, "r") as f:
+            instructions = json.load(f)
+
+    # Merge new key(s) into existing dict
+    instructions.update(data)
+
+    # Save merged version back to disk
+    with open(instructions_path, "w") as f:
+        json.dump(instructions, f, indent=2)
+
     return jsonify({"status": "success"})
+
 
 
 @app.route("/", methods=["GET"])

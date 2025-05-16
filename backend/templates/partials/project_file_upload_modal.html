@@ -1,0 +1,94 @@
+<!-- Project File Upload Modal -->
+<div x-data="{ showUploadModal: false, selectedCategory: '', fileName: '', fileSize: '', file: null }">
+
+    <!-- Upload Button -->
+    <div class="flex justify-end mb-4">
+      <button
+        @click="showUploadModal = true"
+        class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition flex items-center gap-2"
+      >
+        <i data-lucide="plus" class="w-4 h-4"></i> Upload File
+      </button>
+    </div>
+  
+    <!-- Modal Backdrop -->
+    <div
+      x-show="showUploadModal"
+      class="fixed inset-0 bg-black bg-opacity-30 z-40"
+    ></div>
+  
+    <!-- Upload Modal -->
+    <div
+      x-show="showUploadModal"
+      class="fixed inset-0 z-50 flex items-center justify-center"
+    >
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 relative">
+        <!-- Close button -->
+        <button @click="showUploadModal = false" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+  
+        <h2 class="text-xl font-semibold mb-4">Upload File</h2>
+        <p class="text-sm text-gray-500 mb-4">Upload a file and tag it appropriately.</p>
+  
+        <!-- File Category Selection -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <label class="flex items-center gap-2">
+            <input type="radio" name="category" value="Site Notes" x-model="selectedCategory" />
+            Site Notes
+          </label>
+          <label class="flex items-center gap-2">
+            <input type="radio" name="category" value="Gap Analysis" x-model="selectedCategory" />
+            Gap Analysis
+          </label>
+          <label class="flex items-center gap-2">
+            <input type="radio" name="category" value="Recommendations" x-model="selectedCategory" />
+            Recommendations
+          </label>
+          <label class="flex items-center gap-2">
+            <input type="radio" name="category" value="Template" x-model="selectedCategory" />
+            Template
+          </label>
+        </div>
+  
+        <!-- Upload File Input -->
+        <form id="projectUploadForm" method="POST" action="/upload-project-file" enctype="multipart/form-data">
+          <input type="hidden" name="project_name" value="{{ project_name }}" />
+          <input type="hidden" name="category" :value="selectedCategory" />
+  
+          <label
+            for="project-file"
+            class="block border-dashed border-2 border-gray-300 p-6 text-center cursor-pointer rounded hover:bg-gray-50"
+          >
+            <input type="file" id="project-file" name="file" class="hidden"
+                   @change="
+                     file = $event.target.files[0];
+                     fileName = file.name;
+                     fileSize = (file.size / 1024).toFixed(1) + ' KB';
+                   "
+            />
+            <div x-show="!fileName">
+              <i data-lucide="upload" class="w-6 h-6 mx-auto text-gray-500 mb-2"></i>
+              <p class="text-sm text-gray-600">Drag and drop a file, or click to browse</p>
+              <p class="text-xs text-gray-400 mt-1">Supports PDF, DOCX, XLSX, JPG, PNG</p>
+            </div>
+            <div x-show="fileName" class="text-left text-sm">
+              <p><strong x-text="fileName"></strong> <span class="text-gray-400 ml-2" x-text="fileSize"></span></p>
+            </div>
+          </label>
+  
+          <!-- Modal Actions -->
+          <div class="mt-6 flex justify-end gap-2">
+            <button type="button" class="px-4 py-2 text-gray-700" @click="showUploadModal = false">Cancel</button>
+            <button type="submit"
+                    class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition"
+                    :disabled="!file || !selectedCategory"
+            >
+              Upload
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  

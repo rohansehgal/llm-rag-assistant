@@ -27,11 +27,17 @@
       <!-- 🔹 Project Title -->
       <h1 class="text-3xl font-semibold mb-2">{{ project_name }}</h1>
       <p class="text-sm text-gray-500 mb-6">Manage instructions, files, and outputs for this project.</p>
+            <!-- 🔹 Project File Upload  -->
+
+      {% include 'partials/project_file_upload_modal.html' %}
 
       <!-- 🔸 Project Instructions -->
       {% include 'partials/project_instructions.html' %}
 
       <!-- 🔸 Project Files section will go here later -->
+
+      {% include 'partials/project_file_table.html' %}
+      
 
     </main>
   </div>

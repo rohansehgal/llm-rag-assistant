@@ -438,6 +438,56 @@ def save_instructions(slug):
 
     return jsonify({"status": "success"})
 
+@app.route("/upload-project-file", methods=["POST"])
+def upload_project_file():
+    file = request.files.get("file")
+    project_name = request.form.get("project_name", "").strip()
+    category = request.form.get("category", "").strip()
+
+    if not file or not project_name or not category:
+        return "Missing file or form fields", 400
+
+    # Convert project name to slug
+    slug = re.sub(r'[^a-zA-Z0-9\-]', '-', project_name.lower()).replace(" ", "-")
+    project_dir = os.path.join("projects", slug)
+    file_dir = os.path.join(project_dir, "files")
+    os.makedirs(file_dir, exist_ok=True)
+
+    filename = secure_filename(file.filename)
+    save_path = os.path.join(file_dir, filename)
+    file.save(save_path)
+
+    # Prepare manifest entry
+    manifest_path = os.path.join(file_dir, "manifest.json")
+    metadata = []
+
+    if os.path.exists(manifest_path):
+        with open(manifest_path, "r") as f:
+            metadata = json.load(f)
+
+    metadata.append({
+        "filename": filename,
+        "category": category,
+        "size_kb": round(os.path.getsize(save_path) / 1024, 1),
+        "uploaded_at": datetime.now().isoformat()
+    })
+
+    with open(manifest_path, "w") as f:
+        json.dump(metadata, f, indent=2)
+
+    print(f"✅ Uploaded {filename} to {slug} as '{category}'")
+    return redirect(f"/project/{slug}")
+
+@app.route("/project/<slug>/files")
+def list_project_files(slug):
+    file_dir = os.path.join("projects", slug, "files")
+    manifest_path = os.path.join(file_dir, "manifest.json")
+
+    if not os.path.exists(manifest_path):
+        return jsonify([])
+
+    with open(manifest_path, "r") as f:
+        return jsonify(json.load(f))
 
 
 @app.route("/", methods=["GET"])

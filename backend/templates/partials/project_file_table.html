@@ -1,0 +1,55 @@
+<!-- Uploaded Project Files Table -->
+<div x-data="{
+    files: [],
+    filter: 'All',
+    fetchFiles() {
+      fetch(`/project/{{ project_slug }}/files`)
+        .then(res => res.json())
+        .then(data => this.files = data);
+    }
+  }" x-init="fetchFiles()" class="mt-8">
+  
+    <!-- Filter Tabs -->
+    <div class="flex gap-2 mb-4 text-sm font-medium">
+      <template x-for="type in ['All', 'Site Notes', 'Gap Analysis', 'Recommendations', 'Template']" :key="type">
+        <button
+          @click="filter = type"
+          class="px-3 py-1 rounded-full"
+          :class="filter === type ? 'bg-black text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+          x-text="type"
+        ></button>
+      </template>
+    </div>
+  
+    <!-- Table -->
+    <div class="overflow-auto rounded-lg shadow border border-gray-200 bg-white">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-left text-gray-600 uppercase text-xs">
+          <tr>
+            <th class="px-4 py-2 font-medium">File Name</th>
+            <th class="px-4 py-2 font-medium">Category</th>
+            <th class="px-4 py-2 font-medium">Size</th>
+            <th class="px-4 py-2 font-medium">Uploaded</th>
+            <th class="px-4 py-2 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="file in files.filter(f => filter === 'All' || f.category === filter)" :key="file.filename">
+            <tr class="border-t">
+              <td class="px-4 py-2 text-gray-800" x-text="file.filename"></td>
+              <td class="px-4 py-2 text-gray-600" x-text="file.category"></td>
+              <td class="px-4 py-2 text-gray-600" x-text="file.size_kb + ' KB'"></td>
+              <td class="px-4 py-2 text-gray-600" x-text="new Date(file.uploaded_at).toLocaleString()"></td>
+              <td class="px-4 py-2">
+                <a :href="`/project/{{ project_slug }}/files/${file.filename}`" target="_blank" class="text-blue-600 hover:underline text-sm mr-2">
+                  View
+                </a>
+                <button class="text-red-600 hover:underline text-sm">Delete</button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  

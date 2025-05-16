@@ -488,6 +488,37 @@ def list_project_files(slug):
 
     with open(manifest_path, "r") as f:
         return jsonify(json.load(f))
+    
+    
+@app.route("/project/<slug>/delete-file", methods=["POST"])
+def delete_project_file(slug):
+    data = request.get_json()
+    filename = data.get("filename")
+
+    if not filename:
+        return jsonify({"status": "error", "message": "Filename required"}), 400
+
+    file_dir = os.path.join("projects", slug, "files")
+    file_path = os.path.join(file_dir, filename)
+    manifest_path = os.path.join(file_dir, "manifest.json")
+
+    # Delete the file
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    else:
+        return jsonify({"status": "error", "message": "File not found"}), 404
+
+    # Update manifest
+    if os.path.exists(manifest_path):
+        with open(manifest_path, "r") as f:
+            data = json.load(f)
+        data = [entry for entry in data if entry["filename"] != filename]
+        with open(manifest_path, "w") as f:
+            json.dump(data, f, indent=2)
+
+    print(f"🗑️ Deleted {filename} from project: {slug}")
+    return jsonify({"status": "success"})
+
 
 
 @app.route("/", methods=["GET"])

@@ -60,12 +60,16 @@
             for="project-file"
             class="block border-dashed border-2 border-gray-300 p-6 text-center cursor-pointer rounded hover:bg-gray-50"
           >
-            <input type="file" id="project-file" name="file" class="hidden"
-                   @change="
-                     file = $event.target.files[0];
-                     fileName = file.name;
-                     fileSize = (file.size / 1024).toFixed(1) + ' KB';
-                   "
+            <input type="file" id="project-file" name="file" class="hidden" accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png"
+            @change="
+            const f = $event.target.files[0];
+            if (f) {
+              file = f;
+              fileName = f.name;
+              fileSize = (f.size / 1024).toFixed(1) + ' KB';
+            }
+          "
+          
             />
             <div x-show="!fileName">
               <i data-lucide="upload" class="w-6 h-6 mx-auto text-gray-500 mb-2"></i>

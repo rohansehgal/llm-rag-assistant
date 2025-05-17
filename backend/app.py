@@ -40,6 +40,7 @@ INDEX_PATH = os.path.join(APP_DIR, "vector_index.faiss")
 CHUNKS_PATH = os.path.join(APP_DIR, "chunks.pkl")
 STATS_FILE = "stats.json"
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+PROJECTS_DIR = os.path.join(BASE_DIR, "projects")
 UPLOAD_FOLDER_FILES = os.path.join(BASE_DIR, "uploads", "files")
 UPLOAD_FOLDER_RAG = os.path.join(BASE_DIR, "uploads", "rag")
 UPLOAD_FOLDER_IMAGES = os.path.join(BASE_DIR, "uploads", "images")
@@ -861,17 +862,15 @@ def get_cached_response():
 
 @app.route("/project/<slug>/files/<filename>")
 def serve_project_file(slug, filename):
-    """Serve project-uploaded files using the same logic as the upload route."""
-    # Sanitize filename to prevent path traversal
+    """Serve a specific file from a project folder."""
     safe_filename = secure_filename(filename)
+    file_path = os.path.join(PROJECTS_DIR, slug, "files")
 
-    file_dir = os.path.join("projects", slug, "files")
-    full_path = os.path.join(file_dir, safe_filename)
-
-    if not os.path.exists(full_path):
+    if not os.path.exists(os.path.join(file_path, safe_filename)):
         abort(404)
 
-    return send_from_directory(file_dir, safe_filename)
+    return send_from_directory(file_path, safe_filename)
+
 
 
 

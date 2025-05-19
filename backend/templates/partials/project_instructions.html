@@ -177,6 +177,24 @@
             this.mode = 'view';
           }
         });
+    },
+    generating: false,
+    generateWrite() {
+      this.generating = true;
+      fetch(`/project/{{ project_slug }}/run-step/write`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          this.generating = false;
+          if (data.status === 'success') {
+            alert('✅ Write step generated successfully!');
+          } else {
+            alert('⚠️ Error: ' + data.message);
+          }
+        })
+        .catch(() => {
+          this.generating = false;
+          alert('❌ Unexpected error while generating Write output.');
+        });
     }
   }"
   
@@ -219,9 +237,21 @@
           <button @click="mode = 'edit'" class="flex items-center gap-1 text-sm border px-3 py-1 rounded">
             <i data-lucide="pencil" class="w-4 h-4"></i> Edit Instructions
           </button>
-          <button class="flex items-center gap-1 bg-black text-white text-sm px-3 py-1 rounded">
-            <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Generate Write
-          </button>
+          <button
+          @click="generateWrite"
+          class="flex items-center gap-1 bg-black text-white text-sm px-3 py-1 rounded"
+          :disabled="generating"
+        >
+          <template x-if="!generating">
+            <span><i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Generate Write</span>
+          </template>
+          <template x-if="generating">
+            <span class="flex items-center gap-2">
+              <svg class="animate-spin h-4 w-4 mr-1" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="white" stroke-width="3" fill="none"/></svg>
+              Generating...
+            </span>
+          </template>
+        </button>
         </div>
       </div>
     </template>

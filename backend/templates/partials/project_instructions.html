@@ -24,34 +24,54 @@
   </button>
 
   <div x-show="open === 'plan'" x-collapse class="border-t px-4 py-4 text-sm text-gray-800"
-       x-data="{
-         mode: 'view',
-         valueSystem: '',
-         valueUser: '',
-         saved: false,
-         load() {
-           fetch(`/project/{{ project_slug }}/instructions`)
-             .then(res => res.json())
-             .then(data => {
-               this.valueSystem = data?.plan?.system || '';
-               this.valueUser = data?.plan?.user || '';
-               this.saved = !!(this.valueSystem || this.valueUser);
-             });
-         },
-         save() {
-           fetch(`/project/{{ project_slug }}/instructions`, {
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({ plan: { system: this.valueSystem, user: this.valueUser } })
-           }).then(res => res.json())
-             .then(res => {
-               if (res.status === 'success') {
-                 this.saved = true;
-                 this.mode = 'view';
-               }
-             });
-         }
-       }"
+  x-data="{
+    mode: 'view',
+    valueSystem: '',
+    valueUser: '',
+    saved: false,
+    generating: false,
+    load() {
+      fetch(`/project/{{ project_slug }}/instructions`)
+        .then(res => res.json())
+        .then(data => {
+          this.valueSystem = data?.plan?.system || '';
+          this.valueUser = data?.plan?.user || '';
+          this.saved = !!(this.valueSystem || this.valueUser);
+        });
+    },
+    save() {
+      fetch(`/project/{{ project_slug }}/instructions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: { system: this.valueSystem, user: this.valueUser } })
+      }).then(res => res.json())
+        .then(res => {
+          if (res.status === 'success') {
+            this.saved = true;
+            this.mode = 'view';
+          }
+        });
+    },
+    generatePlan() {
+      this.generating = true;
+      fetch(`/project/{{ project_slug }}/run-step/plan`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          this.generating = false;
+          if (data.status === 'success') {
+            alert('✅ Plan generated successfully!');
+            // You can add logic here to show output if needed
+          } else {
+            alert('⚠️ Error: ' + data.message);
+          }
+        })
+        .catch(() => {
+          this.generating = false;
+          alert('❌ Unexpected error while generating.');
+        });
+    }
+  }"
+  
        x-init="load()"
        class="space-y-3"
   >
@@ -94,9 +114,22 @@
           <button @click="mode = 'edit'" class="flex items-center gap-1 text-sm border px-3 py-1 rounded">
             <i data-lucide="pencil" class="w-4 h-4"></i> Edit Instructions
           </button>
-          <button class="flex items-center gap-1 bg-black text-white text-sm px-3 py-1 rounded">
-            <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Generate Plan
-          </button>
+          <button
+          @click="generatePlan"
+          class="flex items-center gap-1 bg-black text-white text-sm px-3 py-1 rounded"
+          :disabled="generating"
+        >
+          <template x-if="!generating">
+            <span><i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Generate Plan</span>
+          </template>
+          <template x-if="generating">
+            <span class="flex items-center gap-2">
+              <svg class="animate-spin h-4 w-4 mr-1" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="white" stroke-width="3" fill="none"/></svg>
+              Generating...
+            </span>
+          </template>
+        </button>
+        
         </div>
       </div>
     </template>

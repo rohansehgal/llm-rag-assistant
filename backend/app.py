@@ -751,6 +751,10 @@ def ask():
     # ✅ Return streamed response
     return Response(stream_with_context(stream_response()), content_type="text/plain")
 
+def try_load_output(slug, step):
+    path = os.path.join("projects", slug, "outputs", f"{step}.md")
+    return open(path).read() if os.path.exists(path) else None
+
 
 import base64
 
@@ -871,6 +875,66 @@ def serve_project_file(slug, filename):
 
     return send_from_directory(file_path, safe_filename)
 
+
+@app.route("/project/<slug>/run-step/<step>", methods=["POST"])
+def run_step(slug, step):
+    """Executes Plan, Write, or Check for a project using saved instructions and uploaded files."""
+
+    step = step.lower()
+    if step not in ["plan", "write", "check"]:
+        return jsonify({"status": "error", "message": f"Invalid step: {step}"}), 400
+
+    # Load instructions
+    instructions_path = os.path.join("projects", slug, "instructions.json")
+    if not os.path.exists(instructions_path):
+        return jsonify({"status": "error", "message": "No instructions found"}), 404
+
+    with open(instructions_path) as f:
+        instructions = json.load(f)
+    step_instructions = instructions.get(step, {})
+
+    # Collect all uploaded files
+    file_dir = os.path.join("projects", slug, "files")
+    texts = []
+    for fname in os.listdir(file_dir):
+        if fname.endswith(".json"):
+            continue
+        fpath = os.path.join(file_dir, fname)
+        content = extract_text_from_file(fpath)  # <- assumes this function exists
+        if content:
+            texts.append(f"--- File: {fname} ---\n{content.strip()}")
+
+    # Add outputs from previous steps if needed
+    if step == "write":
+        plan_output = try_load_output(slug, "plan")
+        if plan_output:
+            texts.append(f"--- Plan Output ---\n{plan_output}")
+    elif step == "check":
+        write_output = try_load_output(slug, "write")
+        if write_output:
+            texts.append(f"--- Write Output ---\n{write_output}")
+
+    # Build prompt
+    messages = []
+    if step_instructions.get("system"):
+        messages.append({"role": "system", "content": step_instructions["system"]})
+    if step_instructions.get("user"):
+        messages.append({"role": "user", "content": step_instructions["user"]})
+    if texts:
+        combined = "\n\n".join(texts)
+        messages.append({"role": "user", "content": combined})
+
+    # Send to model
+    response = ollama.chat(model="mistral", messages=messages)
+    output = response["message"]["content"]
+
+    # Save output
+    output_path = os.path.join("projects", slug, "outputs")
+    os.makedirs(output_path, exist_ok=True)
+    with open(os.path.join(output_path, f"{step}.md"), "w") as f:
+        f.write(output.strip())
+
+    return jsonify({"status": "success", "output": output.strip()})
 
 
 

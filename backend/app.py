@@ -430,8 +430,12 @@ def save_instructions(slug):
         with open(instructions_path, "r") as f:
             instructions = json.load(f)
 
-    # Merge new key(s) into existing dict
-    instructions.update(data)
+    # Normalize all values to dict format
+    for key, value in data.items():
+        if isinstance(value, dict):
+            instructions[key] = value
+        else:
+            instructions[key] = {"user": str(value)}
 
     # Save merged version back to disk
     with open(instructions_path, "w") as f:

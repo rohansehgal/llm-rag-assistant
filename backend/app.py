@@ -904,6 +904,12 @@ def run_step(slug, step):
         if content:
             texts.append(f"--- File: {fname} ---\n{content.strip()}")
 
+    # Log token preview from uploaded files
+    print("📎 File Inputs:")
+    for i, text in enumerate(texts):
+        preview = text[:300].replace("\n", " ") + ("..." if len(text) > 300 else "")
+        print(f"  🔹 File {i+1}: {len(text.split())} words → {preview}")
+
     # Add outputs from previous steps if needed
     if step == "write":
         plan_output = try_load_output(slug, "plan")
@@ -923,6 +929,19 @@ def run_step(slug, step):
     if texts:
         combined = "\n\n".join(texts)
         messages.append({"role": "user", "content": combined})
+    
+    # Log prompt components
+    print("\n🔧 [RUN STEP] Project:", slug)
+    print("🧠 Step:", step)
+    print("🪪 System Prompt:\n", step_instructions.get("system", "").strip() or "[None]")
+    print("🧑‍💻 User Prompt:\n", step_instructions.get("user", "").strip() or "[None]")
+
+    # Log final assembled message
+    print("🧵 Final Messages Sent to LLM:")
+    for m in messages:
+        role = m["role"]
+        snippet = m["content"][:200].replace("\n", " ") + ("..." if len(m["content"]) > 200 else "")
+        print(f"  [{role.upper()}] {snippet}")
 
     # Send to model
     response = ollama.chat(model="mistral", messages=messages)

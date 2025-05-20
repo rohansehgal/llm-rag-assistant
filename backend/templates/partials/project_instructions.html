@@ -10,7 +10,59 @@
     <div x-data="{ open: 'none' }" class="space-y-4">
   
 <!-- Step 1: Plan -->
-<div class="border rounded-md">
+<div class="border rounded-md"
+     x-data="{
+       mode: 'view',
+       valueSystem: '',
+       valueUser: '',
+       saved: false,
+       generating: false,
+       feedback: '',
+       load() {
+         fetch(`/project/{{ project_slug }}/instructions`)
+           .then(res => res.json())
+           .then(data => {
+             this.valueSystem = data?.plan?.system || '';
+             this.valueUser = data?.plan?.user || '';
+             this.saved = !!(this.valueSystem || this.valueUser);
+           });
+       },
+       save() {
+         fetch(`/project/{{ project_slug }}/instructions`, {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ plan: { system: this.valueSystem, user: this.valueUser } })
+         }).then(res => res.json())
+           .then(res => {
+             if (res.status === 'success') {
+               this.saved = true;
+               this.mode = 'view';
+             }
+           });
+       },
+       generatePlan() {
+         this.feedback = 'Your request is being processed. Output will be available in the Plan tab soon.';
+         this.generating = true;
+         this.mode = 'view'; // allow interface to exit edit mode if open
+         fetch(`/project/{{ project_slug }}/run-step/plan`, { method: 'POST' })
+           .then(res => res.json())
+           .then(data => {
+             this.generating = false;
+             if (data.status === 'success') {
+               this.feedback = '✅ Plan generation started successfully.';
+               if (window.loadProjects) window.loadProjects();
+             } else {
+               this.feedback = '⚠️ Error: ' + data.message;
+             }
+           })
+           .catch(() => {
+             this.generating = false;
+             this.feedback = '❌ Unexpected error while triggering generation.';
+           });
+       }
+     }"
+     x-init="load()"
+>
   <button @click="open = open === 'plan' ? null : 'plan'"
           class="flex justify-between items-center w-full px-4 py-3 text-left text-base font-medium hover:bg-gray-50">
     <div class="flex items-center gap-2">
@@ -23,61 +75,7 @@
        :class="{ 'rotate-180': open === 'plan' }"></i>
   </button>
 
-  <div x-show="open === 'plan'" x-collapse class="border-t px-4 py-4 text-sm text-gray-800"
-  x-data="{
-    mode: 'view',
-    valueSystem: '',
-    valueUser: '',
-    saved: false,
-    generating: false,
-    feedback: '',
-    load() {
-      fetch(`/project/{{ project_slug }}/instructions`)
-        .then(res => res.json())
-        .then(data => {
-          this.valueSystem = data?.plan?.system || '';
-          this.valueUser = data?.plan?.user || '';
-          this.saved = !!(this.valueSystem || this.valueUser);
-        });
-    },
-    save() {
-      fetch(`/project/{{ project_slug }}/instructions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: { system: this.valueSystem, user: this.valueUser } })
-      }).then(res => res.json())
-        .then(res => {
-          if (res.status === 'success') {
-            this.saved = true;
-            this.mode = 'view';
-          }
-        });
-    },
-    generatePlan() {
-      this.feedback = 'Your request is being processed. Output will be available in the Plan tab soon.';
-      this.generating = true;
-
-      fetch(`/project/{{ project_slug }}/run-step/plan`, { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-          this.generating = false;
-          if (data.status === 'success') {
-            this.feedback = '✅ Plan generation started successfully.';
-            if (window.loadProjects) window.loadProjects();
-          } else {
-            this.feedback = '⚠️ Error: ' + data.message;
-          }
-        })
-        .catch(() => {
-          this.generating = false;
-          this.feedback = '❌ Unexpected error while triggering generation.';
-        });
-    }
-  }"
-       x-init="load()"
-       class="space-y-3"
-  >
-
+  <div x-show="open === 'plan'" x-collapse class="border-t px-4 py-4 text-sm text-gray-800 space-y-3">
     <!-- Button to add instructions initially -->
     <template x-if="!saved && mode === 'view'">
       <button @click="mode = 'edit'" class="border rounded px-4 py-2 text-sm flex items-center gap-2">

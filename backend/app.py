@@ -974,9 +974,10 @@ def view_output(slug, step):
         return render_template("project_output.html", slug=slug, step=step, content="⚠️ Output not available yet.")
     
     with open(output_path, "r") as f:
-        content = f.read()
+        markdown_text = f.read()
 
-    return render_template("project_output.html", slug=slug, step=step, content=content)
+    html = markdown.markdown(markdown_text, extensions=["fenced_code", "tables"])
+    return render_template("project_output.html", slug=slug, step=step, content=html)
 
 
 if __name__ == "__main__":

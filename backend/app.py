@@ -955,7 +955,7 @@ def run_step(slug, step):
         print(f"  [{role.upper()}] {snippet}")
 
     # Send to model
-    response = ollama.chat(model="llama", messages=messages)
+    response = ollama.chat(model="llama3", messages=messages)
     output = response["message"]["content"]
 
     # Save output

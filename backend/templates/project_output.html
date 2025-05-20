@@ -1,7 +1,25 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ step.title() }} Output</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-full md:w-1/4 lg:w-1/5 border-r bg-white">
+      {% include 'navbar.html' %}
+    </aside>
 
-{% block content %}
-<div class="prose max-w-none p-4 bg-white rounded-xl shadow">
-  {{ content | safe }}
-</div>
-{% endblock %}
+    <main class="flex-1 p-6">
+      <h1 class="text-2xl font-semibold mb-4">{{ step.title() }} Output</h1>
+      <div class="prose max-w-none bg-white p-4 rounded shadow">
+        {{ content | safe }}
+      </div>
+    </main>
+  </div>
+</body>
+</html>

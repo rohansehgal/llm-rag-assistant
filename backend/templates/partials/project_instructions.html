@@ -155,21 +155,28 @@
   <div x-show="open === 'write'" x-collapse class="border-t px-4 py-4 text-sm text-gray-800"
   x-data="{
     mode: 'view',
-    value: '',
+    valueSystem: '',
+    valueUser: '',
     saved: false,
     load() {
       fetch(`/project/{{ project_slug }}/instructions`)
         .then(res => res.json())
         .then(data => {
-          this.value = data.write || '';
-          this.saved = !!this.value;
+          this.valueSystem = data?.write?.system || '';
+          this.valueUser = data?.write?.user || '';
+          this.saved = !!(this.valueSystem || this.valueUser);
         });
     },
     save() {
       fetch(`/project/{{ project_slug }}/instructions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ write: this.value })
+        body: JSON.stringify({
+          write: {
+            system: this.valueSystem,
+            user: this.valueUser
+          }
+        })
       }).then(res => res.json())
         .then(res => {
           if (res.status === 'success') {
@@ -293,7 +300,12 @@
            fetch(`/project/{{ project_slug }}/instructions`, {
              method: 'POST',
              headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({ check: { system: this.valueSystem, user: this.valueUser } })
+             body: JSON.stringify({
+               check: {
+                 system: this.valueSystem,
+                 user: this.valueUser
+               }
+             })
            }).then(res => res.json())
              .then(res => {
                if (res.status === 'success') {

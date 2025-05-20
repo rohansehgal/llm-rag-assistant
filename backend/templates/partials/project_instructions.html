@@ -283,38 +283,56 @@
 
   <div x-show="open === 'check'" x-collapse class="border-t px-4 py-4 text-sm text-gray-800"
        x-data="{
-         mode: 'view',
-         valueSystem: '',
-         valueUser: '',
-         saved: false,
-         load() {
-           fetch(`/project/{{ project_slug }}/instructions`)
-             .then(res => res.json())
-             .then(data => {
-               this.valueSystem = data?.check?.system || '';
-               this.valueUser = data?.check?.user || '';
-               this.saved = !!(this.valueSystem || this.valueUser);
-             });
-         },
-         save() {
-           fetch(`/project/{{ project_slug }}/instructions`, {
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({
-               check: {
-                 system: this.valueSystem,
-                 user: this.valueUser
-               }
-             })
-           }).then(res => res.json())
-             .then(res => {
-               if (res.status === 'success') {
-                 this.saved = true;
-                 this.mode = 'view';
-               }
-             });
-         }
-       }"
+  mode: 'view',
+  valueSystem: '',
+  valueUser: '',
+  saved: false,
+  generating: false,
+  load() {
+    fetch(`/project/{{ project_slug }}/instructions`)
+      .then(res => res.json())
+      .then(data => {
+        this.valueSystem = data?.check?.system || '';
+        this.valueUser = data?.check?.user || '';
+        this.saved = !!(this.valueSystem || this.valueUser);
+      });
+  },
+  save() {
+    fetch(`/project/{{ project_slug }}/instructions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        check: {
+          system: this.valueSystem,
+          user: this.valueUser
+        }
+      })
+    }).then(res => res.json())
+      .then(res => {
+        if (res.status === 'success') {
+          this.saved = true;
+          this.mode = 'view';
+        }
+      });
+  },
+  generateCheck() {
+    this.generating = true;
+    fetch(`/project/{{ project_slug }}/run-step/check`, { method: 'POST' })
+      .then(res => res.json())
+      .then(data => {
+        this.generating = false;
+        if (data.status === 'success') {
+          alert('✅ Check step generated successfully!');
+        } else {
+          alert('⚠️ Error: ' + data.message);
+        }
+      })
+      .catch(() => {
+        this.generating = false;
+        alert('❌ Unexpected error while generating Check output.');
+      });
+  }
+}"
        x-init="load()"
        class="space-y-3"
   >
@@ -357,8 +375,20 @@
           <button @click="mode = 'edit'" class="flex items-center gap-1 text-sm border px-3 py-1 rounded">
             <i data-lucide="pencil" class="w-4 h-4"></i> Edit Instructions
           </button>
-          <button class="flex items-center gap-1 bg-black text-white text-sm px-3 py-1 rounded">
-            <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Generate Check
+          <button
+            @click="generateCheck"
+            class="flex items-center gap-1 bg-black text-white text-sm px-3 py-1 rounded"
+            :disabled="generating"
+          >
+            <template x-if="!generating">
+              <span><i data-lucide='sliders-horizontal' class="w-4 h-4"></i> Generate Check</span>
+            </template>
+            <template x-if="generating">
+              <span class="flex items-center gap-2">
+                <svg class="animate-spin h-4 w-4 mr-1" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="white" stroke-width="3" fill="none"/></svg>
+                Generating...
+              </span>
+            </template>
           </button>
         </div>
       </div>

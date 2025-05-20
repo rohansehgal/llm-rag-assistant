@@ -355,7 +355,7 @@ def create_project():
 
     # Load global model config (if available)
     config = load_config()
-    default_text_model = config.get("default_text_model", "llama3")
+    default_text_model = config.get("default_text_model", "llama")
     default_image_model = config.get("default_image_model", "bakllava")
 
     metadata = {
@@ -955,7 +955,7 @@ def run_step(slug, step):
         print(f"  [{role.upper()}] {snippet}")
 
     # Send to model
-    response = ollama.chat(model="mistral", messages=messages)
+    response = ollama.chat(model="llama", messages=messages)
     output = response["message"]["content"]
 
     # Save output

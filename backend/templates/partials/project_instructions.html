@@ -59,15 +59,15 @@
         .then(data => {
           this.generating = false;
           if (data.status === 'success') {
-            alert('✅ Plan generated successfully!');
-            // You can add logic here to show output if needed
+            alert('✅ Plan generation started. Output will be available under the “Plan” tab shortly.');
+            if (window.loadProjects) window.loadProjects();
           } else {
             alert('⚠️ Error: ' + data.message);
           }
         })
         .catch(() => {
           this.generating = false;
-          alert('❌ Unexpected error while generating.');
+          alert('❌ Unexpected error while triggering generation.');
         });
     }
   }"
@@ -193,7 +193,8 @@
         .then(data => {
           this.generating = false;
           if (data.status === 'success') {
-            alert('✅ Write step generated successfully!');
+            alert('✅ Write generation started. Output will be available under the “Write” tab shortly.');
+            if (window.loadProjects) window.loadProjects();
           } else {
             alert('⚠️ Error: ' + data.message);
           }
@@ -322,7 +323,8 @@
       .then(data => {
         this.generating = false;
         if (data.status === 'success') {
-          alert('✅ Check step generated successfully!');
+          alert('✅ Check generation started. Output will be available under the “Check” tab shortly.');
+          if (window.loadProjects) window.loadProjects();
         } else {
           alert('⚠️ Error: ' + data.message);
         }

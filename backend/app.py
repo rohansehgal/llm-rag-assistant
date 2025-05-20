@@ -384,10 +384,17 @@ def list_projects():
         if os.path.isdir(project_path) and os.path.exists(meta_path):
             with open(meta_path) as f:
                 meta = json.load(f)
+                outputs_path = os.path.join(project_path, "outputs")
+                available_outputs = []
+                for step in ["plan", "write", "check"]:
+                    if os.path.exists(os.path.join(outputs_path, f"{step}.md")):
+                        available_outputs.append(step)
+
                 results.append({
                     "name": meta.get("name", slug),
-                    "slug": slug
-                })
+                    "slug": slug,
+                    "outputs": available_outputs
+        })
 
     return jsonify(results)
 
@@ -959,6 +966,17 @@ def run_step(slug, step):
 
     return jsonify({"status": "success", "output": output.strip()})
 
+@app.route("/project/<slug>/output/<step>")
+def view_output(slug, step):
+    """Render the Markdown output for a specific step (plan, write, check)."""
+    output_path = os.path.join("projects", slug, "outputs", f"{step}.md")
+    if not os.path.exists(output_path):
+        return render_template("project_output.html", slug=slug, step=step, content="⚠️ Output not available yet.")
+    
+    with open(output_path, "r") as f:
+        content = f.read()
+
+    return render_template("project_output.html", slug=slug, step=step, content=content)
 
 
 if __name__ == "__main__":

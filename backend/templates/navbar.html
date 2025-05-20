@@ -64,3 +64,44 @@
     }
   });
 </script>
+
+<script>
+  async function loadProjects() {
+    const res = await fetch("/projects");
+    const projects = await res.json();
+    const list = document.getElementById("project-list");
+    list.innerHTML = "";
+
+    for (const project of projects) {
+      const parent = document.createElement("div");
+      parent.classList.add("text-sm", "text-gray-700");
+
+      // Main project link
+      const mainLink = document.createElement("a");
+      mainLink.href = `/project/${project.slug}`;
+      mainLink.className = "block py-1.5 hover:underline font-semibold";
+      mainLink.textContent = project.name;
+      parent.appendChild(mainLink);
+
+      // Output sub-links
+      if (project.outputs && project.outputs.length > 0) {
+        for (const step of project.outputs) {
+          const stepLink = document.createElement("a");
+          stepLink.href = `/project/${project.slug}/output/${step}`;
+          stepLink.className = "block ml-4 py-1.5 text-gray-500 hover:underline";
+          stepLink.textContent = step.charAt(0).toUpperCase() + step.slice(1) + " Output";
+          parent.appendChild(stepLink);
+        }
+      }
+
+      list.appendChild(parent);
+    }
+
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadProjects);
+  window.loadProjects = loadProjects;
+</script>

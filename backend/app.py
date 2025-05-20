@@ -889,82 +889,84 @@ def serve_project_file(slug, filename):
 
 @app.route("/project/<slug>/run-step/<step>", methods=["POST"])
 def run_step(slug, step):
-    """Executes Plan, Write, or Check for a project using saved instructions and uploaded files."""
+    from threading import Thread
 
+    def background_job(slug, step):
+        instructions_path = os.path.join("projects", slug, "instructions.json")
+        with open(instructions_path) as f:
+            instructions = json.load(f)
+        step_instructions = instructions.get(step, {})
+
+        # Gather files
+        file_dir = os.path.join("projects", slug, "files")
+        texts = []
+        for fname in os.listdir(file_dir):
+            if fname.endswith(".json"):
+                continue
+            fpath = os.path.join(file_dir, fname)
+            content = extract_text_from_file(fpath)
+            if content:
+                texts.append(f"--- File: {fname} ---\n{content.strip()}")
+
+        # Add outputs from prior steps
+        if step == "write":
+            plan_output = try_load_output(slug, "plan")
+            if plan_output:
+                texts.append(f"--- Plan Output ---\n{plan_output}")
+        elif step == "check":
+            write_output = try_load_output(slug, "write")
+            if write_output:
+                texts.append(f"--- Write Output ---\n{write_output}")
+
+        # Prepare messages
+        messages = []
+        if step_instructions.get("system"):
+            messages.append({"role": "system", "content": step_instructions["system"]})
+        if step_instructions.get("user"):
+            messages.append({"role": "user", "content": step_instructions["user"]})
+        if texts:
+            combined = "\n\n".join(texts)
+            messages.append({"role": "user", "content": combined})
+
+        # 🔧 LOGGING: Full trace of prompt components
+        print("\n🔧 [RUN STEP] Project:", slug)
+        print("🧠 Step:", step)
+        print("🪪 System Prompt:\n", step_instructions.get("system", "").strip() or "[None]")
+        print("🧑‍💻 User Prompt:\n", step_instructions.get("user", "").strip() or "[None]")
+
+        print("📎 File Inputs:")
+        for i, text in enumerate(texts):
+            preview = text[:300].replace("\n", " ") + ("..." if len(text) > 300 else "")
+            print(f"  🔹 File {i+1}: {len(text.split())} words → {preview}")
+
+        print("🧵 Final Messages Sent to LLM:")
+        for m in messages:
+            role = m["role"]
+            snippet = m["content"][:200].replace("\n", " ") + ("..." if len(m["content"]) > 200 else "")
+            print(f"  [{role.upper()}] {snippet}")
+
+        # Run LLM call
+        response = ollama.chat(model="llama3", messages=messages)
+        output = response["message"]["content"]
+
+        # Save output
+        output_path = os.path.join("projects", slug, "outputs")
+        os.makedirs(output_path, exist_ok=True)
+        with open(os.path.join(output_path, f"{step}.md"), "w") as f:
+            f.write(output.strip())
+
+    # ✅ Validate and trigger async job
     step = step.lower()
     if step not in ["plan", "write", "check"]:
         return jsonify({"status": "error", "message": f"Invalid step: {step}"}), 400
 
-    # Load instructions
     instructions_path = os.path.join("projects", slug, "instructions.json")
     if not os.path.exists(instructions_path):
         return jsonify({"status": "error", "message": "No instructions found"}), 404
 
-    with open(instructions_path) as f:
-        instructions = json.load(f)
-    step_instructions = instructions.get(step, {})
+    Thread(target=background_job, args=(slug, step)).start()
 
-    # Collect all uploaded files
-    file_dir = os.path.join("projects", slug, "files")
-    texts = []
-    for fname in os.listdir(file_dir):
-        if fname.endswith(".json"):
-            continue
-        fpath = os.path.join(file_dir, fname)
-        content = extract_text_from_file(fpath)  # <- assumes this function exists
-        if content:
-            texts.append(f"--- File: {fname} ---\n{content.strip()}")
-
-    # Log token preview from uploaded files
-    print("📎 File Inputs:")
-    for i, text in enumerate(texts):
-        preview = text[:300].replace("\n", " ") + ("..." if len(text) > 300 else "")
-        print(f"  🔹 File {i+1}: {len(text.split())} words → {preview}")
-
-    # Add outputs from previous steps if needed
-    if step == "write":
-        plan_output = try_load_output(slug, "plan")
-        if plan_output:
-            texts.append(f"--- Plan Output ---\n{plan_output}")
-    elif step == "check":
-        write_output = try_load_output(slug, "write")
-        if write_output:
-            texts.append(f"--- Write Output ---\n{write_output}")
-
-    # Build prompt
-    messages = []
-    if step_instructions.get("system"):
-        messages.append({"role": "system", "content": step_instructions["system"]})
-    if step_instructions.get("user"):
-        messages.append({"role": "user", "content": step_instructions["user"]})
-    if texts:
-        combined = "\n\n".join(texts)
-        messages.append({"role": "user", "content": combined})
-    
-    # Log prompt components
-    print("\n🔧 [RUN STEP] Project:", slug)
-    print("🧠 Step:", step)
-    print("🪪 System Prompt:\n", step_instructions.get("system", "").strip() or "[None]")
-    print("🧑‍💻 User Prompt:\n", step_instructions.get("user", "").strip() or "[None]")
-
-    # Log final assembled message
-    print("🧵 Final Messages Sent to LLM:")
-    for m in messages:
-        role = m["role"]
-        snippet = m["content"][:200].replace("\n", " ") + ("..." if len(m["content"]) > 200 else "")
-        print(f"  [{role.upper()}] {snippet}")
-
-    # Send to model
-    response = ollama.chat(model="llama3", messages=messages)
-    output = response["message"]["content"]
-
-    # Save output
-    output_path = os.path.join("projects", slug, "outputs")
-    os.makedirs(output_path, exist_ok=True)
-    with open(os.path.join(output_path, f"{step}.md"), "w") as f:
-        f.write(output.strip())
-
-    return jsonify({"status": "success", "output": output.strip()})
+    return jsonify({"status": "success", "message": "Step queued for background execution."})
 
 @app.route("/project/<slug>/output/<step>")
 def view_output(slug, step):

@@ -54,8 +54,8 @@
         });
     },
     generatePlan() {
+      this.feedback = 'Your request is being processed. Output will be available in the Plan tab soon.';
       this.generating = true;
-      this.feedback = '✅ Your request is being processed. Output will be available in the Plan tab soon.';
 
       fetch(`/project/{{ project_slug }}/run-step/plan`, { method: 'POST' })
         .then(res => res.json())

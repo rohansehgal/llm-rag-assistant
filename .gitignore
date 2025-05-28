@@ -16,3 +16,4 @@ testbed/
 *.sqlite
 *.db
 *.venv/
+node_modules/

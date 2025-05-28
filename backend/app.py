@@ -4,7 +4,7 @@ import functools
 from flask import Flask, request, render_template, redirect, url_for, flash, jsonify, send_from_directory, abort
 # ✅ NEW: Required for streaming responses from Flask
 from flask import Response, stream_with_context
-
+from flask_cors import CORS
 import ollama
 import faiss
 import numpy as np
@@ -61,6 +61,7 @@ app = Flask(
     static_folder=os.path.join(BASE_DIR, "static"),
     static_url_path="/static"
 )
+CORS(app)
 app.secret_key = 'your_secret_key'
 
 def slugify(name):

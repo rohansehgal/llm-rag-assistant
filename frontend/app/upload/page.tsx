@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useRef, useState, useEffect } from 'react'
+const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5050"
 
 interface UploadedFile {
   name: string
@@ -24,7 +25,7 @@ export default function UploadPage() {
 
   const fetchFiles = async () => {
     try {
-      const res = await fetch("/files?source=all")
+      const res = await fetch(baseUrl + "/files?source=all")
       const data = await res.json()
       setFiles(data.files || [])
     } catch {
@@ -61,7 +62,7 @@ export default function UploadPage() {
     selectedFiles.forEach((file) => formData.append('files', file));
 
     try {
-      const res = await fetch('/upload', {
+      const res = await fetch(baseUrl + '/upload', {
         method: 'POST',
         body: formData,
       });
@@ -91,7 +92,7 @@ export default function UploadPage() {
           <button
             onClick={async () => {
               try {
-                const res = await fetch("/rebuild-index", { method: "POST" });
+                const res = await fetch(baseUrl + "/rebuild-index", { method: "POST" });
                 if (res.ok) {
                   alert("✅ Index rebuilt successfully.");
                 } else {

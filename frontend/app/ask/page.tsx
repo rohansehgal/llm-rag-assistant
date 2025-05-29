@@ -1,4 +1,7 @@
+
 'use client'
+
+const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5050';
 
 import React, { useState, useRef } from 'react'
 
@@ -21,7 +24,7 @@ export default function AskPage() {
     if (file) formData.append('file', file)
 
     try {
-      const res = await fetch('http://34.44.66.122:5050/ask', {
+      const res = await fetch(`${baseUrl}/ask`, {
         method: 'POST',
         body: formData,
       })

@@ -267,6 +267,7 @@ def get_uploaded_files():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
+    print("🔵 /upload route called via", request.method)
     uploaded_files = get_uploaded_files()
 
     if request.method == 'POST':
@@ -283,6 +284,7 @@ def upload():
                 flash('Invalid file type or file too large.', 'danger')
                 return redirect(url_for('upload'))
 
+        print("📄 Number of uploaded files found:", len(uploaded_files))
         flash('Files uploaded successfully!', 'success')
         return redirect(url_for('upload'))
 

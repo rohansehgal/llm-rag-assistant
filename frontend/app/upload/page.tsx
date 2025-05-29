@@ -69,7 +69,7 @@ export default function UploadPage() {
       if (!res.ok) throw new Error('Upload failed');
       setSelectedFiles([]);
       await fetchFiles();
-    } catch (err) {
+    } catch {
       setError('❌ Upload failed');
     } finally {
       setUploading(false);

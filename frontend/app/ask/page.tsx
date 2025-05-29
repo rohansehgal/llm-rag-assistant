@@ -54,39 +54,54 @@ export default function AskPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">🧠 Ask the Assistant</h1>
+    <main className="bg-white text-gray-800 font-sans min-h-screen p-6">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-2xl font-semibold mb-2">Text Analysis</h1>
+        <p className="text-sm text-gray-600 mb-6">
+          Enter your query, upload a file (optional), and select a model to receive a streaming response.
+        </p>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block font-medium mb-1">Your Question</label>
+          <div>
+            <label className="text-sm font-medium block mb-1">Enter your question:</label>
             <textarea
               rows={4}
-              className="w-full border border-gray-300 p-3 rounded"
+              className="w-full border border-gray-300 p-3 rounded-lg text-sm"
               placeholder="Ask me anything..."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block font-medium mb-1">Upload File (Optional)</label>
-            <input
-              type="file"
-              accept=".pdf,.docx,.txt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
-              onChange={handleFileChange}
-              ref={fileInputRef}
-              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
-            {file && <p className="text-sm text-gray-600 mt-1">📎 {file.name}</p>}
+          <div>
+            <label className="text-sm font-medium block mt-6 mb-2">Attach a PDF for RAG (optional):</label>
+            <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center text-sm text-gray-500">
+              <input
+                type="file"
+                accept=".pdf,.docx,.txt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                className="hidden"
+                id="uploadFileInput"
+              />
+              <label htmlFor="uploadFileInput" className="cursor-pointer">
+                Drag and drop a PDF, or click to browse
+                <p className="text-xs mt-1">Supports .PDF files up to 25MB</p>
+              </label>
+            </div>
+            {file && <p className="text-sm text-gray-600 mt-2">📎 {file.name}</p>}
           </div>
 
-          <div className="mb-4">
-            <label className="block font-medium mb-1">Choose a Model</label>
-            <div className="flex gap-4">
+          <div>
+            <label className="text-sm font-medium block mt-6 mb-2">Select Model:</label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {['llama3.2', 'mistral', 'phi3'].map((m) => (
-                <label key={m}>
+                <label
+                  key={m}
+                  className={`border p-4 rounded-lg cursor-pointer ${
+                    model === m ? 'border-blue-600 bg-blue-50' : 'border-gray-200'
+                  }`}
+                >
                   <input
                     type="radio"
                     name="model"
@@ -94,21 +109,24 @@ export default function AskPage() {
                     checked={model === m}
                     onChange={() => setModel(m)}
                     disabled={loading}
-                    className="mr-1"
+                    className="hidden"
                   />
-                  {m}
+                  <div className="text-sm font-semibold">{m === 'llama3.2' ? 'LLaMA 3' : m.charAt(0).toUpperCase() + m.slice(1)}</div>
+                  <div className="text-xs text-gray-500 mt-1">Ollama Text Model</div>
                 </label>
               ))}
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading ? 'Asking...' : 'Ask'}
-          </button>
+          <div className="mt-6">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gray-800 text-white py-2 rounded-lg hover:bg-gray-900 disabled:opacity-50"
+            >
+              {loading ? 'Asking...' : 'Ask'}
+            </button>
+          </div>
         </form>
 
         <div className="mt-6">

@@ -81,12 +81,29 @@ export default function UploadPage() {
       <div className="max-w-5xl mx-auto">
         <h1 className="text-2xl font-semibold mb-2">Upload Manager</h1>
 
-        <div className="mb-6">
+        <div className="mb-6 flex items-center gap-4">
           <button
             onClick={() => fileInputRef.current?.click()}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
             ➕ Add File
+          </button>
+          <button
+            onClick={async () => {
+              try {
+                const res = await fetch("/rebuild-index", { method: "POST" });
+                if (res.ok) {
+                  alert("✅ Index rebuilt successfully.");
+                } else {
+                  alert("⚠️ Failed to rebuild index.");
+                }
+              } catch {
+                alert("❌ Error occurred while rebuilding index.");
+              }
+            }}
+            className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900"
+          >
+            Generate Index
           </button>
           <input
             type="file"
@@ -97,23 +114,6 @@ export default function UploadPage() {
             onChange={handleFileChange}
           />
         </div>
-        <button
-          onClick={async () => {
-            try {
-              const res = await fetch("/rebuild-index", { method: "POST" });
-              if (res.ok) {
-                alert("✅ Index rebuilt successfully.");
-              } else {
-                alert("⚠️ Failed to rebuild index.");
-              }
-            } catch {
-              alert("❌ Error occurred while rebuilding index.");
-            }
-          }}
-          className="ml-4 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900"
-        >
-          Generate Index
-        </button>
 
         {selectedFiles.length > 0 && (
           <div className="mb-4">

@@ -134,9 +134,11 @@ export default function AskPage() {
             <div className="text-sm text-gray-500 mb-2">⏳ In progress...</div>
           )}
           {response && (
-            <div className="p-4 border bg-white rounded shadow">
+            <div className="bg-white border border-gray-300 rounded-md p-4">
               <h3 className="font-semibold mb-2">Response:</h3>
-              <pre className="whitespace-pre-wrap">{response}</pre>
+              <div className="text-sm text-gray-800 whitespace-pre-wrap font-mono leading-relaxed">
+                {response}
+              </div>
             </div>
           )}
         </div>

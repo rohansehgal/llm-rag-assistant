@@ -153,7 +153,16 @@ export default function UploadPage() {
               files.map((file, idx) => (
                 <tr key={idx} className="border-t">
                   <td className="p-2">{file.name}</td>
-                  <td className="p-2">{file.source}</td>
+                  <td className="p-2">
+                    <span className={`inline-block px-2 py-0.5 text-xs rounded-full font-medium ${
+                      file.source === 'Manual Upload' ? 'bg-gray-800 text-white' :
+                      file.source === 'PDF Analysis' ? 'bg-gray-200 text-gray-700' :
+                      file.source === 'Image Analysis' ? 'bg-purple-100 text-purple-800' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
+                      {file.source}
+                    </span>
+                  </td>
                   <td className="p-2">{file.type}</td>
                   <td className="p-2">{file.size}</td>
                   <td className="p-2">{file.upload_date || '-'}</td>

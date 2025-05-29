@@ -25,14 +25,19 @@ export default function UploadPage() {
 
   const fetchFiles = async () => {
     try {
-      const res = await fetch(baseUrl + "/list-files")
-      const data = await res.json()
-      console.log("Fetched files:", data); // ⬅️ Add this
-      setFiles(data.files || [])
-    } catch {
-      console.error("Failed to fetch files");
+      const res = await fetch(baseUrl + "/list-files");
+      const data = await res.json();
+      console.log("Fetched raw response:", data);
+
+      if (Array.isArray(data.files)) {
+        setFiles(data.files);
+      } else {
+        console.error("Expected 'files' to be an array, got:", typeof data.files);
+      }
+    } catch (err) {
+      console.error("Failed to fetch files", err);
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || [])
@@ -149,7 +154,7 @@ export default function UploadPage() {
             </tr>
           </thead>
           <tbody>
-            {files.length > 0 ? (
+            {Array.isArray(files) && files.length > 0 ? (
               files.map((file, idx) => (
                 <tr key={idx} className="border-t">
                   <td className="p-2">{file.name}</td>

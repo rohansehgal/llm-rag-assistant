@@ -27,8 +27,8 @@ export default function UploadPage() {
       const res = await fetch("/files")
       const data = await res.json()
       setFiles(data.files || [])
-    } catch (err) {
-      console.error("Failed to fetch files", err)
+    } catch {
+      console.error("Failed to fetch files")
     }
   }
 
@@ -69,7 +69,7 @@ export default function UploadPage() {
       if (!res.ok) throw new Error("Upload failed")
       setSelectedFiles([])
       fetchFiles()
-    } catch (err) {
+    } catch {
       setError("❌ Upload failed")
     } finally {
       setUploading(false)

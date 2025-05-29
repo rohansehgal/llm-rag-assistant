@@ -25,7 +25,7 @@ export default function UploadPage() {
 
   const fetchFiles = async () => {
     try {
-      const res = await fetch(baseUrl + "/upload")
+      const res = await fetch(baseUrl + "/list-files")
       const data = await res.json()
       setFiles(data.files || [])
     } catch {

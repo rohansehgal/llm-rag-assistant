@@ -5,7 +5,7 @@ const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5050"
 
 interface UploadedFile {
   name: string
-  size: number
+  size: string
   type: string
   source: string
   folder: string

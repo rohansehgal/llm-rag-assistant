@@ -18,7 +18,7 @@ export default function AskPage() {
     formData.append('models', model)
 
     try {
-      const res = await fetch('http://127.0.0.1:5050/ask', {
+      const res = await fetch('http://34.44.66.122:5050/ask', {
         method: 'POST',
         body: formData,
       })

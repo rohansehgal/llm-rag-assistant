@@ -17,3 +17,4 @@ testbed/
 *.db
 *.venv/
 node_modules/
+*.env.production

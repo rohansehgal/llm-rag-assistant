@@ -29,10 +29,10 @@ export default function UploadPage() {
       const data = await res.json();
       console.log("Fetched raw response:", data);
 
-      if (Array.isArray(data.files)) {
-        setFiles(data.files);
+      if (Array.isArray(data)) {
+        setFiles(data);
       } else {
-        console.error("Expected 'files' to be an array, got:", typeof data.files);
+        console.error("Expected array but got:", typeof data);
       }
     } catch (err) {
       console.error("Failed to fetch files", err);

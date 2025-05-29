@@ -24,7 +24,7 @@ export default function UploadPage() {
 
   const fetchFiles = async () => {
     try {
-      const res = await fetch("/files")
+      const res = await fetch("/files?source=all")
       const data = await res.json()
       setFiles(data.files || [])
     } catch {
@@ -97,6 +97,23 @@ export default function UploadPage() {
             onChange={handleFileChange}
           />
         </div>
+        <button
+          onClick={async () => {
+            try {
+              const res = await fetch("/rebuild-index", { method: "POST" });
+              if (res.ok) {
+                alert("✅ Index rebuilt successfully.");
+              } else {
+                alert("⚠️ Failed to rebuild index.");
+              }
+            } catch {
+              alert("❌ Error occurred while rebuilding index.");
+            }
+          }}
+          className="ml-4 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900"
+        >
+          Generate Index
+        </button>
 
         {selectedFiles.length > 0 && (
           <div className="mb-4">

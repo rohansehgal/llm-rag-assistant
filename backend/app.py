@@ -221,11 +221,11 @@ def get_all_rag_documents():
 
 
 
-@app.route('/upload', methods=['GET', 'POST'])
-def upload():
+
+# Extracted file loading logic
+def get_uploaded_files():
     uploaded_files = []
 
- # Load all files from uploads/files (Manual Upload)
     for filename in os.listdir(UPLOAD_FOLDER_FILES):
         path = os.path.join(UPLOAD_FOLDER_FILES, filename)
         if os.path.isfile(path):
@@ -238,7 +238,6 @@ def upload():
                 'folder': 'files'
             })
 
-    # Load all PDFs from uploads/rag (PDF Analysis)
     for filename in os.listdir(UPLOAD_FOLDER_RAG):
         path = os.path.join(UPLOAD_FOLDER_RAG, filename)
         if os.path.isfile(path):
@@ -251,7 +250,6 @@ def upload():
                 'folder': 'rag'
             })
 
-    # Load all images from uploads/images (Image Analysis)
     for filename in os.listdir(UPLOAD_FOLDER_IMAGES):
         path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
         if os.path.isfile(path):
@@ -264,6 +262,12 @@ def upload():
                 'folder': 'images'
             })
 
+    return uploaded_files
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    uploaded_files = get_uploaded_files()
 
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -283,6 +287,12 @@ def upload():
         return redirect(url_for('upload'))
 
     return render_template('upload.html', uploaded_files=uploaded_files, active_page='upload')
+
+
+# New route to list files
+@app.route("/list-files", methods=["GET"])
+def list_files():
+    return jsonify(get_uploaded_files())
 
 
 

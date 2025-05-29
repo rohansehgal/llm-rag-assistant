@@ -10,6 +10,7 @@ interface UploadedFile {
   source: string
   upload_date: string
   url: string
+  folder: string // ⬅️ Add this line
 }
 
 export default function UploadPage() {

@@ -8,9 +8,8 @@ interface UploadedFile {
   size: number
   type: string
   source: string
-  upload_date: string
-  url: string
-  folder: string // ⬅️ Add this line
+  folder: string
+  upload_date?: string
 }
 
 export default function UploadPage() {
@@ -157,7 +156,7 @@ export default function UploadPage() {
                   <td className="p-2">{file.source}</td>
                   <td className="p-2">{file.type}</td>
                   <td className="p-2">{file.size}</td>
-                  <td className="p-2">{file.upload_date}</td>
+                  <td className="p-2">{file.upload_date || '-'}</td>
                   <td className="p-2">
                     <a
                       href={`${baseUrl}/uploads/${file.folder}/${file.name}`}

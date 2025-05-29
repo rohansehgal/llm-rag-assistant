@@ -150,18 +150,30 @@ export default function UploadPage() {
             </tr>
           </thead>
           <tbody>
-            {files.map((file, idx) => (
-              <tr key={idx} className="border-t">
-                <td className="p-2">{file.name}</td>
-                <td className="p-2">{file.source}</td>
-                <td className="p-2">{file.type}</td>
-                <td className="p-2">{(file.size / 1024).toFixed(1)} KB</td>
-                <td className="p-2">{file.upload_date}</td>
-                <td className="p-2">
-                  <a href={file.url} className="text-blue-600 hover:underline" target="_blank">View</a>
-                </td>
+            {files.length > 0 ? (
+              files.map((file, idx) => (
+                <tr key={idx} className="border-t">
+                  <td className="p-2">{file.name}</td>
+                  <td className="p-2">{file.source}</td>
+                  <td className="p-2">{file.type}</td>
+                  <td className="p-2">{file.size}</td>
+                  <td className="p-2">{file.upload_date}</td>
+                  <td className="p-2">
+                    <a
+                      href={`${baseUrl}/uploads/${file.folder}/${file.name}`}
+                      target="_blank"
+                      className="text-blue-600 hover:underline"
+                    >
+                      View
+                    </a>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="p-2 text-center text-gray-500">No files uploaded yet.</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

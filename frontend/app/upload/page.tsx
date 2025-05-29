@@ -27,8 +27,8 @@ export default function UploadPage() {
       const res = await fetch("/files")
       const data = await res.json()
       setFiles(data.files || [])
-    } catch {
-      console.error("Failed to fetch files")
+    } catch (err) {
+      console.error("Failed to fetch files", err);
     }
   }
 
@@ -53,28 +53,28 @@ export default function UploadPage() {
   }
 
   const handleUpload = async () => {
-    if (!selectedFiles.length) return
-    setUploading(true)
-    setError('')
+    if (!selectedFiles.length) return;
+    setUploading(true);
+    setError('');
 
-    const formData = new FormData()
-    selectedFiles.forEach((file) => formData.append("files", file))
+    const formData = new FormData();
+    selectedFiles.forEach((file) => formData.append('files', file));
 
     try {
-      const res = await fetch("/upload", {
-        method: "POST",
+      const res = await fetch('/upload', {
+        method: 'POST',
         body: formData,
-      })
+      });
 
-      if (!res.ok) throw new Error("Upload failed")
-      setSelectedFiles([])
-      fetchFiles()
-    } catch {
-      setError("❌ Upload failed")
+      if (!res.ok) throw new Error('Upload failed');
+      setSelectedFiles([]);
+      await fetchFiles();
+    } catch (err) {
+      setError('❌ Upload failed');
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
-  }
+  };
 
   return (
     <main className="bg-white text-gray-800 font-sans min-h-screen p-6">

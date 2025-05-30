@@ -81,9 +81,9 @@ export default function UploadPage() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-all"
+            className="bg-black text-white font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all flex items-center gap-2"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" />
             </svg>
             Add File

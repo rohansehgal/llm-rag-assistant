@@ -74,14 +74,14 @@ export default function UploadPage() {
   return (
     <main className="bg-white text-gray-800 font-sans min-h-screen p-6">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-2xl font-semibold mb-2">Upload Manager</h1>
-        <p className="text-gray-500 text-sm mb-4">Manage your uploaded files and documents</p>
+        <h1 className="text-2xl font-bold mb-1">Upload Manager</h1>
+        <p className="text-sm text-gray-500 mb-4">Manage your uploaded files and documents</p>
 
         <div className="mb-6 flex items-center gap-4">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded inline-flex items-center"
+            className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-all"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" />

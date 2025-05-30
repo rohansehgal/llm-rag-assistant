@@ -1003,5 +1003,11 @@ def api_stats():
     stats_data = load_stats()
     return jsonify(stats_data)
 
+@app.route("/list-stats", methods=["GET"])
+def list_stats():
+    """Alias route for Next.js frontend to fetch stats"""
+    stats_data = load_stats()
+    return jsonify(stats_data)
+
 if __name__ == "__main__":
     app.run(debug=False, use_reloader=False)

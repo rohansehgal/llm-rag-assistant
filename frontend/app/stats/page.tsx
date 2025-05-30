@@ -7,6 +7,7 @@ type StatEntry = {
   timestamp: string;
   model: string;
   answer: string;
+  source?: string;
 };
 
 export default function StatsPage() {
@@ -35,6 +36,7 @@ export default function StatsPage() {
                 <th className="px-4 py-3">Question</th>
                 <th className="px-4 py-3">Timestamp</th>
                 <th className="px-4 py-3">Model</th>
+                <th className="px-4 py-3">Source</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -43,6 +45,7 @@ export default function StatsPage() {
                   <td className="px-4 py-3 max-w-xs truncate" title={entry.question}>{entry.question}</td>
                   <td className="px-4 py-3">{new Date(entry.timestamp).toLocaleString()}</td>
                   <td className="px-4 py-3">{entry.model}</td>
+                  <td className="px-4 py-3">{entry.source || "—"}</td>
                 </tr>
               ))}
             </tbody>

@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 interface StatEntry {
   question: string
   model: string
+  source: string
   timestamp: string
 }
 
@@ -16,7 +17,7 @@ export default function StatsPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch(`${baseUrl}/stats`)
+        const res = await fetch(`${baseUrl}/list-stats`)
         const data = await res.json()
         const last20 = data.slice(-20).reverse()
         setStats(last20)
@@ -39,6 +40,7 @@ export default function StatsPage() {
               <tr>
                 <th className="px-4 py-3">Question</th>
                 <th className="px-4 py-3">Model</th>
+                <th className="px-4 py-3">Source</th>
                 <th className="px-4 py-3">Timestamp</th>
               </tr>
             </thead>
@@ -47,6 +49,7 @@ export default function StatsPage() {
                 <tr key={idx} className="hover:bg-gray-50">
                   <td className="px-4 py-3">{entry.question}</td>
                   <td className="px-4 py-3">{entry.model}</td>
+                  <td className="px-4 py-3">{entry.source}</td>
                   <td className="px-4 py-3">{entry.timestamp}</td>
                 </tr>
               ))}

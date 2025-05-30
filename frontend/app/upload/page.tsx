@@ -57,6 +57,7 @@ export default function UploadPage() {
     }
 
     setSelectedFiles(valid)
+    setTimeout(() => handleUpload(), 0);
   }
 
   const handleUpload = async () => {
@@ -65,7 +66,7 @@ export default function UploadPage() {
     setError('');
 
     const formData = new FormData();
-    selectedFiles.forEach((file) => formData.append('files', file));
+    selectedFiles.forEach((file) => formData.append('file', file));
 
     try {
       const res = await fetch(baseUrl + '/upload', {
@@ -121,24 +122,6 @@ export default function UploadPage() {
             onChange={handleFileChange}
           />
         </div>
-
-        {selectedFiles.length > 0 && (
-          <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">Ready to upload:</p>
-            <ul className="list-disc ml-6 text-sm">
-              {selectedFiles.map((file, idx) => (
-                <li key={idx}>{file.name}</li>
-              ))}
-            </ul>
-            <button
-              onClick={handleUpload}
-              disabled={uploading}
-              className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
-            >
-              {uploading ? "Uploading..." : "Upload"}
-            </button>
-          </div>
-        )}
 
         {error && <div className="text-red-600 text-sm mb-4">{error}</div>}
 

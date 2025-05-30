@@ -17,7 +17,6 @@ export default function UploadPage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState('')
-  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     fetchFiles()
@@ -62,7 +61,6 @@ export default function UploadPage() {
 
   const handleUpload = async () => {
     if (!selectedFiles.length) return;
-    setUploading(true);
     setError('');
 
     const formData = new FormData();
@@ -79,8 +77,6 @@ export default function UploadPage() {
       await fetchFiles();
     } catch {
       setError('❌ Upload failed');
-    } finally {
-      setUploading(false);
     }
   };
 

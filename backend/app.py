@@ -995,5 +995,13 @@ def view_output(slug, step):
     return render_template("project_output.html", slug=slug, step=step, content=html)
 
 
+
+# Add route to expose raw stats.json data as JSON
+@app.route("/api/stats", methods=["GET"])
+def api_stats():
+    """Return raw stats.json data as JSON."""
+    stats_data = load_stats()
+    return jsonify(stats_data)
+
 if __name__ == "__main__":
     app.run(debug=False, use_reloader=False)

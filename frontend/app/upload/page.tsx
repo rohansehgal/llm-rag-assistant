@@ -142,7 +142,7 @@ export default function UploadPage() {
 
         {error && <div className="text-red-600 text-sm mb-4">{error}</div>}
 
-        <table className="w-full border text-sm mt-6">
+        <table className="w-full text-sm mt-6 bg-white shadow-sm border rounded-lg divide-y">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 text-left">File Name</th>
@@ -157,7 +157,12 @@ export default function UploadPage() {
             {Array.isArray(files) && files.length > 0 ? (
               files.map((file, idx) => (
                 <tr key={idx} className="border-t">
-                  <td className="p-2">{file.name}</td>
+                  <td className="p-2 font-medium flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    {file.name}
+                  </td>
                   <td className="p-2">
                     <span className={`inline-block px-2 py-0.5 text-xs rounded-full font-medium ${
                       file.source === 'Manual Upload' ? 'bg-gray-800 text-white' :
@@ -171,14 +176,44 @@ export default function UploadPage() {
                   <td className="p-2">{file.type}</td>
                   <td className="p-2">{file.size}</td>
                   <td className="p-2">{file.upload_date || '-'}</td>
-                  <td className="p-2">
+                  <td className="p-2 flex gap-3 items-center">
                     <a
                       href={`${baseUrl}/uploads/${file.folder}/${file.name}`}
                       target="_blank"
-                      className="text-blue-600 hover:underline"
+                      className="text-gray-500 hover:text-gray-700"
+                      title="View"
                     >
-                      View
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
                     </a>
+                    <button
+                      onClick={async () => {
+                        const confirmed = confirm(`Are you sure you want to delete "${file.name}"?`)
+                        if (!confirmed) return
+                        try {
+                          const res = await fetch(`${baseUrl}/delete-file`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ filename: file.name, folder: file.folder })
+                          })
+                          if (!res.ok) throw new Error()
+                          await fetchFiles()
+                        } catch {
+                          alert('Error deleting file.')
+                        }
+                      }}
+                      className="text-red-500 hover:text-red-700"
+                      title="Delete"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a2 2 0 012-2h2a2 2 0 012 2v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/>
+                        <line x1="14" y1="11" x2="14" y2="17"/>
+                      </svg>
+                    </button>
                   </td>
                 </tr>
               ))

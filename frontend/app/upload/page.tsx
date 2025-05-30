@@ -14,7 +14,6 @@ interface UploadedFile {
 
 export default function UploadPage() {
   const [files, setFiles] = useState<UploadedFile[]>([])
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState('')
 
@@ -38,7 +37,7 @@ export default function UploadPage() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || [])
     const valid = selected.filter(
       (file) =>
@@ -51,20 +50,13 @@ export default function UploadPage() {
 
     if (valid.length !== selected.length) {
       setError("❌ Some files were invalid or too large (max 25MB).")
-    } else {
-      setError('')
+      return
     }
 
-    setSelectedFiles(valid)
-    setTimeout(() => handleUpload(), 0);
-  }
-
-  const handleUpload = async () => {
-    if (!selectedFiles.length) return;
-    setError('');
+    setError('')
 
     const formData = new FormData();
-    selectedFiles.forEach((file) => formData.append('file', file));
+    valid.forEach((file) => formData.append('file', file));
 
     try {
       const res = await fetch(baseUrl + '/upload', {
@@ -73,12 +65,11 @@ export default function UploadPage() {
       });
 
       if (!res.ok) throw new Error('Upload failed');
-      setSelectedFiles([]);
       await fetchFiles();
     } catch {
       setError('❌ Upload failed');
     }
-  };
+  }
 
   return (
     <main className="bg-white text-gray-800 font-sans min-h-screen p-6">

@@ -20,8 +20,8 @@ export default function ProjectFileTable({ slug }: Props) {
   // ✅ Memoized function to fetch files
   const fetchFiles = useCallback(async () => {
     try {
-      const res = await fetch(`/project/${slug}/files`);
-      const data = await res.json();
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${slug}/files`);
+        const data = await res.json();
       setFiles(data);
     } catch {
       console.error("❌ Failed to fetch project files.");
@@ -36,7 +36,7 @@ export default function ProjectFileTable({ slug }: Props) {
     if (!confirm(`Delete file "${filename}"?`)) return;
 
     try {
-      const res = await fetch(`/project/${slug}/delete-file`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${slug}/delete-file`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ filename }),

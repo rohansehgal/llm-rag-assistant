@@ -22,7 +22,7 @@ export default function AskPage() {
         setModel(data.default_text_model || 'llama3.2')
       })
       .catch(error => {
-        console.warn("⚠️ Failed to load settings, using defaults.")
+        console.warn("⚠️ Failed to load settings, using defaults.", error)
         setAllowedModels(['llama3.2', 'mistral', 'phi3'])
         setModel('llama3.2')
       })

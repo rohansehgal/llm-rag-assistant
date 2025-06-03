@@ -8,7 +8,6 @@ import {
   BarChart3,
   Settings,
   Image,
-  Folder,
   Plus,
   Menu,
   X,

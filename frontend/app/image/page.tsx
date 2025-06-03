@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import PageWrapper from '@/components/PageWrapper';
 
+
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5050';
 
 export default function ImagePage() {

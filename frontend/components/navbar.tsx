@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Home,
   Upload,
@@ -14,8 +14,14 @@ import {
   X,
 } from 'lucide-react'
 
+type Project = {
+  name: string
+  created?: string
+}
+
 export default function Navbar() {
   const [open, setOpen] = useState(false)
+  const [projects, setProjects] = useState<Project[]>([])
 
   const links = [
     { href: '/ask', label: 'Home', icon: <Home size={18} /> },
@@ -26,7 +32,17 @@ export default function Navbar() {
     { href: '/project', label: 'Projects', icon: <Folder size={18} /> },
   ]
 
-  const projects = ['Risk Audit 2025', 'Test 1zzz']
+  useEffect(() => {
+    fetch('/list-projects')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setProjects(data)
+      })
+      .catch((err) => {
+        console.warn('⚠️ Failed to load projects:', err)
+        setProjects([])
+      })
+  }, [])
 
   return (
     <>
@@ -47,15 +63,17 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="border-t pt-4 space-y-2 text-sm text-gray-600">
-          <div className="flex items-center gap-2 text-gray-800 font-semibold">
+        <div className="border-t pt-4 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-gray-800 font-semibold mb-2">
             <Folder size={16} />
             Projects
-            <Plus size={16} className="ml-auto cursor-pointer" />
+            <Plus size={16} className="ml-auto cursor-pointer hover:text-gray-700" />
           </div>
-          <ul className="ml-6 list-disc">
+          <ul className="ml-6 list-disc space-y-1">
             {projects.map((p) => (
-              <li key={p}>{p}</li>
+              <li key={p.name} className="text-sm text-gray-700 truncate">
+                {p.name}
+              </li>
             ))}
           </ul>
         </div>
@@ -92,15 +110,17 @@ export default function Navbar() {
                 </Link>
               ))}
             </nav>
-            <div className="border-t mt-4 pt-4 space-y-2 text-sm text-gray-600">
-              <div className="flex items-center gap-2 font-semibold text-gray-800">
+            <div className="border-t mt-4 pt-4 text-sm text-gray-600">
+              <div className="flex items-center gap-2 font-semibold text-gray-800 mb-2">
                 <Folder size={16} />
                 Projects
-                <Plus size={16} className="ml-auto" />
+                <Plus size={16} className="ml-auto hover:text-gray-700" />
               </div>
-              <ul className="ml-6 list-disc">
+              <ul className="ml-6 list-disc space-y-1">
                 {projects.map((p) => (
-                  <li key={p}>{p}</li>
+                  <li key={p.name} className="text-sm text-gray-700 truncate">
+                    {p.name}
+                  </li>
                 ))}
               </ul>
             </div>

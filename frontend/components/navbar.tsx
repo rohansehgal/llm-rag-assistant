@@ -16,6 +16,7 @@ import {
 
 type Project = {
   name: string
+  slug: string
   created?: string
 }
 
@@ -29,12 +30,11 @@ export default function Navbar() {
     { href: '/stats', label: 'Statistics', icon: <BarChart3 size={18} /> },
     { href: '/settings', label: 'Settings', icon: <Settings size={18} /> },
     { href: '/image', label: 'Image Analysis', icon: <Image size={18} /> },
-    { href: '/project', label: 'Projects', icon: <Folder size={18} /> },
   ]
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/projects`)
-    .then((res) => res.json())
+      .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setProjects(data)
       })
@@ -71,10 +71,19 @@ export default function Navbar() {
           </div>
           <ul className="ml-6 list-disc space-y-1">
             {projects.map((p) => (
-              <li key={p.name} className="text-sm text-gray-700 truncate">
-                {p.name}
+              <li key={p.slug}>
+                <Link
+                  href={`/project/${p.slug}`}
+                  className="text-sm text-gray-700 hover:underline truncate block"
+                >
+                  {p.name}
+                </Link>
               </li>
             ))}
+            {/* Optional empty state
+            {projects.length === 0 && (
+              <li className="text-sm text-gray-400 italic">No projects yet</li>
+            )} */}
           </ul>
         </div>
       </aside>
@@ -118,10 +127,20 @@ export default function Navbar() {
               </div>
               <ul className="ml-6 list-disc space-y-1">
                 {projects.map((p) => (
-                  <li key={p.name} className="text-sm text-gray-700 truncate">
-                    {p.name}
+                  <li key={p.slug}>
+                    <Link
+                      href={`/project/${p.slug}`}
+                      className="text-sm text-gray-700 hover:underline truncate block"
+                      onClick={() => setOpen(false)}
+                    >
+                      {p.name}
+                    </Link>
                   </li>
                 ))}
+                {/* Optional empty state
+                {projects.length === 0 && (
+                  <li className="text-sm text-gray-400 italic">No projects yet</li>
+                )} */}
               </ul>
             </div>
           </div>

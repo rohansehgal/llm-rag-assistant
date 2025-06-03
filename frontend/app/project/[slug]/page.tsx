@@ -4,14 +4,18 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import ProjectFileUploadModal from "@/components/ProjectFileUploadModal";
+import ProjectFileTable from "@/components/ProjectFileTable";
 
 export default function ProjectPage() {
   const { slug } = useParams();
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // 🔁 used to re-render the file table
 
   useEffect(() => {
     document.title = `${slug} - Project`;
   }, [slug]);
+
+  const triggerRefresh = () => setRefreshKey((prev) => prev + 1); // 🚀 call this after upload
 
   return (
     <main className="p-6 text-gray-800">
@@ -31,21 +35,20 @@ export default function ProjectPage() {
           </button>
         </div>
 
-        {/* File Upload Modal */}
+        {/* Upload Modal */}
         <ProjectFileUploadModal
           isOpen={showUploadModal}
           onClose={() => setShowUploadModal(false)}
           projectName={slug as string}
-          onUploadSuccess={() => {
-            // refresh the file list or just close modal
-            setShowUploadModal(false)
-            // optionally trigger a fetch or re-render here
-          }}
+          onUploadSuccess={triggerRefresh} // 🔁 refresh files on success
         />
 
-        {/* Placeholder for rest of project page (instructions, file table, etc.) */}
+        {/* File Table */}
+        <ProjectFileTable key={refreshKey} projectSlug={slug as string} />
+
+        {/* Future sections: Instructions and step execution */}
         <div className="text-sm text-gray-500 mt-12">
-          File table, filters, and instructions will appear here...
+          Instructions and outputs will appear here...
         </div>
       </div>
     </main>

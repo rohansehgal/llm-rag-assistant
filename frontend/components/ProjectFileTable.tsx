@@ -23,7 +23,7 @@ export default function ProjectFileTable({ slug }: Props) {
 
   const fetchFiles = useCallback(async () => {
     try {
-      const res = await fetch(`/project/${slug}/files`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${slug}/files`);
       const data = await res.json();
       setFiles(data);
     } catch {
@@ -39,7 +39,7 @@ export default function ProjectFileTable({ slug }: Props) {
     if (!confirm(`Delete file "${filename}"?`)) return;
 
     try {
-      const res = await fetch(`/project/${slug}/delete-file`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${slug}/delete-file`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ filename }),

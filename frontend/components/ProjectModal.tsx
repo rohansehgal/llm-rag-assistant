@@ -8,9 +8,12 @@ import { X } from "lucide-react";
 interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onProjectCreated?: () => void; // ✅ Add this
+
 }
 
-export default function ProjectModal({ isOpen, onClose }: ProjectModalProps) {
+export default function ProjectModal({ isOpen, onClose, onProjectCreated }: ProjectModalProps) {
+
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -32,6 +35,7 @@ export default function ProjectModal({ isOpen, onClose }: ProjectModalProps) {
       const data = await res.json();
       if (res.ok && data.success && data.slug) {
         onClose();
+        onProjectCreated?.(); // ✅ trigger refresh
         router.push(`/project/${data.slug}`);
       } else {
         setError(data.error || "Something went wrong.");

@@ -1,12 +1,7 @@
-'use client';
-
 import type { Metadata } from "next";
-import { useState } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-import Navbar from "@/components/navbar";
-import ProjectModal from "@/components/ProjectModal";
+import LayoutClient from "./layoutClient"; // ✅ Add this
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,21 +20,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const [showModal, setShowModal] = useState(false);
-
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 flex`}
       >
-        <Navbar onAddProject={() => setShowModal(true)} />
-        <ProjectModal isOpen={showModal} onClose={() => setShowModal(false)} />
-        <div className="flex-1 min-h-screen overflow-y-auto">
-          {children}
-        </div>
+        <LayoutClient>{children}</LayoutClient>
       </body>
     </html>
   );

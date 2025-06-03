@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { forwardRef, useImperativeHandle, useState, useEffect } from 'react'
 import {
   Home,
   Upload,
@@ -19,23 +19,19 @@ type Project = {
   slug: string
 }
 
+export type NavbarHandle = {
+  refreshProjects: () => void
+}
+
 type NavbarProps = {
   onAddProject?: () => void
 }
 
-export default function Navbar({ onAddProject }: NavbarProps) {
+const Navbar = forwardRef<NavbarHandle, NavbarProps>(({ onAddProject }, ref) => {
   const [open, setOpen] = useState(false)
   const [projects, setProjects] = useState<Project[]>([])
 
-  const links = [
-    { href: '/ask', label: 'Home', icon: <Home size={18} /> },
-    { href: '/upload', label: 'Upload Manager', icon: <Upload size={18} /> },
-    { href: '/stats', label: 'Statistics', icon: <BarChart3 size={18} /> },
-    { href: '/settings', label: 'Settings', icon: <Settings size={18} /> },
-    { href: '/image', label: 'Image Analysis', icon: <Image size={18} /> },
-  ]
-
-  useEffect(() => {
+  const fetchProjects = () => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/projects`)
       .then((res) => res.json())
       .then((data) => {
@@ -45,7 +41,25 @@ export default function Navbar({ onAddProject }: NavbarProps) {
         console.warn('⚠️ Failed to load projects:', err)
         setProjects([])
       })
+  }
+
+  // Initial load
+  useEffect(() => {
+    fetchProjects()
   }, [])
+
+  // Expose refreshProjects() to parent via ref
+  useImperativeHandle(ref, () => ({
+    refreshProjects: fetchProjects,
+  }))
+
+  const links = [
+    { href: '/ask', label: 'Home', icon: <Home size={18} /> },
+    { href: '/upload', label: 'Upload Manager', icon: <Upload size={18} /> },
+    { href: '/stats', label: 'Statistics', icon: <BarChart3 size={18} /> },
+    { href: '/settings', label: 'Settings', icon: <Settings size={18} /> },
+    { href: '/image', label: 'Image Analysis', icon: <Image size={18} /> },
+  ]
 
   return (
     <>
@@ -65,12 +79,16 @@ export default function Navbar({ onAddProject }: NavbarProps) {
             </Link>
           ))}
 
-          {/* Projects Section (inline below other nav items) */}
+          {/* Projects Section */}
           <div className="mt-2 ml-7 space-y-1">
             <div className="flex items-center text-sm text-gray-700">
               <Folder size={16} className="mr-2 text-gray-500" />
               Projects
-              <Plus size={16} className="ml-auto cursor-pointer hover:text-gray-800" onClick={onAddProject} />
+              <Plus
+                size={16}
+                className="ml-auto cursor-pointer hover:text-gray-800"
+                onClick={onAddProject}
+              />
             </div>
             <ul className="ml-6 list-disc space-y-1">
               {projects.map((p) => (
@@ -125,7 +143,11 @@ export default function Navbar({ onAddProject }: NavbarProps) {
                 <div className="flex items-center text-sm text-gray-700">
                   <Folder size={16} className="mr-2 text-gray-500" />
                   Projects
-                  <Plus size={16} className="ml-auto hover:text-gray-800" onClick={onAddProject} />
+                  <Plus
+                    size={16}
+                    className="ml-auto hover:text-gray-800"
+                    onClick={onAddProject}
+                  />
                 </div>
                 <ul className="ml-6 list-disc space-y-1">
                   {projects.map((p) => (
@@ -147,4 +169,7 @@ export default function Navbar({ onAddProject }: NavbarProps) {
       )}
     </>
   )
-}
+})
+
+Navbar.displayName = 'Navbar'
+export default Navbar

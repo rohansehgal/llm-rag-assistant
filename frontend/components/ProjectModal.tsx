@@ -40,7 +40,7 @@ export default function ProjectModal({ isOpen, onClose, onProjectCreated }: Proj
       } else {
         setError(data.error || "Something went wrong.");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to create project.");
     } finally {
       setSubmitting(false);

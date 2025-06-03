@@ -1,17 +1,32 @@
-
 'use client'
+
+import React, { useState, useEffect, useRef } from 'react'
 
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5050';
 
-import React, { useState, useRef } from 'react'
-
 export default function AskPage() {
   const [prompt, setPrompt] = useState('')
-  const [model, setModel] = useState('llama3.2')
+  const [model, setModel] = useState('')
+  const [allowedModels, setAllowedModels] = useState<string[]>([])
   const [response, setResponse] = useState('')
   const [loading, setLoading] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Fetch settings on mount
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        setAllowedModels(data.allowed_text_models || ['llama3.2', 'mistral', 'phi3'])
+        setModel(data.default_text_model || 'llama3.2')
+      })
+      .catch(err => {
+        console.warn("⚠️ Failed to load settings, using defaults.")
+        setAllowedModels(['llama3.2', 'mistral', 'phi3'])
+        setModel('llama3.2')
+      })
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -98,7 +113,7 @@ export default function AskPage() {
           <div>
             <label className="text-sm font-medium block mt-6 mb-2">Select Model:</label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {['llama3.2', 'mistral', 'phi3'].map((m) => (
+              {allowedModels.map((m) => (
                 <label
                   key={m}
                   className={`border p-4 rounded-lg cursor-pointer ${

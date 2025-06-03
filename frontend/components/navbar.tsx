@@ -18,7 +18,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
 
   const links = [
-    { href: '/', label: 'Home', icon: <Home size={18} /> },
+    { href: '/ask', label: 'Home', icon: <Home size={18} /> },
     { href: '/upload', label: 'Upload Manager', icon: <Upload size={18} /> },
     { href: '/stats', label: 'Statistics', icon: <BarChart3 size={18} /> },
     { href: '/settings', label: 'Settings', icon: <Settings size={18} /> },

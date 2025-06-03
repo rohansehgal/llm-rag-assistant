@@ -84,10 +84,10 @@ export default function ImagePage() {
         if (done) break;
         setResponse((prev) => prev + decoder.decode(value, { stream: true }));
       }
-    } catch (err: any) {
-      console.error('❌ Image analysis failed:', err);
-      setResponse(err?.message || '⚠️ Failed to analyze image.');
-    } finally {
+    }  catch (err: unknown) {
+  const errorMsg = err instanceof Error ? err.message : '⚠️ Failed to analyze image.';
+  setResponse(errorMsg);
+} finally {
       setLoading(false);
     }
   };

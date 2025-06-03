@@ -49,7 +49,7 @@ export default function ProjectFileUploadModal({
         onUploadSuccess();
         onClose();
       }
-    } catch (_e) {
+    } catch  {
       alert("❌ Upload failed");
     } finally {
       setSubmitting(false);

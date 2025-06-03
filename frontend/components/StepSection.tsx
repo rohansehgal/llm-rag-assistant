@@ -50,7 +50,7 @@ export default function StepSection({ step, title, slug }: StepSectionProps) {
       const reader = stream.getReader();
       const decoder = new TextDecoder();
 
-      let fullText = "";
+     let fullText = "";
 
       while (true) {
         const { done, value } = await reader.read();
@@ -59,8 +59,8 @@ export default function StepSection({ step, title, slug }: StepSectionProps) {
         setOutput((prev) => prev + decoder.decode(value));
       }
     } catch (err) {
-      setOutput("❌ Error while streaming response.");
-    } finally {
+        console.error("❌ Streaming error:", err);
+      } finally {
       setLoading(false);
     }
   };

@@ -17,7 +17,6 @@ import {
 type Project = {
   name: string
   slug: string
-  created?: string
 }
 
 export default function Navbar() {
@@ -61,31 +60,27 @@ export default function Navbar() {
               <span className="text-sm font-medium">{label}</span>
             </Link>
           ))}
-        </nav>
 
-        <div className="border-t pt-4 text-sm text-gray-600">
-          <div className="flex items-center gap-2 text-gray-800 font-semibold mb-2">
-            <Folder size={16} />
-            Projects
-            <Plus size={16} className="ml-auto cursor-pointer hover:text-gray-700" />
+          {/* Projects Section (inline below Image Analysis) */}
+          <div className="mt-2 ml-7 space-y-1">
+            <div className="flex items-center text-sm text-gray-700">
+              Projects
+              <Plus size={16} className="ml-auto cursor-pointer hover:text-gray-800" />
+            </div>
+            <ul className="ml-4 list-disc space-y-1">
+              {projects.map((p) => (
+                <li key={p.slug}>
+                  <Link
+                    href={`/project/${p.slug}`}
+                    className="text-sm text-gray-700 hover:underline truncate block"
+                  >
+                    {p.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="ml-6 list-disc space-y-1">
-            {projects.map((p) => (
-              <li key={p.slug}>
-                <Link
-                  href={`/project/${p.slug}`}
-                  className="text-sm text-gray-700 hover:underline truncate block"
-                >
-                  {p.name}
-                </Link>
-              </li>
-            ))}
-            {/* Optional empty state
-            {projects.length === 0 && (
-              <li className="text-sm text-gray-400 italic">No projects yet</li>
-            )} */}
-          </ul>
-        </div>
+        </nav>
       </aside>
 
       {/* Mobile Toggle Button */}
@@ -106,6 +101,7 @@ export default function Navbar() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-2xl font-bold text-gray-800 mb-6">SecureAI</div>
+
             <nav className="space-y-3">
               {links.map(({ href, label, icon }) => (
                 <Link
@@ -118,31 +114,28 @@ export default function Navbar() {
                   <span className="text-sm font-medium">{label}</span>
                 </Link>
               ))}
-            </nav>
-            <div className="border-t mt-4 pt-4 text-sm text-gray-600">
-              <div className="flex items-center gap-2 font-semibold text-gray-800 mb-2">
-                <Folder size={16} />
-                Projects
-                <Plus size={16} className="ml-auto hover:text-gray-700" />
+
+              {/* Mobile Projects section */}
+              <div className="ml-7 space-y-1 mt-1">
+                <div className="flex items-center text-sm text-gray-700">
+                  Projects
+                  <Plus size={16} className="ml-auto hover:text-gray-800" />
+                </div>
+                <ul className="ml-4 list-disc space-y-1">
+                  {projects.map((p) => (
+                    <li key={p.slug}>
+                      <Link
+                        href={`/project/${p.slug}`}
+                        className="text-sm text-gray-700 hover:underline truncate block"
+                        onClick={() => setOpen(false)}
+                      >
+                        {p.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="ml-6 list-disc space-y-1">
-                {projects.map((p) => (
-                  <li key={p.slug}>
-                    <Link
-                      href={`/project/${p.slug}`}
-                      className="text-sm text-gray-700 hover:underline truncate block"
-                      onClick={() => setOpen(false)}
-                    >
-                      {p.name}
-                    </Link>
-                  </li>
-                ))}
-                {/* Optional empty state
-                {projects.length === 0 && (
-                  <li className="text-sm text-gray-400 italic">No projects yet</li>
-                )} */}
-              </ul>
-            </div>
+            </nav>
           </div>
         </div>
       )}

@@ -61,9 +61,9 @@ export default function ImagePage() {
     setResponse('');
 
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('model', model);
-    formData.append('prompt', prompt.trim());
+    formData.append('image', file);
+    formData.append('image_model', model);
+    formData.append('image_prompt', prompt.trim());
 
     try {
       const res = await fetch(`${baseUrl}/analyze-image`, {

@@ -44,7 +44,7 @@ export default function ProjectPage() {
         />
 
         {/* File Table */}
-        <ProjectFileTable key={refreshKey} projectSlug={slug as string} />
+        <ProjectFileTable key={refreshKey} slug={slug as string} />
 
         {/* Future sections: Instructions and step execution */}
         <div className="text-sm text-gray-500 mt-12">

@@ -1,7 +1,7 @@
+// components/ProjectFileTable.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { Trash2, Eye } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
 
 interface FileEntry {
   filename: string;
@@ -10,94 +10,85 @@ interface FileEntry {
   uploaded_at: string;
 }
 
-export default function ProjectFileTable({ projectSlug }: { projectSlug: string }) {
-  const [files, setFiles] = useState<FileEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+interface Props {
+  slug: string;
+}
 
-  const fetchFiles = async () => {
+export default function ProjectFileTable({ slug }: Props) {
+  const [files, setFiles] = useState<FileEntry[]>([]);
+
+  // ✅ Memoized function to fetch files
+  const fetchFiles = useCallback(async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${projectSlug}/files`);
-      if (res.ok) {
-        const data = await res.json();
-        setFiles(data);
-      }
-    } catch (e) {
-      console.warn("⚠️ Failed to fetch project files");
-    } finally {
-      setLoading(false);
+      const res = await fetch(`/project/${slug}/files`);
+      const data = await res.json();
+      setFiles(data);
+    } catch {
+      console.error("❌ Failed to fetch project files.");
     }
-  };
+  }, [slug]);
 
   useEffect(() => {
     fetchFiles();
-  }, [projectSlug]);
+  }, [fetchFiles]); // ✅ Warning resolved: all deps included
 
   const handleDelete = async (filename: string) => {
-    const confirmed = confirm(`Delete file "${filename}"?`);
-    if (!confirmed) return;
+    if (!confirm(`Delete file "${filename}"?`)) return;
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${projectSlug}/delete-file`, {
+      const res = await fetch(`/project/${slug}/delete-file`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ filename }),
       });
 
       if (res.ok) {
-        setFiles((prev) => prev.filter((f) => f.filename !== filename));
+        fetchFiles();
       } else {
-        alert("❌ Failed to delete file");
+        alert("❌ Failed to delete file.");
       }
-    } catch (e) {
-      alert("❌ Error deleting file");
+    } catch {
+      alert("❌ Failed to delete file.");
     }
   };
 
-  if (loading) return <p className="text-sm text-gray-500">Loading files...</p>;
-
-  if (files.length === 0) {
-    return <p className="text-sm text-gray-500">No files uploaded yet.</p>;
-  }
-
   return (
-    <div className="overflow-x-auto mt-6">
-      <table className="w-full text-sm border rounded-lg bg-white shadow-sm">
-        <thead className="bg-gray-100 text-left text-gray-700 font-medium">
-          <tr>
-            <th className="px-4 py-2">File</th>
-            <th className="px-4 py-2">Category</th>
-            <th className="px-4 py-2">Size</th>
-            <th className="px-4 py-2">Uploaded</th>
-            <th className="px-4 py-2 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {files.map((f) => (
-            <tr key={f.filename} className="border-t text-gray-800">
-              <td className="px-4 py-2">{f.filename}</td>
-              <td className="px-4 py-2">{f.category}</td>
-              <td className="px-4 py-2">{f.size_kb} KB</td>
-              <td className="px-4 py-2">{new Date(f.uploaded_at).toLocaleDateString()}</td>
-              <td className="px-4 py-2 text-right flex gap-3 justify-end">
-                <a
-                  href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${projectSlug}/files/${f.filename}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="View file"
-                >
-                  <Eye size={16} className="text-gray-600 hover:text-black" />
-                </a>
-                <button
-                  onClick={() => handleDelete(f.filename)}
-                  title="Delete file"
-                >
-                  <Trash2 size={16} className="text-red-500 hover:text-red-700" />
-                </button>
-              </td>
+    <div className="overflow-x-auto border rounded-xl bg-white p-4 text-sm shadow">
+      <h2 className="text-base font-semibold text-gray-800 mb-3">Uploaded Files</h2>
+
+      {files.length === 0 ? (
+        <p className="text-gray-500">No files uploaded yet.</p>
+      ) : (
+        <table className="w-full table-auto text-left">
+          <thead className="border-b text-gray-600">
+            <tr>
+              <th className="py-1 pr-2">File Name</th>
+              <th className="py-1 pr-2">Category</th>
+              <th className="py-1 pr-2">Size</th>
+              <th className="py-1 pr-2">Uploaded</th>
+              <th className="py-1 pr-2">Action</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {files.map((file) => (
+              <tr key={file.filename} className="border-b last:border-none">
+                <td className="py-1 pr-2">{file.filename}</td>
+                <td className="py-1 pr-2">{file.category}</td>
+                <td className="py-1 pr-2">{file.size_kb} KB</td>
+                <td className="py-1 pr-2">{file.uploaded_at}</td>
+                <td className="py-1 pr-2">
+                  <button
+                    onClick={() => handleDelete(file.filename)}
+                    className="text-red-600 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

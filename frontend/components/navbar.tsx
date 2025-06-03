@@ -31,7 +31,7 @@ export default function Navbar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex md:flex-col w-64 bg-white border-r h-screen p-4 space-y-6">
+      <aside className="hidden md:flex md:flex-col w-64 bg-white border-r border-gray-200 h-screen p-4 space-y-6">
         <div className="text-2xl font-bold text-gray-800">SecureAI</div>
 
         <nav className="flex-1 space-y-2">

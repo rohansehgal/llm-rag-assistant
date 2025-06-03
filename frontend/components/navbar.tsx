@@ -19,7 +19,11 @@ type Project = {
   slug: string
 }
 
-export default function Navbar() {
+type NavbarProps = {
+  onAddProject?: () => void
+}
+
+export default function Navbar({ onAddProject }: NavbarProps) {
   const [open, setOpen] = useState(false)
   const [projects, setProjects] = useState<Project[]>([])
 
@@ -61,19 +65,19 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* Projects Section (same level as others) */}
-          <div className="mt-2">
-            <div className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded cursor-pointer">
-              <Folder size={18} />
-              <span className="text-sm font-medium">Projects</span>
-              <Plus size={16} className="ml-auto hover:text-gray-800" />
+          {/* Projects Section (inline below other nav items) */}
+          <div className="mt-2 ml-7 space-y-1">
+            <div className="flex items-center text-sm text-gray-700">
+              <Folder size={16} className="mr-2 text-gray-500" />
+              Projects
+              <Plus size={16} className="ml-auto cursor-pointer hover:text-gray-800" onClick={onAddProject} />
             </div>
-            <ul className="ml-8 list-disc text-sm text-gray-700 mt-1 space-y-1">
+            <ul className="ml-6 list-disc space-y-1">
               {projects.map((p) => (
                 <li key={p.slug}>
                   <Link
                     href={`/project/${p.slug}`}
-                    className="hover:underline truncate block"
+                    className="text-sm text-gray-700 hover:underline truncate block"
                   >
                     {p.name}
                   </Link>
@@ -116,19 +120,19 @@ export default function Navbar() {
                 </Link>
               ))}
 
-              {/* Mobile Projects Section */}
-              <div className="mt-4">
-                <div className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded cursor-pointer">
-                  <Folder size={18} />
-                  <span className="text-sm font-medium">Projects</span>
-                  <Plus size={16} className="ml-auto hover:text-gray-800" />
+              {/* Mobile Projects section */}
+              <div className="ml-7 space-y-1 mt-1">
+                <div className="flex items-center text-sm text-gray-700">
+                  <Folder size={16} className="mr-2 text-gray-500" />
+                  Projects
+                  <Plus size={16} className="ml-auto hover:text-gray-800" onClick={onAddProject} />
                 </div>
-                <ul className="ml-8 list-disc text-sm text-gray-700 mt-1 space-y-1">
+                <ul className="ml-6 list-disc space-y-1">
                   {projects.map((p) => (
                     <li key={p.slug}>
                       <Link
                         href={`/project/${p.slug}`}
-                        className="hover:underline truncate block"
+                        className="text-sm text-gray-700 hover:underline truncate block"
                         onClick={() => setOpen(false)}
                       >
                         {p.name}

@@ -33,8 +33,8 @@ export default function Navbar() {
   ]
 
   useEffect(() => {
-    fetch('/list-projects')
-      .then((res) => res.json())
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/projects`)
+    .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setProjects(data)
       })

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PageWrapper from '@/components/PageWrapper'
+
 
 const TEXT_MODEL_OPTIONS = ["llama", "mistral", "phi"];
 const IMAGE_MODEL_OPTIONS = ["bakllava", "llava-llama3"];
@@ -58,8 +60,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-10 space-y-10">
+    <PageWrapper>
       <h1 className="text-3xl font-bold">Settings</h1>
+      <div className="space-y-10">
 
       {/* Text Model Settings */}
       <section className="bg-white p-6 rounded-xl shadow-sm border">
@@ -144,6 +147,7 @@ export default function SettingsPage() {
         </button>
         <p className="text-sm text-gray-500">{status}</p>
       </div>
-    </main>
+      </div>
+      </PageWrapper>
   );
 }

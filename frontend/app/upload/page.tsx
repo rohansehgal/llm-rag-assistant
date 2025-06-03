@@ -1,6 +1,9 @@
 "use client"
 
 import React, { useRef, useState, useEffect } from 'react'
+
+import PageWrapper from '@/components/PageWrapper'
+
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5050"
 
 interface UploadedFile {
@@ -72,8 +75,7 @@ export default function UploadPage() {
   }
 
   return (
-    <main className="bg-white text-gray-800 font-sans min-h-screen p-6">
-      <div className="max-w-5xl mx-auto">
+    <PageWrapper>
         <h1 className="text-2xl font-bold mb-1">Upload Manager</h1>
         <p className="text-sm text-gray-500 mb-4">Manage your uploaded files and documents</p>
 
@@ -199,7 +201,6 @@ export default function UploadPage() {
             )}
           </tbody>
         </table>
-      </div>
-    </main>
+        </PageWrapper>
   )
 }

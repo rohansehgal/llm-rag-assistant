@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PageWrapper from '@/components/PageWrapper'
+
 
 type StatEntry = {
   question: string;
@@ -23,8 +25,8 @@ export default function StatsPage() {
   }, []);
 
   return (
-    <main className="p-6 bg-gray-50 min-h-screen text-gray-800 font-sans">
-      <div className="max-w-6xl mx-auto">
+<PageWrapper>
+
         <h1 className="text-2xl font-bold mb-2">Statistics</h1>
         <p className="text-sm text-gray-500 mb-6">
           Latest 20 questions asked and their associated models
@@ -54,7 +56,6 @@ export default function StatsPage() {
             </tbody>
           </table>
         </div>
-      </div>
-    </main>
+        </PageWrapper>
   );
 }

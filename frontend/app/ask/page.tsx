@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import PageWrapper from '@/components/PageWrapper'
 
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5050';
 
@@ -13,7 +14,6 @@ export default function AskPage() {
   const [file, setFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Fetch settings on mount
   useEffect(() => {
     fetch('/api/settings')
       .then(res => res.json())
@@ -72,97 +72,97 @@ export default function AskPage() {
   }
 
   return (
-    <main className="bg-white text-gray-800 font-sans min-h-screen p-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-semibold mb-2">Text Analysis</h1>
-        <p className="text-sm text-gray-600 mb-6">
-          Enter your query, upload a file (optional), and select a model to receive a streaming response.
-        </p>
+    <PageWrapper>
+      <h1 className="text-2xl font-semibold mb-2">Text Analysis</h1>
+      <p className="text-sm text-gray-600 mb-6">
+        Enter your query, upload a file (optional), and select a model to receive a streaming response.
+      </p>
 
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label className="text-sm font-medium block mb-1">Enter your question:</label>
-            <textarea
-              rows={4}
-              className="w-full border border-gray-300 p-3 rounded-lg text-sm"
-              placeholder="Ask me anything..."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label className="text-sm font-medium block mb-1">Enter your question:</label>
+          <textarea
+            rows={4}
+            className="w-full border border-gray-300 p-3 rounded-lg text-sm"
+            placeholder="Ask me anything..."
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium block mt-6 mb-2">Attach a PDF for RAG (optional):</label>
+          <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center text-sm text-gray-500">
+            <input
+              type="file"
+              accept=".pdf,.docx,.txt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+              onChange={handleFileChange}
+              ref={fileInputRef}
+              className="hidden"
+              id="uploadFileInput"
             />
+            <label htmlFor="uploadFileInput" className="cursor-pointer">
+              Drag and drop a PDF, or click to browse
+              <p className="text-xs mt-1">Supports .PDF files up to 25MB</p>
+            </label>
           </div>
+          {file && <p className="text-sm text-gray-600 mt-2">📎 {file.name}</p>}
+        </div>
 
-          <div>
-            <label className="text-sm font-medium block mt-6 mb-2">Attach a PDF for RAG (optional):</label>
-            <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center text-sm text-gray-500">
-              <input
-                type="file"
-                accept=".pdf,.docx,.txt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
-                onChange={handleFileChange}
-                ref={fileInputRef}
-                className="hidden"
-                id="uploadFileInput"
-              />
-              <label htmlFor="uploadFileInput" className="cursor-pointer">
-                Drag and drop a PDF, or click to browse
-                <p className="text-xs mt-1">Supports .PDF files up to 25MB</p>
+        <div>
+          <label className="text-sm font-medium block mt-6 mb-2">Select Model:</label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {allowedModels.map((m) => (
+              <label
+                key={m}
+                className={`border p-4 rounded-lg cursor-pointer ${
+                  model === m ? 'border-blue-600 bg-blue-50' : 'border-gray-200'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="model"
+                  value={m}
+                  checked={model === m}
+                  onChange={() => setModel(m)}
+                  disabled={loading}
+                  className="hidden"
+                />
+                <div className="text-sm font-semibold">
+                  {m === 'llama3.2' ? 'LLaMA 3' : m.charAt(0).toUpperCase() + m.slice(1)}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">Ollama Text Model</div>
               </label>
-            </div>
-            {file && <p className="text-sm text-gray-600 mt-2">📎 {file.name}</p>}
+            ))}
           </div>
-
-          <div>
-            <label className="text-sm font-medium block mt-6 mb-2">Select Model:</label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {allowedModels.map((m) => (
-                <label
-                  key={m}
-                  className={`border p-4 rounded-lg cursor-pointer ${
-                    model === m ? 'border-blue-600 bg-blue-50' : 'border-gray-200'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="model"
-                    value={m}
-                    checked={model === m}
-                    onChange={() => setModel(m)}
-                    disabled={loading}
-                    className="hidden"
-                  />
-                  <div className="text-sm font-semibold">{m === 'llama3.2' ? 'LLaMA 3' : m.charAt(0).toUpperCase() + m.slice(1)}</div>
-                  <div className="text-xs text-gray-500 mt-1">Ollama Text Model</div>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gray-800 text-white py-2 rounded-lg hover:bg-gray-900 disabled:opacity-50"
-            >
-              {loading ? 'Asking...' : 'Ask'}
-            </button>
-          </div>
-        </form>
+        </div>
 
         <div className="mt-6">
-          {loading && (
-            <div className="text-sm text-gray-500 mb-2">⏳ In progress...</div>
-          )}
-          {response && (
-            <div className="mt-6 border border-gray-300 rounded-lg bg-white">
-              <div className="bg-gray-100 border-b border-gray-300 rounded-t-lg px-4 py-2 text-sm text-gray-600 font-medium">
-                Response from {model}
-              </div>
-              <div className="p-4 text-sm text-gray-800 whitespace-pre-wrap font-mono leading-relaxed">
-                {response}
-              </div>
-            </div>
-          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gray-800 text-white py-2 rounded-lg hover:bg-gray-900 disabled:opacity-50"
+          >
+            {loading ? 'Asking...' : 'Ask'}
+          </button>
         </div>
+      </form>
+
+      <div className="mt-6">
+        {loading && (
+          <div className="text-sm text-gray-500 mb-2">⏳ In progress...</div>
+        )}
+        {response && (
+          <div className="mt-6 border border-gray-300 rounded-lg bg-white">
+            <div className="bg-gray-100 border-b border-gray-300 rounded-t-lg px-4 py-2 text-sm text-gray-600 font-medium">
+              Response from {model}
+            </div>
+            <div className="p-4 text-sm text-gray-800 whitespace-pre-wrap font-mono leading-relaxed">
+              {response}
+            </div>
+          </div>
+        )}
       </div>
-    </main>
+    </PageWrapper>
   )
 }

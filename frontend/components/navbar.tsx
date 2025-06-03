@@ -8,6 +8,7 @@ import {
   BarChart3,
   Settings,
   Image,
+  Folder,
   Plus,
   Menu,
   X,
@@ -60,13 +61,14 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* Projects Section (inline below Image Analysis) */}
-          <div className="mt-2 ml-7 space-y-1">
-            <div className="flex items-center text-sm text-gray-700">
-              Projects
-              <Plus size={16} className="ml-auto cursor-pointer hover:text-gray-800" />
+          {/* Projects Section (nested under Image Analysis) */}
+          <div className="mt-1 ml-8 space-y-1">
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <Folder size={14} className="text-gray-500" />
+              <span>Projects</span>
+              <Plus size={14} className="ml-auto cursor-pointer hover:text-gray-800" />
             </div>
-            <ul className="ml-4 list-disc space-y-1">
+            <ul className="ml-6 list-disc space-y-1">
               {projects.map((p) => (
                 <li key={p.slug}>
                   <Link
@@ -115,12 +117,13 @@ export default function Navbar() {
               ))}
 
               {/* Mobile Projects section */}
-              <div className="ml-7 space-y-1 mt-1">
-                <div className="flex items-center text-sm text-gray-700">
-                  Projects
-                  <Plus size={16} className="ml-auto hover:text-gray-800" />
+              <div className="ml-8 space-y-1 mt-1">
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <Folder size={14} className="text-gray-500" />
+                  <span>Projects</span>
+                  <Plus size={14} className="ml-auto hover:text-gray-800" />
                 </div>
-                <ul className="ml-4 list-disc space-y-1">
+                <ul className="ml-6 list-disc space-y-1">
                   {projects.map((p) => (
                     <li key={p.slug}>
                       <Link

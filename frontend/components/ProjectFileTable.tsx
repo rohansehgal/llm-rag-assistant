@@ -1,4 +1,3 @@
-// components/ProjectFileTable.tsx
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -15,11 +14,8 @@ interface Props {
   slug: string;
 }
 
-const CATEGORIES = ["All", "Site Notes", "Gap Analysis", "Recommendations", "Template"];
-
 export default function ProjectFileTable({ slug }: Props) {
   const [files, setFiles] = useState<FileEntry[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("All");
 
   const fetchFiles = useCallback(async () => {
     try {
@@ -55,78 +51,53 @@ export default function ProjectFileTable({ slug }: Props) {
     }
   };
 
-  const visibleFiles =
-    selectedCategory === "All"
-      ? files
-      : files.filter((f) => f.category === selectedCategory);
-
   return (
-    <div className="text-sm mt-8">
-      {/* Filter chips */}
-      <div className="mb-3 flex gap-2 flex-wrap">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-3 py-1 rounded-full border ${
-              selectedCategory === cat
-                ? "bg-gray-900 text-white"
-                : "bg-white text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+    <div className="max-w-6xl mx-auto overflow-x-auto border border-gray-200 rounded-xl bg-white p-4 text-sm shadow">
+      <h2 className="text-base font-semibold text-gray-800 mb-3">Uploaded Files</h2>
 
-      {/* Table */}
-      <div className="overflow-x-auto border rounded-xl bg-white p-4 shadow">
-        <h2 className="text-base font-semibold text-gray-800 mb-3">Uploaded Files</h2>
-
-        {visibleFiles.length === 0 ? (
-          <p className="text-gray-500">No files uploaded yet.</p>
-        ) : (
-          <table className="w-full table-auto text-left border-collapse">
-            <thead className="border-b text-gray-600">
-              <tr>
-                <th className="py-1.5 px-2">File Name</th>
-                <th className="py-1.5 px-2">Category</th>
-                <th className="py-1.5 px-2">Size</th>
-                <th className="py-1.5 px-2">Uploaded</th>
-                <th className="py-1.5 px-2">Actions</th>
+      {files.length === 0 ? (
+        <p className="text-gray-500">No files uploaded yet.</p>
+      ) : (
+        <table className="w-full table-auto text-left">
+          <thead className="border-b border-gray-200 text-gray-600">
+            <tr>
+              <th className="py-1 pr-2">File Name</th>
+              <th className="py-1 pr-2">Category</th>
+              <th className="py-1 pr-2">Size</th>
+              <th className="py-1 pr-2">Uploaded</th>
+              <th className="py-1 pr-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {files.map((file) => (
+              <tr key={file.filename} className="border-b border-gray-200 last:border-none">
+                <td className="py-1 pr-2">{file.filename}</td>
+                <td className="py-1 pr-2">{file.category}</td>
+                <td className="py-1 pr-2">{file.size_kb} KB</td>
+                <td className="py-1 pr-2">{file.uploaded_at}</td>
+                <td className="py-1 pr-2 flex gap-3">
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${slug}/files/${file.filename}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-500 hover:text-gray-700"
+                    title="View file"
+                  >
+                    <Eye size={16} />
+                  </a>
+                  <button
+                    onClick={() => handleDelete(file.filename)}
+                    className="text-gray-500 hover:text-gray-700"
+                    title="Delete file"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {visibleFiles.map((file) => (
-                <tr key={file.filename} className="border-b last:border-none">
-                  <td className="py-1.5 px-2">{file.filename}</td>
-                  <td className="py-1.5 px-2">{file.category}</td>
-                  <td className="py-1.5 px-2">{file.size_kb} KB</td>
-                  <td className="py-1.5 px-2">{file.uploaded_at}</td>
-                  <td className="py-1.5 px-2">
-                    <div className="flex gap-3 items-center">
-                      <a
-                        href={`/project/${slug}/files/${file.filename}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-gray-800"
-                      >
-                        <Eye size={16} />
-                      </a>
-                      <button
-                        onClick={() => handleDelete(file.filename)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

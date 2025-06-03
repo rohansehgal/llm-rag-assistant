@@ -11,7 +11,8 @@ export async function GET() {
   try {
     const file = await fs.readFile(settingsFile, "utf-8");
     return NextResponse.json(JSON.parse(file));
-  } catch (err) {
+  } catch (error) {
+    console.warn("⚠️ Falling back to default settings:", (error as Error).message);
     // Return default settings if file doesn't exist
     return NextResponse.json({
       allowed_text_models: ["llama", "mistral", "phi"],

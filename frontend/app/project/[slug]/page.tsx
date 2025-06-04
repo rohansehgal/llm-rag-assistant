@@ -1,4 +1,3 @@
-// app/project/[slug]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -34,15 +33,27 @@ export default function ProjectPage() {
   return (
     <main className="p-6 text-gray-800">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold mb-1 capitalize">
-          {projectName || resolvedSlug || "Loading..."}
-        </h1>
+        <h1 className="text-2xl font-bold mb-1 capitalize">{projectName || resolvedSlug}</h1>
         <p className="text-sm text-gray-500 mb-6">
           Manage instructions, files, and outputs for this project.
         </p>
-  
+
         {resolvedSlug && (
           <>
+            <div className="border rounded-xl bg-white shadow-sm p-5 mb-8">
+              <h2 className="text-lg font-semibold flex items-center gap-2 mb-1">
+                <span className="text-gray-700">📝 Project Instructions</span>
+              </h2>
+              <p className="text-sm text-gray-500 mb-4">
+                Define and run step-by-step tasks for this project.
+              </p>
+
+              {/* Step sections */}
+              <StepSection slug={resolvedSlug} step="plan" title="Plan Instructions" />
+              <StepSection slug={resolvedSlug} step="write" title="Write Draft" />
+              <StepSection slug={resolvedSlug} step="check" title="Check Quality" />
+            </div>
+
             {/* Upload Button */}
             <div className="text-right mb-4">
               <button
@@ -52,7 +63,7 @@ export default function ProjectPage() {
                 + Upload File
               </button>
             </div>
-  
+
             {/* Upload Modal */}
             <ProjectFileUploadModal
               isOpen={showUploadModal}
@@ -60,16 +71,9 @@ export default function ProjectPage() {
               projectName={resolvedSlug}
               onUploadSuccess={() => {}}
             />
-  
+
             {/* File Table */}
             <ProjectFileTable slug={resolvedSlug} />
-  
-            {/* Step Instructions */}
-            <div className="mt-12 space-y-6">
-              <StepSection slug={resolvedSlug} step="plan" title="Plan Instructions" />
-              <StepSection slug={resolvedSlug} step="write" title="Write Draft" />
-              <StepSection slug={resolvedSlug} step="check" title="Check Quality" />
-            </div>
           </>
         )}
       </div>

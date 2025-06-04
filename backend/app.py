@@ -1026,6 +1026,14 @@ def api_get_project(slug):
         "instructions": instructions
     })
 
+@app.route("/api/project/<slug>/instructions", methods=["GET"])
+def api_get_instructions(slug):
+    return get_instructions(slug)  # reuse existing logic
+
+@app.route("/api/project/<slug>/instructions", methods=["POST"])
+def api_save_instructions(slug):
+    return save_instructions(slug)  # reuse existing logic
+
 
 if __name__ == "__main__":
     app.run(debug=False, use_reloader=False)

@@ -1,7 +1,6 @@
-// components/StepSection.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface StepSectionProps {
   step: "plan" | "write" | "check";
@@ -18,11 +17,42 @@ export default function StepSection({ step, slug, title }: StepSectionProps) {
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ✅ Load saved prompts on mount
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${slug}/instructions`)
+      .then(res => res.json())
+      .then(data => {
+        const stepData = data?.[step];
+        if (stepData) {
+          setSystemPrompt(stepData.system || "");
+          setUserPrompt(stepData.user || "");
+          setSaved(true);
+        }
+      })
+      .catch(() => {
+        console.warn("⚠️ Failed to load instructions");
+      });
+  }, [slug, step]);
+
   const toggleExpanded = () => setExpanded((prev) => !prev);
 
-  const handleSave = () => {
-    setSaved(true);
+  const handleSave = async () => {
     setEditing(false);
+    setSaved(true);
+
+    const payload = {
+      [step]: { system: systemPrompt, user: userPrompt },
+    };
+
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${slug}/instructions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch {
+      console.error("❌ Failed to save instructions");
+    }
   };
 
   const handleGenerate = async () => {
@@ -54,20 +84,16 @@ export default function StepSection({ step, slug, title }: StepSectionProps) {
         setOutput((prev) => prev + chunk);
       }
     } catch {
-      console.error("❌ Streaming error");
+      setOutput("[Error during generation]");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section className="mb-6 border border-gray-200 rounded-xl p-4 bg-white">
-      <h2
-        className="text-base font-medium mb-2 cursor-pointer flex justify-between items-center"
-        onClick={toggleExpanded}
-      >
+    <section className="mb-6 border border-gray-200 rounded-xl p-4 bg-white shadow-sm">
+      <h2 className="text-lg font-semibold mb-2 cursor-pointer" onClick={toggleExpanded}>
         {title}
-        <span className="text-gray-500 text-xs">{expanded ? "▲" : "▼"}</span>
       </h2>
 
       {expanded && (
@@ -75,9 +101,9 @@ export default function StepSection({ step, slug, title }: StepSectionProps) {
           {!saved && !editing && (
             <button
               onClick={() => setEditing(true)}
-              className="px-3 py-1.5 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50"
+              className="text-sm px-4 py-1.5 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
             >
-              + Add Instructions
+              Add Instructions
             </button>
           )}
 
@@ -134,8 +160,8 @@ export default function StepSection({ step, slug, title }: StepSectionProps) {
                 </button>
                 <button
                   onClick={handleGenerate}
-                  className="text-sm px-4 py-1.5 rounded bg-gray-800 text-white hover:bg-gray-900 disabled:opacity-50"
                   disabled={loading}
+                  className="text-sm px-4 py-1.5 rounded bg-gray-800 text-white hover:bg-gray-900 disabled:opacity-50"
                 >
                   {loading ? "Generating..." : "Generate Step"}
                 </button>

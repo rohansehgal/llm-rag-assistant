@@ -1,13 +1,12 @@
 // components/StepSection.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface StepSectionProps {
   step: "plan" | "write" | "check";
   slug: string;
-  title: string; // ✅ add this line
-
+  title: string;
 }
 
 export default function StepSection({ step, slug, title }: StepSectionProps) {
@@ -19,13 +18,50 @@ export default function StepSection({ step, slug, title }: StepSectionProps) {
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
-
+  // 🔄 Load instructions on first expand
+  useEffect(() => {
+    if (expanded && !saved) {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${slug}/instructions`)
+        .then((res) => res.json())
+        .then((data) => {
+          const stepData = data?.[step];
+          if (stepData) {
+            setSystemPrompt(stepData.system || "");
+            setUserPrompt(stepData.user || "");
+            setSaved(true);
+            setEditing(false);
+          }
+        })
+        .catch(() => {
+          console.warn("⚠️ Failed to load saved instructions.");
+        });
+    }
+  }, [expanded, slug, step, saved]);
 
   const toggleExpanded = () => setExpanded((prev) => !prev);
 
-  const handleSave = () => {
-    setSaved(true);
-    setEditing(false);
+  const handleSave = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${slug}/instructions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          [step]: {
+            system: systemPrompt,
+            user: userPrompt,
+          },
+        }),
+      });
+
+      if (res.ok) {
+        setSaved(true);
+        setEditing(false);
+      } else {
+        alert("❌ Failed to save instructions");
+      }
+    } catch {
+      alert("❌ Failed to save instructions");
+    }
   };
 
   const handleGenerate = async () => {
@@ -50,14 +86,12 @@ export default function StepSection({ step, slug, title }: StepSectionProps) {
         return;
       }
 
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
         setOutput((prev) => prev + chunk);
       }
-
     } catch {
       console.error("❌ Streaming error");
     } finally {
@@ -67,9 +101,9 @@ export default function StepSection({ step, slug, title }: StepSectionProps) {
 
   return (
     <section className="mb-10 border rounded-xl p-4 bg-white shadow-sm">
-<h2 className="text-lg font-semibold mb-2 cursor-pointer" onClick={toggleExpanded}>
-  {title}
-</h2>
+      <h2 className="text-lg font-semibold mb-2 cursor-pointer" onClick={toggleExpanded}>
+        {title}
+      </h2>
 
       {expanded && (
         <>

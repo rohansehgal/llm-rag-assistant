@@ -19,11 +19,7 @@ export default function StepSection({ step, slug, title }: StepSectionProps) {
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const labelMap = {
-    plan: "Plan Instructions",
-    write: "Write Draft",
-    check: "Final Check",
-  };
+
 
   const toggleExpanded = () => setExpanded((prev) => !prev);
 
@@ -54,13 +50,11 @@ export default function StepSection({ step, slug, title }: StepSectionProps) {
         return;
       }
 
-      let accumulated = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
-        accumulated += chunk;
         setOutput((prev) => prev + chunk);
       }
 

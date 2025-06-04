@@ -1009,5 +1009,23 @@ def list_stats():
     stats_data = load_stats()
     return jsonify(stats_data)
 
+# app.py
+@app.route("/api/project/<slug>")
+def api_get_project(slug):
+    """Returns project metadata and instructions in JSON for Next.js frontend."""
+    project_path = os.path.join("projects", slug, "instructions.json")
+    instructions = {}
+
+    if os.path.exists(project_path):
+        with open(project_path, "r") as f:
+            instructions = json.load(f)
+
+    return jsonify({
+        "project_name": slug.capitalize(),
+        "slug": slug,
+        "instructions": instructions
+    })
+
+
 if __name__ == "__main__":
     app.run(debug=False, use_reloader=False)

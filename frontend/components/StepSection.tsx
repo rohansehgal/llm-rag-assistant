@@ -19,7 +19,7 @@ export default function StepSection({ step, slug, title }: StepSectionProps) {
 
   // ✅ Load saved prompts on mount
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${slug}/instructions`)
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${slug}/instructions`)
       .then(res => res.json())
       .then(data => {
         const stepData = data?.[step];
@@ -45,7 +45,7 @@ export default function StepSection({ step, slug, title }: StepSectionProps) {
     };
 
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${slug}/instructions`, {
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${slug}/instructions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -60,7 +60,7 @@ export default function StepSection({ step, slug, title }: StepSectionProps) {
     setOutput("");
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/${slug}/run-step/${step}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${slug}/run-step/${step}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
